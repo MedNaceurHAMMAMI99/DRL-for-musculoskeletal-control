@@ -1,5 +1,5 @@
 {
-  "run": "runs/effort_sweep/w2_5",
+  "run": "C:\\Users\\moham\\thesis_run\\runs\\effort_sweep\\w2_5",
   "episodes": 20,
   "timesteps": 2000,
   "verdict": "AGREES",

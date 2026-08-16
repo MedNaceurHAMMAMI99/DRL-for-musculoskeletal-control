@@ -1,0 +1,41 @@
+{
+  "w2_5_seed1": {
+    "group": "replicate_w2",
+    "device": "cpu",
+    "minutes": 119.23962742833343,
+    "mean_final_error": 0.11059360653226646,
+    "mean_min_error": 0.07838270046268515,
+    "success_rate": 0.06,
+    "mean_energy": 113802.66746685562,
+    "reach_5cm": 0.3,
+    "reach_10cm": 0.58,
+    "effort_ratio": 1.5566441767255261,
+    "pearson_r": 0.8942357716341949
+  },
+  "w2_5_seed2": {
+    "group": "replicate_w2",
+    "device": "cuda",
+    "minutes": 173.57756462333344,
+    "mean_final_error": 0.10633392485345457,
+    "mean_min_error": 0.06588701150880577,
+    "success_rate": 0.1,
+    "mean_energy": 96987.96646468488,
+    "reach_5cm": 0.32,
+    "reach_10cm": 0.64,
+    "effort_ratio": 1.3358486961070122,
+    "pearson_r": 0.92832675821414
+  },
+  "w2_5_seed3": {
+    "group": "replicate_w2",
+    "device": "cpu",
+    "minutes": 130.42047313666652,
+    "mean_final_error": 0.10169695104336705,
+    "mean_min_error": 0.07027114471850124,
+    "success_rate": 0.0,
+    "mean_energy": 104739.905848307,
+    "reach_5cm": 0.3,
+    "reach_10cm": 0.52,
+    "effort_ratio": 1.355140452146344,
+    "pearson_r": 0.9333507043811152
+  }
+}

@@ -631,15 +631,15 @@ only the training objective differed.
 \centering
 \caption{Effect of the effort weight. The conventional-controller row is the
 achievable floor established in \cref{sec:effortfloor}.}
-\begin{tabular}{@{} L{4.2cm} C{2.6cm} C{2.4cm} C{2.4cm} C{2.2cm} @{}}
+\begin{tabular}{@{} L{3.8cm} C{1.2cm} C{2.6cm} C{2.4cm} C{2.4cm} C{1.8cm} @{}}
 \toprule
-\textbf{Configuration} & \textbf{Effort ratio} & \textbf{Pearson $r$} & \textbf{Final error} & \textbf{Energy} \\
+\textbf{Configuration} & \textbf{$n$} & \textbf{Effort ratio} & \textbf{Pearson $r$} & \textbf{Final error} & \textbf{Energy} \\
 \midrule
-$w_2 = 1$ (as reported) & $1.91 \pm 0.15$ & $0.808$ & 0.1033 & 327\,048 \\
-$\mathbf{w_2 = 5}$ & $\mathbf{1.43}$ & $\mathbf{0.911}$ & $\mathbf{0.1019}$ & 91\,810 \\
-$w_2 = 20$ & $\mathbf{1.34}$ & $\mathbf{0.932}$ & 0.1249 & \textbf{38\,855} \\
+$w_2 = 1$ & 5 & $1.91 \pm 0.15$ & $0.808 \pm 0.044$ & $0.1033 \pm 0.0034$ & 327\,048 \\
+$\mathbf{w_2 = 5}$ & 4 & $\mathbf{1.42 \pm 0.10}$ & $\mathbf{0.917 \pm 0.018}$ & $0.1051 \pm 0.0042$ & 101\,835 \\
+$w_2 = 20$ & 1 & $1.34$ & $0.932$ & 0.1249 & \textbf{38\,855} \\
 \midrule
-Conventional controller \emph{(floor)} & $1.33$ & $0.916$ & 0.199 & 102\,876 \\
+Conventional \emph{(floor)} & 1 & $1.33$ & $0.916$ & 0.199 & 102\,876 \\
 \bottomrule
 \end{tabular}
 \label{tab:effortsweep}
@@ -647,7 +647,7 @@ Conventional controller \emph{(floor)} & $1.33$ & $0.916$ & 0.199 & 102\,876 \\
 
 \subsection{The discrepancy is essentially eliminated}
 
-At $w_2 = 20$ the learned policy attains an effort ratio of \textbf{1.34} against
+At $w_2 = 20$ --- a single seed, replication pending --- the learned policy attains an effort ratio of \textbf{1.34} against
 the achievable floor of \textbf{1.33} demonstrated by a controller that solves
 minimum-effort load sharing explicitly at every timestep. Agreement with the
 classical solution rises to $r = 0.932$, exceeding the conventional controller's
@@ -660,17 +660,42 @@ learning.} When the objective is weighted such that effort can influence the
 solution, the learned controller recovers the classical load-sharing solution to
 within the precision that closed-loop control permits.
 
-\subsection{And at moderate weighting there is no trade-off at all}
+\subsection{At moderate weighting the effort cost is close to free}
 
-The result at $w_2 = 5$ was not anticipated. Both this chapter and
-\cref{sec:whygap} expected a Pareto trade-off --- less wasted effort bought with
-worse accuracy. Instead $w_2 = 5$ is \textbf{better on both axes} than the
-reported configuration: final error $0.1019$ against $0.1033$, closest approach
-$0.0690$ against $0.0729$, energy reduced by 72\,\%, effort ratio $1.91
-\rightarrow 1.43$, and agreement $0.808 \rightarrow 0.911$.
+A first, single-seed measurement of $w_2 = 5$ suggested it was better on
+\emph{both} axes than the reported configuration, and an earlier draft of this
+section described that configuration as strictly dominated. Replication across
+four seeds does not support the accuracy half of that claim, and it is withdrawn.
 
-The configuration this thesis reports as its principal result is therefore
-\emph{strictly dominated} by one differing only in a single reward weight.
+What replicates, and cleanly:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+\item \textbf{Effort ratio $1.91 \pm 0.15 \rightarrow 1.42 \pm 0.10$}, a 26\,\%
+      reduction. The two distributions do not overlap: every $w_2 = 5$ seed
+      (1.34--1.56) sits below every $w_2 = 1$ seed (1.71--2.12).
+\item \textbf{Agreement with the classical solution
+      $0.808 \pm 0.044 \rightarrow 0.917 \pm 0.018$}, and notably tighter across
+      seeds --- the load-sharing solution becomes both closer to the classical
+      one and more consistent between runs.
+\item \textbf{Energy reduced by a factor of 3.2}, from 327\,048 to
+      $101\,835 \pm 9\,586$.
+\end{itemize}
+
+What does not replicate is the accuracy advantage. Final error is
+$0.1051 \pm 0.0042$ against $0.1033 \pm 0.0034$ --- overlapping, and marginally
+\emph{worse} rather than better. Closest approach is $0.0709 \pm 0.0053$ against
+$0.0729 \pm 0.0032$, also overlapping. The single seed originally analysed was
+the most favourable of the four.
+
+The defensible statement is therefore that raising the effort weight buys a
+substantial improvement in load-sharing fidelity \textbf{at no measurable cost in
+reaching accuracy} --- which is a weaker claim than dominance, and still the most
+useful result in this chapter.
+
+This is the second occasion on which a single-seed result in this work proved
+optimistic in the same direction (\cref{sec:replication} was the first). The
+pattern is not coincidence: when one run is selected for detailed analysis
+because it performed well, its favourable metrics are selected along with it.
 
 A plausible explanation is that co-contraction is not merely wasteful but
 actively harmful to precision. Antagonist pairs firing together make the endpoint
@@ -694,11 +719,13 @@ reproduces coordination but not economy. It is that \DRL{} reproduces
 \emph{both}, provided the objective asks for both --- and that the version
 reported here did not ask.
 
-\textbf{The reported configuration is not the best one found.} $w_2 = 5$
-dominates it. The results of \cref{sec:replication} are retained as the
-five-seed characterisation of the configuration this work analysed in depth, and
-this section is reported alongside them rather than replacing them, because the
-$w_2$ variants were run at a single seed each and have not been replicated.
+\textbf{The reported configuration is not the best one found.} At $w_2 = 5$ the
+load-sharing fidelity is markedly better for no measurable accuracy cost, over
+four seeds. The results of \cref{sec:replication} are retained as the five-seed
+characterisation of the configuration analysed in depth throughout this chapter,
+and this section is reported alongside them rather than replacing them. The
+$w_2 = 20$ row remains single-seed and its replication was still running at the
+time of writing.
 
 \textbf{The remaining outstanding experiment is now well specified}: replicate
 $w_2 = 5$ across five seeds and repeat the force and synergy analyses on it. If
