@@ -145,10 +145,10 @@ conventional controller solving the same load-sharing problem explicitly attains
 $1{,}33$, so the learned policy uses about 44~\% more effort than is achievable
 rather than 91~\% more than an unattainable ideal.
 
-Two secondary results follow. The SAC default target entropy of $-\dim(A)$ was
-found to prevent the controller from settling on a target, an error plateau that
-persisted through three reward redesigns; hyperparameter optimisation selected
-approximately $-19$ and halved the reaching error. And tuning proved to dominate
+Two secondary results follow. Library-default hyperparameters imposed an error
+plateau that persisted through three reward redesigns; optimisation halved the
+reaching error, though a subsequent ablation refuted the initial attribution of
+this to the exploration temperature. And tuning proved to dominate
 algorithm choice: tuning SAC improved final error by $38$~\%, against
 approximately $6$~\% separating untuned SAC from TD3.
 

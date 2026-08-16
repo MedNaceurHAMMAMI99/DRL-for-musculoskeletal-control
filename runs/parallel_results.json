@@ -37,5 +37,81 @@
     "reach_10cm": 0.52,
     "effort_ratio": 1.355140452146344,
     "pearson_r": 0.9333507043811152
+  },
+  "w2_5_seed4": {
+    "group": "replicate_w2",
+    "device": "cuda",
+    "minutes": 187.80817314666686,
+    "mean_final_error": 0.09080398130199606,
+    "mean_min_error": 0.056824777643176345,
+    "success_rate": 0.04,
+    "mean_energy": 115651.84705737754,
+    "reach_5cm": 0.32,
+    "reach_10cm": 0.68,
+    "effort_ratio": 1.3506003553180526,
+    "pearson_r": 0.9265037287558376
+  },
+  "w2_20_seed1": {
+    "group": "replicate_w2",
+    "device": "cpu",
+    "minutes": 120.33919743333293,
+    "mean_final_error": 0.09084041795523794,
+    "mean_min_error": 0.05385976150771654,
+    "success_rate": 0.0,
+    "mean_energy": 31574.001689739373,
+    "reach_5cm": 0.22,
+    "reach_10cm": 0.76,
+    "effort_ratio": 1.3179384099428249,
+    "pearson_r": 0.9459468523291489
+  },
+  "w2_20_seed3": {
+    "group": "replicate_w2",
+    "device": "cpu",
+    "minutes": 119.31571699500006,
+    "mean_final_error": 0.11934647235524785,
+    "mean_min_error": 0.07464133740339428,
+    "success_rate": 0.0,
+    "mean_energy": 37987.254431745394,
+    "reach_5cm": 0.2,
+    "reach_10cm": 0.54,
+    "effort_ratio": 1.2779186872814772,
+    "pearson_r": 0.951294887847974
+  },
+  "w2_20_seed2": {
+    "group": "replicate_w2",
+    "device": "cuda",
+    "minutes": 177.75048006333333,
+    "mean_final_error": 0.09494507543676445,
+    "mean_min_error": 0.0656354117166129,
+    "success_rate": 0.04,
+    "mean_energy": 36494.94108016866,
+    "reach_5cm": 0.22,
+    "reach_10cm": 0.72,
+    "effort_ratio": 1.2918105982249046,
+    "pearson_r": 0.9392565103429008
+  },
+  "lr_only_seed0": {
+    "group": "ablation_rest",
+    "device": "cuda",
+    "minutes": 59.94303209000015,
+    "mean_final_error": 0.2640041819283555,
+    "mean_min_error": 0.14472008677373074,
+    "success_rate": 0.0,
+    "mean_energy": 927289.8883874603,
+    "reach_5cm": 0.04,
+    "reach_10cm": 0.2
+  },
+  "w2_20_seed4": {
+    "group": "replicate_w2",
+    "device": "cpu",
+    "minutes": 119.99760526999987,
+    "mean_final_error": 0.10583142340139384,
+    "mean_min_error": 0.06915832234577425,
+    "success_rate": 0.02,
+    "mean_energy": 40470.80805043442,
+    "reach_5cm": 0.28,
+    "reach_10cm": 0.52,
+    "effort_ratio": 1.2930105566962262,
+    "pearson_r": 0.9484960327237139
   }
 }
