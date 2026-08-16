@@ -1,0 +1,253 @@
+% ============================================================
+%  GENERAL CONCLUSION AND FUTURE DIRECTIONS
+% ============================================================
+
+\frontchapter{General Conclusion and Future Directions}
+\label{ch:conclusion}
+
+\section{Summary of the work}
+
+This thesis asked whether deep reinforcement learning can replace classical
+calculation in determining the force required from each muscle during a reaching
+movement. Answering it required constructing a nine-muscle, four-degree-of-freedom
+model of the human arm in \MuJoCo, training controllers to reach targets by
+commanding muscle activations directly, and comparing the resulting forces
+against those prescribed by static optimisation on the same movements.
+
+The answer is qualified. The learned controller reproduces the \emph{structure}
+of the classical solution --- a correlation of $0.81 \pm 0.04$ across all
+nine muscles, and a pattern cosine of $0.813 \pm 0.047$ against a shuffled null
+of $0.372$ --- while expending $1.91 \pm 0.15$ times the minimum effort required
+to generate the same joint torques, about 44\,\% above the floor a conventional
+controller attains. All figures are means over five independent training runs. It is therefore a
+usable fast approximation of which muscles act and in what proportion, at
+a fixed inference cost --- though not, as \cref{sec:latencycaveat}
+establishes, at lower latency than a competently implemented classical solver
+--- but not a substitute where the magnitude of individual
+muscle forces is the quantity of interest.
+
+\section{Contributions}
+
+Three results are established by the evidence presented.
+
+\textbf{A per-muscle load-sharing comparison between \DRL and static
+optimisation.} The analysis of \cref{ch:forces} poses both methods the identical
+problem on the identical trajectory, verified to machine precision, and reports
+agreement muscle by muscle. It establishes that the two methods agree on
+coordination and disagree on economy, and it localises the disagreement
+anatomically to the elbow antagonists.
+
+The comparison is \emph{conditional} and its scope must travel with it: static
+optimisation is given the movement the policy produced and asked only how to
+distribute force across it. It therefore validates load sharing along a
+trajectory, not the trajectory itself, and a controller moving unnaturally could
+still score well (\cref{sec:forcescope}). Assessing trajectory realism would
+require kinematic comparison against recorded human reaching, which this work
+does not perform.
+
+\textbf{A hyperparameter regime that prevents precision.} At \SAC's library
+defaults the controller could not settle on a target, and the resulting error
+plateau persisted through three complete redesigns of the reward function and a
+fourfold correction to the effective training budget. Hyperparameter
+optimisation halved the reaching error. The practical significance lies less in
+the values than in the diagnostic difficulty: the failure presents as
+insufficient training or as poor reward shaping, and survives attempts to remedy
+both.
+
+The optimiser moved five parameters simultaneously, and the evidence does not
+isolate which of them is responsible. Target entropy is the most likely
+candidate --- it moved from the default $-\dim(\mathcal{A}) = -9$ to
+approximately $-19$, all five best trials cluster there, and its mechanism
+(residual stochasticity in the commanded activations preventing the end effector
+from settling) matches the observed symptom exactly. But the target-network
+update rate $\tau$ also rose by a factor of 3.8, the learning rate by 47\,\%, and
+both plausibly affect convergence. Clustering in a TPE search reflects the
+sampler's exploitation of a promising region and is not by itself evidence of
+causal importance.
+
+\textbf{This attribution is therefore stated as a hypothesis, not a result.}
+Establishing it requires a one-at-a-time ablation --- the default configuration
+with only the target entropy changed, and the tuned configuration with only the
+target entropy reverted --- which is listed in \cref{sec:future} and had not been
+completed at the time of writing. Until it is, the defensible claim is that the
+\emph{tuned regime} resolves the plateau, with target entropy the leading
+candidate mechanism.
+
+\textbf{Evidence that tuning dominates algorithm selection.} In the comparison of
+\cref{sec:benchmark}, tuning \SAC improved final error by 38\,\%, whereas the
+interval between untuned \SAC and \TDIII was approximately 6\,\% and comparable to
+the seed-to-seed spread. A four-algorithm comparison conducted at library defaults
+measures which algorithm's defaults happen to suit the problem, rather than which
+algorithm is superior.
+
+\textbf{Convergent evidence from three independent analyses.} The effort ratio
+against static optimisation (\cref{sec:effortall}), the co-contraction index of
+Falconer and Winter (\cref{sec:icc}), and the synergy decomposition
+(\cref{sec:synergies}) are methodologically unrelated, yet order the
+configurations consistently and localise the same residual defect to the same
+muscle group. The synergy analysis additionally shows that agreement between the
+learned and classical modular organisation rises from 0.647 to 0.950 as the
+policy improves, and that the classical solution is uniformly the more
+low-dimensional of the two --- requiring four to five synergies where the learned
+policies require six to nine. That the same hyperparameter change improved
+positional accuracy, muscular economy and modular organisation simultaneously,
+none of which was jointly optimised, is a stronger result than any of the three
+in isolation.
+
+A further observation, less firmly established but of interest, is that reaching
+accuracy and load-sharing fidelity ordered themselves inversely across the five
+configurations tested (\cref{sec:effortall}).
+
+\section{Critical assessment}
+
+The results of this work are considerably weaker than those reported in its
+earlier version, and the difference warrants explicit statement.
+
+\subsection{Results withdrawn from the previous version}
+
+An audit of the code that generated the previously reported benchmark established
+that its four-algorithm comparison, its Wilcoxon significance tests, its
+convergence-rate claims and its synergy and co-contraction analyses were not
+produced by experiment. The multi-seed results were generated by sampling from a
+normal distribution with a chosen mean, under a source comment indicating that
+real evaluation data was intended to replace them. Corroborating the audit: no
+code trained or evaluated \DDPG, \TDIII or \PPO; no implementation of the synergy
+or co-contraction analyses existed; two model checkpoints existed on disk against
+the forty the text described as archived; and no hyperparameter-search database
+existed although the text described tuned hyperparameters.
+
+Those results are withdrawn. Specifically, the reported success rate of
+$91.4 \pm 3.8$\,\% and final distance of \SI{1.4}{\centi\meter} for \SAC are
+replaced by a measured 4\,\% and \SI{10.6}{\centi\meter}; the reported $p$-values
+of 0.002, 0.014 and 0.004 correspond to tests that were never performed. The
+reported success rate also exceeds what a privileged controller with full state
+access achieves on this model, which is approximately 7\,\%.
+
+The material that survives is that which does not depend on policy quality: the
+parameter count and memory footprint, the Hill-solver validation against
+\MuJoCo, the muscle-function validation, and the model-stability result.
+
+The inference-latency comparison requires separate treatment. The measurements
+themselves are sound, but they were used to support a conclusion they do not
+reach: they time the Hill equilibrium solve rather than load sharing, and both
+sides were unoptimised Python. Measured like-for-like, a direct solve of the
+load-sharing problem is roughly an order of magnitude \emph{faster} than the
+network (\cref{sec:latencycaveat}). 	extbf{The speed-based argument for
+replacing classical calculation is withdrawn.} What remains is that the network's
+cost is fixed and branch-free where the solver's is data-dependent --- relevant
+where a hard real-time bound matters, but a substantially weaker claim.
+
+\subsection{Limitations of the present results}
+
+\textbf{The principal result has been replicated across five seeds}
+(\cref{sec:replication}), and the outcome was mixed. The accuracy claim is
+stable: final error varies by 3.3\,\% and closest approach by 4.4\,\% across
+independent runs. The agreement and efficiency figures were not: the originally
+reported run proved to be the most favourable of the five on both, and both have
+been corrected downward. The muscular solution itself is highly variable ---
+energy spans 77\,\% across runs at essentially constant task performance ---
+which is itself reported as a finding rather than as noise.
+
+\textbf{No statistical significance is established anywhere in this work.} Three
+seeds cannot support a Wilcoxon signed-rank test with useful power. No $p$-value
+is reported, deliberately; where configurations differ by less than their spread,
+the text states that no ordering is supported.
+
+\textbf{The task is not solved to the stated tolerance.} Under the strict success
+criterion the best policy scores between 0 and 4\,\%, corresponding to one or two
+episodes in fifty, which is indistinguishable from zero at that sample size. The
+graded measures improved substantially and genuinely; the strict criterion was not
+met.
+
+\textbf{The algorithm comparison is not a fair test.} \SAC received a
+sixteen-trial hyperparameter search; \TDIII, \DDPG and \PPO were run at library
+defaults. Since this work itself demonstrates that the exploration parameter is
+the decisive setting, comparing a tuned configuration against untuned ones
+conflates algorithm with tuning effort. The comparison is reported because it
+supports the tuning-dominates-algorithm conclusion, for which it is adequate; it
+does not establish an algorithmic ranking.
+
+\textbf{The comparison is entirely computational.} No physical arm, no
+electromyography, no human participant. Static optimisation is itself a model
+encoding a contested assumption about what the nervous system minimises, and
+\MuJoCo's muscle implementation is an approximation. Agreement with static
+optimisation is agreement with the standard method, not demonstration of
+physiological correctness.
+
+\textbf{The muscle set is incomplete.} The rotator cuff is absent, which required
+constraining shoulder rotation (\cref{sec:rotation}). Conclusions apply to
+reaching with a restrained rotational degree of freedom, not to arbitrary arm
+movement.
+
+\subsection{On methodology}
+
+Six substantive defects were identified during this work, documented in
+\cref{chap:impl}. Four of them produced results that appeared entirely
+reasonable while being wrong: a reward exploit under which the agent terminated
+every episode deliberately, yet reported plausible and slowly improving distances;
+a silent fourfold under-training that produced a normal-looking learning curve; a
+simulator that reset itself on divergence and thereby substituted the arm's rest
+position for measured data; and a domain-randomisation implementation that
+applied a single global scale factor rather than independent perturbation.
+
+In each case the defect was detected only by measuring a quantity the existing
+metrics did not cover --- episode length, gradient updates per environment step,
+solver warning counters, muscle forces --- and in each case the previously
+reported numbers had been incorrect for an extended period without any indication.
+
+The generalisable observation is that a metric which cannot fail cannot detect
+failure. End-effector error could not reveal that the agent had ceased attempting
+the task, that training was performing a quarter of its intended work, or that
+the muscle forces were 71\,\% wasteful. Each required a measurement designed
+specifically for the failure mode, which in turn required the failure mode to be
+hypothesised first. This is the reason \cref{chap:impl} documents the errors
+at the same length as the results.
+
+\section{Future directions}
+\label{sec:future}
+
+\textbf{Isolate the hyperparameter responsible for the precision plateau.} A
+one-at-a-time ablation --- the default configuration with only the target entropy
+changed, and the tuned configuration with only the target entropy reverted, three
+seeds each --- determines whether the mechanism is the exploration temperature or
+the target-network update rate, which also moved substantially. Approximately
+four hours. Until it is run, the attribution above remains a hypothesis, and this
+is the most exposed claim in the thesis.
+
+\textbf{Replicate the principal result across seeds.} Approximately eight hours of
+computation converts a single-run observation into a result with error bars. This
+should precede any publication.
+
+\textbf{Train with the classical criterion as the effort term.} \Cref{sec:whygap}
+predicts that a reward whose effort term is exactly
+$\sum_i (f_i/F_{\max,i})^2$ should close the $1.71\times$ discrepancy. This
+distinguishes a limitation of reinforcement learning from a limitation of the
+reward chosen here --- two conclusions with entirely different implications.
+
+\textbf{Tune the exploration parameter of every algorithm on an equal budget.}
+Target entropy for \SAC, action-noise scale for \TDIII and \DDPG, entropy
+coefficient for \PPO. This is the only route to a fair four-way comparison, given
+that this work identifies exploration as the decisive axis.
+
+\textbf{Compare against electromyography.} Static optimisation is a model;
+measured muscle activity is closer to ground truth. This step would convert a
+computational comparison into a physiological claim, and is the natural extension
+toward the clinical applications that motivate the work.
+
+\textbf{Repeat the synergy and co-contraction analyses on a valid policy.} The
+implementation now exists; the earlier results were computed on policies since
+established to be invalid.
+
+\section{Closing remark}
+
+The contribution of this thesis is narrower than initially envisaged but rests on
+evidence that can be inspected. Every quantitative statement traces to a named
+artifact produced by a documented procedure, and where a result is weak,
+uncertain or absent, the text records it as such.
+
+That a learned controller recovers the coordination structure of a classical
+optimisation criterion without ever being shown it is a genuine and encouraging
+result. That it does so while expending 71\,\% more effort than necessary is an
+equally genuine limitation, and identifying it required measuring muscle forces
+directly --- which no amount of additional accuracy on the reaching task would ever
+have revealed.

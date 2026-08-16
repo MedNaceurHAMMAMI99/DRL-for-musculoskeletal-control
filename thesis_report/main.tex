@@ -1,0 +1,297 @@
+% ============================================================
+%  MASTER'S THESIS — MODULAR VERSION
+%  Learning Motor Control Strategies in Musculoskeletal Systems
+%  Using Deep Reinforcement Learning
+%
+%  Compile with: pdflatex -> biber -> pdflatex -> pdflatex
+%  Or:           latexmk -pdf main.tex
+%
+%  File structure:
+%    main.tex         ← this file (preamble + document skeleton)
+%    Abstract.tex     ← standalone research abstract (compile separately)
+%    frontmatter.tex  ← title page, dedication, acks, abstracts, TOC
+%    chapter1.tex     ← General Introduction
+%    chapter2.tex     ← State of the Art
+%    chapter3.tex     ← Modeling and Simulation Environment
+%    chapter4.tex     ← Theoretical Framework of DRL
+%    chapter5.tex     ← Implementation and Experimental Methodology
+%    chapter6.tex     ← Experimental Results and Analysis
+%    chapter7.tex     ← Discussion
+%    conclusion.tex   ← General Conclusion and Future Directions
+%    appendices.tex   ← Appendices A–E
+%    references.bib   ← BibTeX bibliography
+% ============================================================
+
+\documentclass[12pt, a4paper, oneside, openany]{report}
+
+% ── Encoding & language ────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+% ── Fonts ──────────────────────────────────────────────────
+\usepackage{lmodern}
+\usepackage{csquotes}
+
+% ── Page layout ────────────────────────────────────────────
+\usepackage[
+  a4paper,
+  top=25mm, bottom=25mm,
+  left=30mm, right=25mm,
+  headheight=15pt,
+  headsep=10mm,
+  footskip=12mm
+]{geometry}
+
+% ── Headers / Footers ──────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small\slshape Musculoskeletal Model \& RL}
+\fancyhead[R]{\small\slshape\leftmark}
+\fancyfoot[R]{\small\thepage}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyfoot[R]{\small\thepage}
+}
+
+% ── Maths ──────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{bm}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,}, group-separator={\,}, detect-all}
+
+% ── Graphics & colors ──────────────────────────────────────
+\usepackage[dvipsnames, table]{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes, decorations.pathmorphing,
+                calc, shadows.blur, patterns}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{pgf-pie}
+
+% ── Define colour palette ──────────────────────────────────
+\definecolor{navyblue}{HTML}{1F3864}
+\definecolor{accentblue}{HTML}{2E5FA3}
+\definecolor{lightblue}{HTML}{D9E8F5}
+\definecolor{midgrey}{HTML}{555555}
+\definecolor{codebg}{HTML}{F5F5F5}
+\definecolor{coderule}{HTML}{2E5FA3}
+\definecolor{successgreen}{HTML}{1B7340}
+\definecolor{warningorange}{HTML}{C75000}
+\definecolor{deepred}{HTML}{A81E2B}
+
+% ── Tables ─────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% ── Code listings ──────────────────────────────────────────
+\usepackage{listings}
+\lstset{
+  backgroundcolor = \color{codebg},
+  basicstyle      = \ttfamily\footnotesize,
+  breaklines      = true,
+  captionpos      = b,
+  commentstyle    = \color{black}\itshape,
+  frame           = leftline,
+  framerule       = 2pt,
+  rulecolor       = \color{accentblue},
+  keywordstyle    = \color{black}\bfseries,
+  stringstyle     = \color{black},
+  numbers         = left,
+  numberstyle     = \tiny\color{black},
+  numbersep       = 8pt,
+  showstringspaces= false,
+  tabsize         = 4,
+  xleftmargin     = 14pt,
+}
+\lstdefinelanguage{Python3}{
+  language     = Python,
+  morekeywords = {True, False, None, self, def, class, import, from,
+                  return, yield, with, as, async, await, lambda},
+}
+\lstdefinelanguage{XML}{
+  morestring   = [s]{"}{"},
+  morestring   = [s]{'}{'},
+  morecomment  = [s]{<!--}{-->},
+  morekeywords = {mujoco, worldbody, body, joint, geom, site, tendon,
+                  spatial, actuator, muscle, sensor, jointpos, option,
+                  compiler},
+  sensitive    = false,
+}
+
+% ── Hyperlinks & PDF meta ──────────────────────────────────
+\usepackage[
+  colorlinks = true,
+  linkcolor  = black,
+  citecolor  = black,
+  urlcolor   = black,
+]{hyperref}
+\usepackage[nameinlink, noabbrev]{cleveref}
+
+% ── Bibliography ───────────────────────────────────────────
+\usepackage[
+  backend    = biber,
+  style      = numeric,
+  sorting    = none,
+  maxcitenames = 2,
+  maxbibnames = 6,
+]{biblatex}
+\addbibresource{references.bib}
+
+% ── Misc utilities ─────────────────────────────────────────
+\usepackage{caption}
+\captionsetup{labelfont=bf, font=small, labelsep=period}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{emptypage}
+\usepackage{tocloft}
+\usepackage[nottoc]{tocbibind}
+\usepackage{chngcntr}
+\usepackage{xspace}
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+\counterwithin{equation}{chapter}
+\usepackage{epigraph}
+\setlength{\epigraphwidth}{0.75\textwidth}
+\raggedbottom
+\emergencystretch=2em
+\hfuzz=20pt
+\hbadness=10000
+\vbadness=10000
+
+% ── Chapter styling ────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\huge\bfseries\color{black}}
+  {\thechapter}
+  {0.75em}
+  {}
+
+\titleformat{name=\chapter,numberless}[block]
+  {\normalfont\huge\bfseries\color{black}}
+  {}
+  {0pt}
+  {}
+
+\titlespacing*{\chapter}{0pt}{0pt}{24pt}
+
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{black}}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\color{black}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\itshape\color{black}}
+  {\thesubsubsection}{1em}{}
+
+% ── Custom commands ────────────────────────────────────────
+\newcommand{\RL}{RL}
+\newcommand{\DR}{\textsc{DR}\xspace}
+\newcommand{\DRL}{DRL}
+\newcommand{\MuJoCo}{MuJoCo}
+\newcommand{\opensource}{open-source\xspace}
+\newcommand{\DDPG}{\textsc{DDPG}\xspace}
+\newcommand{\TD}{\textsc{TD3}\xspace}
+\newcommand{\TDIII}{\textsc{TD3}\xspace}
+\newcommand{\PPO}{\textsc{PPO}\xspace}
+\newcommand{\SAC}{\textsc{SAC}\xspace}
+\newcommand{\eg}{\textit{e.g.}\xspace}
+\newcommand{\ie}{\textit{i.e.}\xspace}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\lnorm}{\tilde{l}}
+\newcommand{\vnorm}{\tilde{v}}
+
+\newcommand{\frontmatter}{%
+  \clearpage
+  \hypersetup{pageanchor=false}%
+  \pagenumbering{roman}%
+  \setcounter{page}{1}%
+  \pagestyle{plain}%
+}
+\newcommand{\mainmatter}{%
+  \clearpage
+  \hypersetup{pageanchor=true}%
+  \pagenumbering{arabic}%
+  \setcounter{page}{1}%
+  \pagestyle{fancy}%
+}
+\newcommand{\backmatter}{\clearpage}
+\let\cleardoublepage\clearpage
+\newcommand{\frontchapter}[1]{%
+  \clearpage
+  \chapter*{#1}%
+  \markboth{#1}{#1}%
+  \phantomsection
+  \addcontentsline{toc}{chapter}{#1}%
+}
+
+% ── Theorem-like environments ──────────────────────────────
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{remarque}{Remarque}[chapter]
+
+% ── Line spacing ───────────────────────────────────────────
+\setstretch{1.3}
+
+% ===========================================================
+\begin{document}
+% ===========================================================
+
+\hypersetup{
+  pdftitle   = {Master's Thesis - Musculoskeletal Model and RL},
+  pdfauthor  = {Mohamed Naceur Hammami},
+  pdfsubject = {Computational biomechanics and Deep Reinforcement Learning}
+}
+
+% ── Front matter (roman page numbers) ─────────────────────
+\frontmatter
+% frontmatter.tex contains: title page, dedication, acknowledgements,
+% executive summary (French), abstract (English), abbreviations,
+% symbols, table of contents, list of figures, list of tables.
+\input{frontmatter}
+
+% ── Main matter (arabic page numbers) ─────────────────────
+\mainmatter
+\input{chapter1}   % General Introduction
+\input{chapter2}   % State of the Art
+\input{chapter3}   % Modeling and Simulation Environment
+\input{chapter4}   % Theoretical Framework of DRL
+\input{chapter5}   % Implementation and Experimental Methodology
+\input{chapter6}   % Experimental Results and Analysis
+\input{chapter7}   % Load-Sharing Fidelity vs Classical Calculation
+\input{chapter8}   % Discussion
+
+% ── Conclusion ─────────────────────────────────────────────
+\input{conclusion}
+
+% ── Bibliography ───────────────────────────────────────────
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliographie}
+{\sloppy\printbibliography[title={Bibliographie}, heading=bibintoc]\par}
+
+% ── Appendices ─────────────────────────────────────────────
+\appendix
+\renewcommand{\chaptername}{Annexe}
+\input{appendices}
+
+\end{document}

@@ -1,0 +1,57 @@
+# ── Large training artifacts ────────────────────────────────────────────────
+# Replay buffers are ~105 MB each and there are 20 of them; GitHub's hard limit
+# is 100 MB per file. They are reproducible from a rerun and carry no
+# information a reader needs.
+**/replay_buffer.pkl
+**/checkpoint/
+**/best/
+
+# Trained model weights. Kept out by default: ~3.5 MB each and numerous.
+# To publish a specific policy, force-add it:  git add -f runs/SAC_seed0/model.zip
+*.zip
+**/vecnormalize.pkl
+
+# Optuna study databases (binary, regenerable, and one is 120 KB+ of SQLite).
+# The extracted results live in the JSON files, which ARE tracked.
+*.db
+
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# ── LaTeX build products ────────────────────────────────────────────────────
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.run.xml
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+# main.pdf and journey.pdf ARE tracked deliberately — they are the deliverable.
+
+# ── Media ───────────────────────────────────────────────────────────────────
+# Rendered videos/animations: large and regenerable.
+media/
+animation/
+*.mp4
+*.gif
+
+# ── OS / editor ─────────────────────────────────────────────────────────────
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ── Locks and scratch ───────────────────────────────────────────────────────
+*.lock
+runs/*.lock
+nohup.out

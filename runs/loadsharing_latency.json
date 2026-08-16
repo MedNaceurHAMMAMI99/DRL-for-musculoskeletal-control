@@ -1,0 +1,33 @@
+{
+  "n_queries": 400,
+  "rows": [
+    {
+      "label": "Network forward pass",
+      "mean_us": 288.84924977319315,
+      "p95_us": 332.6250007376075,
+      "p99_us": 499.85399309662165
+    },
+    {
+      "label": "Classical: SLSQP (general solver)",
+      "mean_us": 2370.4660000657896,
+      "p95_us": 4023.6700006062156,
+      "p99_us": 5133.147010055835
+    },
+    {
+      "label": "Classical: direct 4x4 solve",
+      "mean_us": 18.84100001916522,
+      "p95_us": 20.710011449409638,
+      "p99_us": 26.201010186923668
+    },
+    {
+      "label": "Moment-arm extraction (classical only)",
+      "mean_us": 5.0442502470104955,
+      "p95_us": 6.205003592185672,
+      "p99_us": 7.704000454396006
+    }
+  ],
+  "box_inactive_pct": 0.0,
+  "network_us": 288.84924977319315,
+  "classical_slsqp_us": 2370.4660000657896,
+  "classical_direct_total_us": 23.885250266175717
+}

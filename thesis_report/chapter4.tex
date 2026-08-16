@@ -1,0 +1,116 @@
+% ===========================================================
+%  CHAPTER IV — THEORETICAL FRAMEWORK OF DRL APPLIED TO MUSCLE CONTROL
+% ===========================================================
+\chapter{Theoretical Framework of DRL Applied to Muscle Control}
+\label{chap:drl}
+
+% -----------------------------------------------------------
+\section{MDP Formulation}
+
+The state $s_t \in \mathcal{S} \subset \R^{38}$ is the observation
+vector~\eqref{eq:obs}. The action $a_t \in \mathcal{A} = [0,1]^9$ is the vector of
+muscle excitations. The transition function $P(s_{t+1}|s_t,a_t)$ is deterministic
+in the standard configuration (physics simulation) and stochastic under Domain
+Randomization.
+
+L'équation de Bellman pour la fonction action-valeur $Q^\pi$ est~:
+\begin{equation}
+  Q^\pi(s,a) = \E\!\left[r(s,a) + \gamma\,Q^\pi(s', \pi(s'))\right]
+  \label{eq:bellman}
+\end{equation}
+The dimensionality of the problem is notable: the state space $\R^{38}$ combined
+with the action space $[0,1]^9$ and the nonlinear dynamics of the Hill model make
+this a demanding benchmark for \DRL{} algorithms.
+
+\begin{proposition}[Absence of strict Markov guarantee]
+Strictly speaking, the observation $o_t$ described by~\eqref{eq:obs} is Markovian
+only under the following assumptions: (i)~the second derivatives of position
+(accelerations) are sufficiently reconstructible from velocities; (ii)~the
+electromechanical delay in activation dynamics (Equation~\eqref{eq:activation}) is
+a deterministic function of the observed variables. The \textit{frame-stacking}
+paradigm (stacking $k$ consecutive observations) was not required here, consistent
+with standard practice~\parencite{Caggiano2022}.
+\end{proposition}
+
+% -----------------------------------------------------------
+\section{Neural Network Architectures}
+
+All algorithms use MLPs with the same base architecture
+(Table~\ref{tab:nn_arch}), ensuring a fair comparison:
+
+\begin{table}[H]
+  \centering
+  \caption{Neural network architectures. The actor input is $\R^{38}$;
+           the critic input is $\R^{38+9} = \R^{47}$.}
+  \label{tab:nn_arch}
+  \rowcolors{2}{lightblue!30}{white}
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabularx}{\textwidth}{@{} L{2.5cm} X C{2.1cm} C{2.1cm} @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Network} & \textbf{Architecture} & \textbf{Activ.} & \textbf{Params.} \\
+    \midrule
+    Actor (SAC)       & $[38 \to 256 \to 256 \to 2\times9]$ & ReLU + tanh    & 76\,809 \\
+    Actor (TD3/DDPG)  & $[38 \to 256 \to 256 \to 9]$        & ReLU + sigmoid & 76\,809 \\
+    Critic            & $[47 \to 256 \to 256 \to 1]$        & ReLU           & 79\,617 \\
+    Value (PPO)       & $[38 \to 256 \to 256 \to 1]$        & ReLU           & 76\,545 \\
+    \bottomrule
+  \end{tabularx}
+  \normalsize
+\end{table}
+
+Weights are initialized using the orthogonal method for PPO~\parencite{Schulman2017}
+and uniform Xavier initialization~\parencite{Glorot2010} for off-policy algorithms.
+Observation normalization is handled by an exponential moving average layer
+(EMA, $\alpha = 0.001$) via Stable-Baselines3's \texttt{VecNormalize}.
+
+% -----------------------------------------------------------
+\section{Theoretical Comparison of Algorithms}
+
+\begin{table}[H]
+  \centering
+  \caption{Theoretical comparison of the implemented \DRL{} algorithms.}
+  \label{tab:algo_compare}
+  \rowcolors{2}{lightblue!30}{white}
+  \small
+  \begin{tabularx}{\textwidth}{@{} L{1.6cm} L{1.6cm} L{2.2cm} L{2.5cm} X L{2.2cm} @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Algo.} & \textbf{Type} & \textbf{Policy} & \textbf{Exploration} &
+    \textbf{Advantages} & \textbf{Limitations} \\
+    \midrule
+    DDPG & Off-policy & Deterministic & Additive OU noise        &
+          Sample-efficient & Unstable, $Q$-overestimation \\
+    TD3  & Off-policy & Deterministic & Gaussian noise + smoothing &
+          Corrects $Q$ bias, stable & Deterministic policy \\
+    SAC  & Off-policy & Stochastic    & Max-entropy (implicit)   &
+          Robust, natural exploration & $\alpha$ sensitive if poorly initialized \\
+    PPO  & On-policy  & Stochastic    & Policy stochasticity     &
+          Stable, low variance & Lower sample efficiency \\
+    \bottomrule
+  \end{tabularx}
+  \normalsize
+\end{table}
+
+% -----------------------------------------------------------
+\section{Reference Controllers (Baselines)}
+
+\subsection{Random Policy}
+
+The random policy draws excitations $u \sim \mathcal{U}([0,1]^9)$ at each step,
+without any learning. It establishes the lower performance bound.
+
+\subsection{PD Impedance Controller}
+
+The PD impedance controller computes a restoring force toward the target in
+operational space, then uses the transposed Jacobian to map forces to joint
+torques, and a pseudo-inverse method to map torques to muscle activations:
+\begin{equation}
+  \tau^\text{cmd} = K_p \,\Delta p - K_d\,\dot{p}_\text{ee},
+  \quad u_i = \max\!\left(0,\, [J^\top(q)]^+\, \tau^\text{cmd} / F_{0,i}^M \right)
+  \label{eq:pd_controller}
+\end{equation}
+with $K_p = 100$~N/m and $K_d = 20$~N$\cdot$s/m, tuned empirically by bisection on
+mean episode reward. This controller represents a reasonable level of performance
+achievable without learning, and anchors the comparison of \DRL{} agents.

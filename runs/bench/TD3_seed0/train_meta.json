@@ -1,0 +1,29 @@
+{
+  "algo": "TD3",
+  "seed": 0,
+  "steps": 100000,
+  "wall_clock_s": 1258.7429975999985,
+  "n_policy_params": 469526,
+  "eval_curve": [
+    {
+      "t": 50000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.28148645232073577,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.3280621168352691,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "gradient_steps": 8
+  },
+  "best_err": 0.28148645232073577,
+  "best_step": 50000
+}

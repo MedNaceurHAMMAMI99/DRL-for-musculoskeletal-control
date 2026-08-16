@@ -1,0 +1,170 @@
+<mujoco model="arm_9muscles">
+  <!-- v2 (2026-08-13): corrected model. Changes vs v1, each independently
+       verified by diagnose_env.py / validate_muscles.py:
+       1. angle="radian" — v1 relied on the MJCF default (degrees), which
+          silently shrank every joint range to <3 degrees and locked the arm.
+       2. Deltoids re-anchored to the thorax (worldbody). In v1 all nine
+          muscles ran humerus->forearm, so no muscle could exert any shoulder
+          torque (both attachment points move rigidly together under shoulder
+          rotation -> zero moment arm, structurally).
+       3. Biceps/triceps long heads made biarticular (thorax origin), matching
+          anatomy (supra-/infraglenoid tubercle origins).
+       4. Elbow flexors/extensors given via points just above the elbow so the
+          path clears the joint axis: a physiological ~2-3 cm moment arm at
+          full extension instead of the ~0 of v1's through-the-axis paths.
+       5. Flexion axes set to (0 -1 0) so positive q = forward/flexion toward
+          +x, consistent with the anterior (+x) muscle placements.
+       6. shoulder_rot given small passive stiffness (no muscle drives it).
+       Segment lengths, masses, joint ranges, and per-muscle peak isometric
+       forces (Holzbaur 2005) are unchanged from v1.
+       Actuator lengthranges: measured tendon min/max over the joint workspace
+       (measure_lengthranges.py), padded x0.7/x1.3 so the operating range
+       sits on the productive part of the normalized F-L curve. -->
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" iterations="50" solver="Newton"
+          integrator="implicit" cone="elliptic"/>
+
+  <default>
+    <muscle ctrllimited="true" ctrlrange="0 1"
+            force="-1" scale="200" lmin="0.5" lmax="1.6"
+            vmax="10" fpmax="1.5" fvmax="1.4"/>
+  </default>
+
+  <worldbody>
+    <!-- Thorax anchor sites: shoulder muscles need a ground reaction -->
+    <site name="bic_l_origin"  pos="0.03  0.00 -0.27"/>
+    <site name="tri_l_origin"  pos="-0.03 0.00 -0.27"/>
+    <site name="delt_a_anchor" pos="0.06  0.00 -0.22"/>
+    <site name="delt_m_anchor" pos="0.00  0.07 -0.24"/>
+    <site name="delt_p_anchor" pos="-0.06 0.00 -0.22"/>
+
+    <body name="humerus" pos="0 0 -0.3">
+      <joint name="shoulder_flex" type="hinge" axis="0 -1 0" range="-0.5 2.5" damping="0.1"/>
+      <joint name="shoulder_abd"  type="hinge" axis="1 0 0"  range="-0.5 2.5" damping="0.1"/>
+      <!-- Shoulder internal/external rotation is spanned by NO muscle in the
+           modeled set (it requires the rotator cuff: subscapularis,
+           infraspinatus, teres minor). Left free it makes the arm
+           underactuated: the static-hold test (oracle_feasibility.py) found
+           gravity uncancelled on this DOF in 41% of target postures, and the
+           resulting sag displaces the hand by up to ~0.19 m — an irreducible
+           error floor no policy can beat. It is therefore constrained near
+           neutral, and retained (rather than deleted) so the state keeps its
+           documented 4-joint / 38-dim form. The reaching task lives in the
+           3-DOF space the 9 muscles do control — shoulder flexion, shoulder
+           abduction, elbow flexion — which is exactly enough to position the
+           hand anywhere in R^3. -->
+      <joint name="shoulder_rot"  type="hinge" axis="0 0 1"  range="-0.05 0.05" damping="20" stiffness="200"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="1.98"/>
+
+      <!-- Single-joint muscle origins on the humerus shaft -->
+      <site name="bic_s_origin"  pos="0.02   0.00 -0.10"/>
+      <site name="bra_origin"    pos="0.015  0.00 -0.15"/>
+      <site name="tri_la_origin" pos="-0.02  0.00 -0.08"/>
+      <site name="tri_m_origin"  pos="-0.015 0.00 -0.12"/>
+
+      <!-- Via points just above the elbow: keep flexor/extensor paths off the
+           joint axis so the moment arm stays physiological at full extension -->
+      <site name="bic_l_via"  pos="0.025  0.00 -0.28"/>
+      <site name="bic_s_via"  pos="0.025  0.00 -0.28"/>
+      <site name="bra_via"    pos="0.02   0.00 -0.28"/>
+      <site name="tri_l_via"  pos="-0.025 0.00 -0.28"/>
+      <site name="tri_la_via" pos="-0.025 0.00 -0.28"/>
+      <site name="tri_m_via"  pos="-0.02  0.00 -0.28"/>
+
+      <!-- Deltoid insertions at the deltoid tuberosity (~mid-humerus) -->
+      <site name="delt_a_insertion" pos="0.035  0.00  -0.13"/>
+      <site name="delt_m_insertion" pos="0.00   0.035 -0.13"/>
+      <site name="delt_p_insertion" pos="-0.035 0.00  -0.13"/>
+
+      <body name="radius" pos="0 0 -0.3">
+        <joint name="elbow_flex" type="hinge" axis="0 -1 0" range="0 2.7" damping="0.1"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.27" size="0.03" mass="1.18"/>
+
+        <!-- Flexor insertions on the anterior forearm, extensors on the
+             olecranon side -->
+        <site name="bic_l_insertion"  pos="0.02   0.00 -0.05"/>
+        <site name="bic_s_insertion"  pos="0.02   0.00 -0.04"/>
+        <site name="bra_insertion"    pos="0.015  0.00 -0.05"/>
+        <site name="tri_l_insertion"  pos="-0.03  0.00 -0.02"/>
+        <site name="tri_la_insertion" pos="-0.025 0.00 -0.015"/>
+        <site name="tri_m_insertion"  pos="-0.02  0.00 -0.015"/>
+
+        <body name="hand" pos="0 0 -0.27">
+          <geom type="sphere" size="0.04" mass="0.45"/>
+          <site name="end_effector" pos="0 0 0"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <tendon>
+    <spatial name="biceps_long"  width="0.003">
+      <site site="bic_l_origin"/>
+      <site site="bic_l_via"/>
+      <site site="bic_l_insertion"/>
+    </spatial>
+    <spatial name="biceps_short" width="0.003">
+      <site site="bic_s_origin"/>
+      <site site="bic_s_via"/>
+      <site site="bic_s_insertion"/>
+    </spatial>
+    <spatial name="brachialis"   width="0.003">
+      <site site="bra_origin"/>
+      <site site="bra_via"/>
+      <site site="bra_insertion"/>
+    </spatial>
+    <spatial name="triceps_long" width="0.003">
+      <site site="tri_l_origin"/>
+      <site site="tri_l_via"/>
+      <site site="tri_l_insertion"/>
+    </spatial>
+    <spatial name="triceps_lat"  width="0.003">
+      <site site="tri_la_origin"/>
+      <site site="tri_la_via"/>
+      <site site="tri_la_insertion"/>
+    </spatial>
+    <spatial name="triceps_med"  width="0.003">
+      <site site="tri_m_origin"/>
+      <site site="tri_m_via"/>
+      <site site="tri_m_insertion"/>
+    </spatial>
+    <spatial name="deltoid_ant"  width="0.003">
+      <site site="delt_a_anchor"/>
+      <site site="delt_a_insertion"/>
+    </spatial>
+    <spatial name="deltoid_med"  width="0.003">
+      <site site="delt_m_anchor"/>
+      <site site="delt_m_insertion"/>
+    </spatial>
+    <spatial name="deltoid_post" width="0.003">
+      <site site="delt_p_anchor"/>
+      <site site="delt_p_insertion"/>
+    </spatial>
+  </tendon>
+
+  <actuator>
+    <muscle name="biceps_long"  tendon="biceps_long"  force="624"  lengthrange="0.1834 0.5086"/>
+    <muscle name="biceps_short" tendon="biceps_short" force="435"  lengthrange="0.1350 0.3124"/>
+    <muscle name="brachialis"   tendon="brachialis"   force="987"  lengthrange="0.1085 0.2604"/>
+    <muscle name="triceps_long" tendon="triceps_long" force="798"  lengthrange="0.2024 0.5087"/>
+    <muscle name="triceps_lat"  tendon="triceps_lat"  force="624"  lengthrange="0.1646 0.3394"/>
+    <muscle name="triceps_med"  tendon="triceps_med"  force="624"  lengthrange="0.1366 0.2773"/>
+    <muscle name="deltoid_ant"  tendon="deltoid_ant"  force="1142" lengthrange="0.0308 0.2989"/>
+    <muscle name="deltoid_med"  tendon="deltoid_med"  force="1142" lengthrange="0.0297 0.2811"/>
+    <muscle name="deltoid_post" tendon="deltoid_post" force="259"  lengthrange="0.0556 0.3047"/>
+  </actuator>
+
+  <sensor>
+    <actuatorfrc name="f_bl"  actuator="biceps_long"/>
+    <actuatorfrc name="f_bs"  actuator="biceps_short"/>
+    <actuatorfrc name="f_bra" actuator="brachialis"/>
+    <actuatorfrc name="f_tl"  actuator="triceps_long"/>
+    <actuatorfrc name="f_tla" actuator="triceps_lat"/>
+    <actuatorfrc name="f_tm"  actuator="triceps_med"/>
+    <actuatorfrc name="f_da"  actuator="deltoid_ant"/>
+    <actuatorfrc name="f_dm"  actuator="deltoid_med"/>
+    <actuatorfrc name="f_dp"  actuator="deltoid_post"/>
+    <jointpos name="shf_q" joint="shoulder_flex"/>
+    <jointvel name="shf_v" joint="shoulder_flex"/>
+  </sensor>
+</mujoco>

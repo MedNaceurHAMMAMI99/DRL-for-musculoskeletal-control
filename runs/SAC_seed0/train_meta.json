@@ -1,0 +1,104 @@
+{
+  "algo": "SAC",
+  "seed": 0,
+  "steps": 300000,
+  "wall_clock_s": 5794.829885799998,
+  "n_policy_params": 393750,
+  "eval_curve": [
+    {
+      "t": 25000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.43891580998631535,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 50000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.2098708025202769,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 75000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.14443261526062998,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.1632736149597755,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 125000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.19875377418191315,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 150000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.16708330638611657,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 175000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.14456668590861704,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 200000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.1836586151077572,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 225000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.16742790713692934,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 250000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.1327874296359337,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 275000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.0811683431590179,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 300000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.09200968791823708,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "learning_rate": 0.00043997941251346594,
+    "gamma": 0.9568097976880915,
+    "batch_size": 128,
+    "tau": 0.018771833627238235,
+    "target_entropy": -19.64862576109677,
+    "gradient_steps": 8
+  },
+  "best_err": 0.0811683431590179,
+  "best_step": 275000
+}

@@ -1,0 +1,341 @@
+{
+  "SAC_default_seed0": {
+    "config": "SAC_default",
+    "algo": "SAC",
+    "seed": 0,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 46.40171233499993,
+    "metrics": {
+      "mean_final_error": 0.26803467404226516,
+      "mean_min_error": 0.13336577761700893,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.04,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.16,
+      "mean_energy": 1220692.1432024962,
+      "blow_up_rate": 0.02,
+      "mean_episode_len": 98.9
+    }
+  },
+  "SAC_default_seed1": {
+    "config": "SAC_default",
+    "algo": "SAC",
+    "seed": 1,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 45.82942190666666,
+    "metrics": {
+      "mean_final_error": 0.23381277573010184,
+      "mean_min_error": 0.12417256893069636,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.06,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.18,
+      "mean_energy": 1199356.757930911,
+      "blow_up_rate": 0.02,
+      "mean_episode_len": 98.2
+    }
+  },
+  "SAC_default_seed2": {
+    "config": "SAC_default",
+    "algo": "SAC",
+    "seed": 2,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 45.91747210666666,
+    "metrics": {
+      "mean_final_error": 0.2820365771222291,
+      "mean_min_error": 0.12863762468844192,
+      "success_rate": 0.0,
+      "reach_5cm": 0.02,
+      "reach_10cm": 0.06,
+      "touch_2cm": 0.02,
+      "touch_5cm": 0.14,
+      "mean_energy": 1141260.1610523409,
+      "blow_up_rate": 0.02,
+      "mean_episode_len": 98.34
+    }
+  },
+  "SAC_tuned_seed0": {
+    "config": "SAC_tuned",
+    "algo": "SAC",
+    "seed": 0,
+    "steps": 100000,
+    "hyperparams": {
+      "learning_rate": 0.00043997941251346594,
+      "gamma": 0.9568097976880915,
+      "batch_size": 128,
+      "tau": 0.018771833627238235,
+      "target_entropy": -19.64862576109677,
+      "gradient_steps": 8
+    },
+    "wall_min": 29.506898356666717,
+    "metrics": {
+      "mean_final_error": 0.16721586471902314,
+      "mean_min_error": 0.08701882611068253,
+      "success_rate": 0.0,
+      "reach_5cm": 0.14,
+      "reach_10cm": 0.36,
+      "touch_2cm": 0.22,
+      "touch_5cm": 0.42,
+      "mean_energy": 615055.8007328367,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "SAC_tuned_seed1": {
+    "config": "SAC_tuned",
+    "algo": "SAC",
+    "seed": 1,
+    "steps": 100000,
+    "hyperparams": {
+      "learning_rate": 0.00043997941251346594,
+      "gamma": 0.9568097976880915,
+      "batch_size": 128,
+      "tau": 0.018771833627238235,
+      "target_entropy": -19.64862576109677,
+      "gradient_steps": 8
+    },
+    "wall_min": 29.73456121333329,
+    "metrics": {
+      "mean_final_error": 0.14921809425592764,
+      "mean_min_error": 0.08527952578977815,
+      "success_rate": 0.0,
+      "reach_5cm": 0.08,
+      "reach_10cm": 0.4,
+      "touch_2cm": 0.22,
+      "touch_5cm": 0.44,
+      "mean_energy": 514679.19041761785,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "SAC_tuned_seed2": {
+    "config": "SAC_tuned",
+    "algo": "SAC",
+    "seed": 2,
+    "steps": 100000,
+    "hyperparams": {
+      "learning_rate": 0.00043997941251346594,
+      "gamma": 0.9568097976880915,
+      "batch_size": 128,
+      "tau": 0.018771833627238235,
+      "target_entropy": -19.64862576109677,
+      "gradient_steps": 8
+    },
+    "wall_min": 30.12078521166671,
+    "metrics": {
+      "mean_final_error": 0.1666364994281662,
+      "mean_min_error": 0.10509499740513924,
+      "success_rate": 0.0,
+      "reach_5cm": 0.02,
+      "reach_10cm": 0.34,
+      "touch_2cm": 0.06,
+      "touch_5cm": 0.3,
+      "mean_energy": 661159.3826988628,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "TD3_seed0": {
+    "config": "TD3",
+    "algo": "TD3",
+    "seed": 0,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 20.980229620000078,
+    "metrics": {
+      "mean_final_error": 0.28919164056155133,
+      "mean_min_error": 0.15982071983697163,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.04,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.04,
+      "mean_energy": 1174661.8251510835,
+      "blow_up_rate": 0.04,
+      "mean_episode_len": 96.72
+    }
+  },
+  "TD3_seed1": {
+    "config": "TD3",
+    "algo": "TD3",
+    "seed": 1,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 21.113221716666644,
+    "metrics": {
+      "mean_final_error": 0.28313493297331527,
+      "mean_min_error": 0.18815179960714296,
+      "success_rate": 0.0,
+      "reach_5cm": 0.02,
+      "reach_10cm": 0.04,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.04,
+      "mean_energy": 1334846.5202542467,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "TD3_seed2": {
+    "config": "TD3",
+    "algo": "TD3",
+    "seed": 2,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 21.078662086666736,
+    "metrics": {
+      "mean_final_error": 0.26341961510313255,
+      "mean_min_error": 0.1481969904178368,
+      "success_rate": 0.0,
+      "reach_5cm": 0.02,
+      "reach_10cm": 0.22,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.22,
+      "mean_energy": 1216753.2769781393,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "DDPG_seed0": {
+    "config": "DDPG",
+    "algo": "DDPG",
+    "seed": 0,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 21.985655215000104,
+    "metrics": {
+      "mean_final_error": 0.4039623641381413,
+      "mean_min_error": 0.1971396094720201,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.06,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.06,
+      "mean_energy": 1574696.204421428,
+      "blow_up_rate": 0.32,
+      "mean_episode_len": 78.52
+    }
+  },
+  "DDPG_seed1": {
+    "config": "DDPG",
+    "algo": "DDPG",
+    "seed": 1,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 22.759901941666612,
+    "metrics": {
+      "mean_final_error": 0.40168473683634,
+      "mean_min_error": 0.20217488082725435,
+      "success_rate": 0.0,
+      "reach_5cm": 0.02,
+      "reach_10cm": 0.02,
+      "touch_2cm": 0.04,
+      "touch_5cm": 0.18,
+      "mean_energy": 1242833.8015096516,
+      "blow_up_rate": 0.1,
+      "mean_episode_len": 91.42
+    }
+  },
+  "DDPG_seed2": {
+    "config": "DDPG",
+    "algo": "DDPG",
+    "seed": 2,
+    "steps": 100000,
+    "hyperparams": {
+      "gradient_steps": 8
+    },
+    "wall_min": 23.947532303333233,
+    "metrics": {
+      "mean_final_error": 0.44279863219939064,
+      "mean_min_error": 0.2555803097412189,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.0,
+      "touch_2cm": 0.04,
+      "touch_5cm": 0.1,
+      "mean_energy": 1333338.130459847,
+      "blow_up_rate": 0.58,
+      "mean_episode_len": 57.88
+    }
+  },
+  "PPO_seed0": {
+    "config": "PPO",
+    "algo": "PPO",
+    "seed": 0,
+    "steps": 100000,
+    "hyperparams": {},
+    "wall_min": 3.044011283333384,
+    "metrics": {
+      "mean_final_error": 0.4326287138435848,
+      "mean_min_error": 0.1548651949785623,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.02,
+      "touch_2cm": 0.02,
+      "touch_5cm": 0.18,
+      "mean_energy": 134935.38740396337,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "PPO_seed1": {
+    "config": "PPO",
+    "algo": "PPO",
+    "seed": 1,
+    "steps": 100000,
+    "hyperparams": {},
+    "wall_min": 3.107053946666565,
+    "metrics": {
+      "mean_final_error": 0.376097525879018,
+      "mean_min_error": 0.23103926590456245,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.14,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.12,
+      "mean_energy": 57388.72693190378,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  },
+  "PPO_seed2": {
+    "config": "PPO",
+    "algo": "PPO",
+    "seed": 2,
+    "steps": 100000,
+    "hyperparams": {},
+    "wall_min": 3.107795649999995,
+    "metrics": {
+      "mean_final_error": 0.46050462088283434,
+      "mean_min_error": 0.3285810038750604,
+      "success_rate": 0.0,
+      "reach_5cm": 0.0,
+      "reach_10cm": 0.0,
+      "touch_2cm": 0.0,
+      "touch_5cm": 0.0,
+      "mean_energy": 414665.80307244527,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  }
+}

@@ -1,0 +1,486 @@
+% ===========================================================
+%  APPENDICES
+% ===========================================================
+
+\chapter{MJCF File of the Musculoskeletal Model}
+\label{app:mjcf}
+
+Extrait du fichier MJCF décrivant le modèle du bras à neuf muscles. Les
+propriétés biomécaniques (longueurs optimales, forces isométriques maximales,
+points d'insertion) sont issues de \parencite{Holzbaur2005}~; les paramètres
+inertiels proviennent de \parencite{Winter2009}. Le fichier complet est
+disponible sur le dépôt Git associé à ce mémoire.
+
+\begin{lstlisting}[language=XML, caption={Extrait du fichier MJCF (arm.xml).}, label={lst:mjcf}]
+<mujoco model="arm_9muscles">
+  <option timestep="0.002" iterations="50" solver="Newton"
+          integrator="implicit" cone="elliptic"/>
+
+  <default>
+    <muscle ctrllimited="true" ctrlrange="0 1"
+            force="-1" scale="200" lmin="0.5" lmax="1.6"
+            vmax="10" fpmax="1.5" fvmax="1.4"/>
+  </default>
+
+  <worldbody>
+    <body name="humerus" pos="0 0 -0.3">
+      <joint name="shoulder_flex" type="hinge" axis="0 1 0" range="-0.5 2.5" damping="0.1"/>
+      <joint name="shoulder_abd"  type="hinge" axis="1 0 0" range="-0.5 2.5" damping="0.1"/>
+      <joint name="shoulder_rot"  type="hinge" axis="0 0 1" range="-1.5 1.5" damping="0.1"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="1.98"/>
+
+      <!-- Muscle origin sites (humerus) -->
+      <site name="bic_origin_long" pos="0     0.01  0.05"/>
+      <site name="bic_s_origin"    pos="0.01  0.01  0.03"/>
+      <site name="bra_origin"      pos="0     0.00 -0.15"/>
+      <site name="tri_l_origin"    pos="0    -0.01  0.02"/>
+      <site name="delt_a_origin"   pos="0.05  0.00  0.05"/>
+      <site name="delt_m_origin"   pos="0.00  0.05  0.05"/>
+      <site name="delt_p_origin"   pos="-0.05 0.00  0.05"/>
+
+      <body name="radius" pos="0 0 -0.3">
+        <joint name="elbow_flex" type="hinge" axis="0 1 0" range="0 2.7" damping="0.1"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.27" size="0.03" mass="1.18"/>
+
+        <!-- Via-point and insertion sites (forearm) -->
+        <site name="bic_via_1"        pos="0     0.02 -0.02"/>
+        <site name="bic_insertion"    pos="0     0.02 -0.08"/>
+        <site name="bic_s_insertion"  pos="0     0.02 -0.08"/>
+        <site name="bra_insertion"    pos="0     0.01 -0.05"/>
+        <site name="tri_l_insertion"  pos="0    -0.01 -0.01"/>
+        <site name="tri_la_origin"    pos="0.01 -0.01 -0.10"/>
+        <site name="tri_la_insertion" pos="0    -0.01 -0.01"/>
+        <site name="tri_m_origin"     pos="-0.01 -0.01 -0.10"/>
+        <site name="tri_m_insertion"  pos="0    -0.01 -0.01"/>
+        <site name="delt_a_insertion" pos="0.03  0.00 -0.15"/>
+        <site name="delt_m_insertion" pos="0.00  0.03 -0.15"/>
+        <site name="delt_p_insertion" pos="-0.03 0.00 -0.15"/>
+
+        <body name="hand" pos="0 0 -0.27">
+          <geom type="sphere" size="0.04" mass="0.45"/>
+          <site name="end_effector" pos="0 0 0"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <tendon>
+    <spatial name="biceps_long"  width="0.003">
+      <site site="bic_origin_long"/>
+      <site site="bic_via_1"/>
+      <site site="bic_insertion"/>
+    </spatial>
+    <spatial name="biceps_short" width="0.003">
+      <site site="bic_s_origin"/>
+      <site site="bic_s_insertion"/>
+    </spatial>
+    <spatial name="brachialis"   width="0.003">
+      <site site="bra_origin"/>
+      <site site="bra_insertion"/>
+    </spatial>
+    <spatial name="triceps_long" width="0.003">
+      <site site="tri_l_origin"/>
+      <site site="tri_l_insertion"/>
+    </spatial>
+    <spatial name="triceps_lat"  width="0.003">
+      <site site="tri_la_origin"/>
+      <site site="tri_la_insertion"/>
+    </spatial>
+    <spatial name="triceps_med"  width="0.003">
+      <site site="tri_m_origin"/>
+      <site site="tri_m_insertion"/>
+    </spatial>
+    <spatial name="deltoid_ant"  width="0.003">
+      <site site="delt_a_origin"/>
+      <site site="delt_a_insertion"/>
+    </spatial>
+    <spatial name="deltoid_med"  width="0.003">
+      <site site="delt_m_origin"/>
+      <site site="delt_m_insertion"/>
+    </spatial>
+    <spatial name="deltoid_post" width="0.003">
+      <site site="delt_p_origin"/>
+      <site site="delt_p_insertion"/>
+    </spatial>
+  </tendon>
+
+  <actuator>
+    <muscle name="biceps_long"  tendon="biceps_long"  force="624"  lengthrange="0.01 0.50"/>
+    <muscle name="biceps_short" tendon="biceps_short" force="435"  lengthrange="0.01 0.50"/>
+    <muscle name="brachialis"   tendon="brachialis"   force="987"  lengthrange="0.01 0.50"/>
+    <muscle name="triceps_long" tendon="triceps_long" force="798"  lengthrange="0.01 0.50"/>
+    <muscle name="triceps_lat"  tendon="triceps_lat"  force="624"  lengthrange="0.01 0.50"/>
+    <muscle name="triceps_med"  tendon="triceps_med"  force="624"  lengthrange="0.01 0.50"/>
+    <muscle name="deltoid_ant"  tendon="deltoid_ant"  force="1142" lengthrange="0.01 0.50"/>
+    <muscle name="deltoid_med"  tendon="deltoid_med"  force="1142" lengthrange="0.01 0.50"/>
+    <muscle name="deltoid_post" tendon="deltoid_post" force="259"  lengthrange="0.01 0.50"/>
+  </actuator>
+
+  <sensor>
+    <actuatorfrc name="f_bl"  actuator="biceps_long"/>
+    <actuatorfrc name="f_bs"  actuator="biceps_short"/>
+    <actuatorfrc name="f_bra" actuator="brachialis"/>
+    <actuatorfrc name="f_tl"  actuator="triceps_long"/>
+    <actuatorfrc name="f_tla" actuator="triceps_lat"/>
+    <actuatorfrc name="f_tm"  actuator="triceps_med"/>
+    <actuatorfrc name="f_da"  actuator="deltoid_ant"/>
+    <actuatorfrc name="f_dm"  actuator="deltoid_med"/>
+    <actuatorfrc name="f_dp"  actuator="deltoid_post"/>
+    <jointpos name="shf_q" joint="shoulder_flex"/>
+    <jointvel name="shf_v" joint="shoulder_flex"/>
+  </sensor>
+</mujoco>
+\end{lstlisting}
+
+% -----------------------------------------------------------
+\chapter[Gymnasium Environment (Python)]{Gymnasium Environment\\(Python)}
+\label{app:env}
+
+Implémentation Python de l'environnement \texttt{ArmMusculoEnv} héritant de
+\texttt{gymnasium.Env}, intégrant la randomisation de domaine et le calcul
+de la récompense définie en~\eqref{eq:reward}.
+
+\begin{lstlisting}[language=Python, caption={Extrait de \texttt{arm\_env.py}.}, label={lst:env}]
+import numpy as np
+import gymnasium as gym
+from gymnasium import spaces
+import mujoco
+import mujoco.viewer
+
+
+class ArmMusculoEnv(gym.Env):
+    """Environnement musculo-squelettique pour tache d'atteinte 3D."""
+
+    metadata = {"render_modes": ["human", "rgb_array"]}
+
+    def __init__(self, model_path="arm.xml", domain_rand=True,
+                 max_steps=1000, render_mode=None, seed=None):
+        super().__init__()
+        self.model = mujoco.MjModel.from_xml_path(model_path)
+        self.data = mujoco.MjData(self.model)
+        self.domain_rand = domain_rand
+        self.max_steps = max_steps
+        self.render_mode = render_mode
+        self.rng = np.random.default_rng(seed)
+
+        # 9 muscles, activation dans [0,1]
+        self.action_space = spaces.Box(
+            low=0.0, high=1.0, shape=(9,), dtype=np.float32)
+
+        # 38 dimensions : 4q, 4qdot, 9 lengths, 9 forces, 9 acts, 3 err
+        self.observation_space = spaces.Box(
+            low=-np.inf, high=np.inf, shape=(38,), dtype=np.float32)
+
+        # Poids de recompense optimises par Optuna
+        self.w1, self.w2, self.w3 = 1.0, 0.005, 0.01
+        self.w4, self.w5 = 0.1, 0.5
+
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
+        mujoco.mj_resetData(self.model, self.data)
+
+        # Randomisation de domaine
+        if self.domain_rand:
+            # Masses +/- 15%
+            self.model.body_mass[:] *= self.rng.uniform(0.85, 1.15)
+            # Parametres de Hill Fmax +/- 20%
+            for i in range(self.model.nu):
+                self.model.actuator_gainprm[i, 2] *= \
+                    self.rng.uniform(0.80, 1.20)
+            # Amortissement articulaire
+            self.model.dof_damping[:] *= self.rng.uniform(0.70, 1.30)
+
+        # Cible aleatoire dans l'espace atteignable
+        self.target = self.rng.uniform(
+            low=[-0.20, -0.30, -0.45], high=[0.45, 0.30, 0.00])
+
+        self.steps = 0
+        self.prev_action = np.zeros(9, dtype=np.float32)
+        obs = self._get_obs()
+        return obs, {}
+
+    def step(self, action):
+        action = np.clip(action, 0.0, 1.0).astype(np.float32)
+        self.data.ctrl[:] = action
+        # Bruit moteur (OU) pour robustesse
+        if self.domain_rand:
+            self.data.ctrl[:] += self.rng.normal(0, 0.02, size=9)
+            self.data.ctrl[:] = np.clip(self.data.ctrl, 0, 1)
+        mujoco.mj_step(self.model, self.data)
+
+        obs = self._get_obs()
+        err = np.linalg.norm(obs[-3:])
+        e_metab = np.sum(self.data.actuator_force ** 2)
+        d_act = np.sum((action - self.prev_action) ** 2)
+        v = np.linalg.norm(self.data.qvel[:4])
+
+        reward = -(self.w1 * err**2 + self.w2 * e_metab +
+                   self.w3 * d_act) + self.w4
+        success = (err < 0.02) and (v < 0.1)
+        if success:
+            reward += self.w5
+
+        self.steps += 1
+        terminated = bool(success) or (err > 0.60) or \
+                     np.any(np.abs(self.data.qvel[:4]) > 50)
+        truncated = self.steps >= self.max_steps
+
+        self.prev_action = action
+        info = {"err": err, "success": success, "energy": e_metab}
+        return obs, float(reward), terminated, truncated, info
+
+    def _get_obs(self):
+        q = self.data.qpos[:4]
+        qdot = self.data.qvel[:4]
+        lm = np.array([self.data.actuator_length[i]
+                       for i in range(9)])
+        fm = np.array([self.data.actuator_force[i]
+                       for i in range(9)])
+        act = np.array([self.data.act[i] for i in range(9)])
+        ee = self.data.site_xpos[
+            mujoco.mj_name2id(
+                self.model, mujoco.mjtObj.mjOBJ_SITE, "end_effector")]
+        err = self.target - ee
+        return np.concatenate([q, qdot, lm, fm, act, err]).astype(
+            np.float32)
+\end{lstlisting}
+
+% -----------------------------------------------------------
+\chapter{SAC Training Script}
+\label{app:train}
+
+Training script using Stable-Baselines3 for \SAC{}, with
+observation normalization, periodic evaluation, and saving of
+the best-performing models.
+
+\begin{lstlisting}[language=Python, caption={Excerpt from \texttt{train\_sac.py}.}, label={lst:train}]
+import argparse, os, numpy as np
+from stable_baselines3 import SAC
+from stable_baselines3.common.vec_env import (
+    SubprocVecEnv, VecNormalize)
+from stable_baselines3.common.callbacks import EvalCallback
+from arm_env import ArmMusculoEnv
+
+def make_env(seed, domain_rand=True):
+    def _init():
+        env = ArmMusculoEnv(domain_rand=domain_rand, seed=seed)
+        env.reset(seed=seed)
+        return env
+    return _init
+
+def main(args):
+    os.makedirs(args.logdir, exist_ok=True)
+
+    # Environnements vectorises
+    train_envs = SubprocVecEnv(
+        [make_env(args.seed + i) for i in range(args.n_envs)])
+    train_envs = VecNormalize(
+        train_envs, norm_obs=True, norm_reward=True, clip_obs=10.0)
+
+    eval_env = SubprocVecEnv([make_env(args.seed + 999)])
+    eval_env = VecNormalize(
+        eval_env, norm_obs=True, norm_reward=False,
+        training=False)
+
+    # Hyperparametres issus d'Optuna (Annexe D)
+    model = SAC(
+        "MlpPolicy", train_envs,
+        learning_rate=3e-4,
+        buffer_size=1_000_000,
+        batch_size=256,
+        tau=0.005,
+        gamma=0.99,
+        train_freq=1,
+        gradient_steps=1,
+        ent_coef="auto",
+        target_entropy="auto",
+        policy_kwargs=dict(net_arch=[256, 256]),
+        seed=args.seed,
+        verbose=1,
+        tensorboard_log=args.logdir)
+
+    callback = EvalCallback(
+        eval_env,
+        best_model_save_path=args.logdir,
+        log_path=args.logdir,
+        eval_freq=5000,
+        n_eval_episodes=20,
+        deterministic=True)
+
+    model.learn(total_timesteps=args.steps, callback=callback)
+    model.save(os.path.join(args.logdir, "final_model"))
+    train_envs.save(os.path.join(args.logdir, "vecnormalize.pkl"))
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--steps", type=int, default=2_000_000)
+    parser.add_argument("--n_envs", type=int, default=4)
+    parser.add_argument("--logdir", type=str, default="runs/sac")
+    args = parser.parse_args()
+    main(args)
+\end{lstlisting}
+
+% -----------------------------------------------------------
+\chapter[Hill Integration by Newton--Raphson]{Hill Integration\\by Newton--Raphson}
+\label{app:newton}
+
+Numerical solution of the muscle equilibrium equation~\eqref{eq:equilibrium}
+by Newton--Raphson iterations, used at each simulation step to
+determine the fiber length $\ell_M$ from the musculotendon length
+$\ell_{MT}$ and the activation level $a$.
+
+\begin{lstlisting}[language=Python, caption={Musculotendon equilibrium solver.}, label={lst:newton}]
+import numpy as np
+
+def solve_muscle_equilibrium(L_MT, a, L_M0, L_S0, alpha0,
+                              F_max, epsilon=1e-6, max_iter=50):
+    """
+    Resout f_CE + f_PEE - f_SEE = 0 pour L_M.
+    Retourne (L_M, L_S, F_muscle) par iterations de Newton-Raphson.
+    """
+    # Initialisation : hypothese L_S = L_S0 (tendon a longueur nominale)
+    L_M = L_MT - L_S0
+    L_M = max(0.5 * L_M0, min(1.6 * L_M0, L_M))  # bornes
+
+    for it in range(max_iter):
+        # Angle de pennation
+        sin_alpha = (L_M0 * np.sin(alpha0)) / L_M
+        cos_alpha = np.sqrt(max(1.0 - sin_alpha**2, 1e-6))
+
+        # Longueur du tendon
+        L_S = L_MT - L_M * cos_alpha
+
+        # Force active (gaussienne centree sur L_M0)
+        f_l = np.exp(-((L_M / L_M0 - 1.0) / 0.45) ** 2)
+        f_CE = a * f_l * F_max
+
+        # Force passive (exponentielle)
+        if L_M > L_M0:
+            f_PEE = F_max * (np.exp(5.0 * (L_M / L_M0 - 1.0)) - 1.0) \
+                    / (np.exp(5.0) - 1.0)
+        else:
+            f_PEE = 0.0
+
+        # Force tendineuse (quadratique en deformation)
+        eps_s = (L_S - L_S0) / L_S0
+        if eps_s > 0:
+            f_SEE = F_max * 37.5 * eps_s ** 2
+        else:
+            f_SEE = 0.0
+
+        # Residu d'equilibre
+        res = (f_CE + f_PEE) * cos_alpha - f_SEE
+        if abs(res) < epsilon:
+            break
+
+        # Derivee numerique pour mise a jour
+        dL = 1e-5 * L_M0
+        L_M_p = L_M + dL
+        # (recalcul rapide f_CE, f_PEE, f_SEE a L_M_p omis pour concision)
+        # Puis : L_M -= res / (dRes / dL_M)
+        L_M -= 0.5 * res / (F_max / L_M0)  # simplification pas adaptatif
+        L_M = max(0.5 * L_M0, min(1.6 * L_M0, L_M))
+
+    return L_M, L_S, (f_CE + f_PEE) * cos_alpha
+\end{lstlisting}
+
+% -----------------------------------------------------------
+\chapter{Detailed Statistical Protocol}
+\label{app:stats}
+
+\textbf{This protocol was not applied to any result in this thesis, and no
+$p$-value, effect size or confidence interval appears anywhere in the text.} It
+is retained here because the implementation is complete and correct, and because
+the seed count --- not the analysis --- is what prevents its use.
+
+With the three seeds the available hardware permitted (\cref{sec:stats_protocol}),
+the two-sided Wilcoxon signed-rank test has a minimum attainable $p$-value of
+$0.25$. Running it would produce numbers that cannot reach significance under any
+threshold while giving the appearance of inferential rigour. An earlier version of
+this work reported $p$-values from this protocol over a purported ten seeds; those
+analyses were never executed and are withdrawn (\cref{ch:conclusion}).
+
+The code below therefore documents what \emph{should} be run once the replication
+recommended in \cref{sec:future} is complete: Wilcoxon signed-rank test for paired
+samples, Bonferroni correction for multiple comparisons, BCa bootstrap confidence
+intervals, and rank-biserial effect size.
+
+\begin{lstlisting}[language=Python, caption={Inter-algorithm statistical analysis.}, label={lst:stats}]
+import numpy as np
+from scipy import stats
+from scipy.stats import wilcoxon
+
+def rank_biserial(x, y):
+    """Taille d'effet rank-biserial pour deux echantillons apparies."""
+    diff = np.asarray(x) - np.asarray(y)
+    pos = np.sum(diff > 0)
+    neg = np.sum(diff < 0)
+    return (pos - neg) / (pos + neg) if (pos + neg) > 0 else 0.0
+
+def bootstrap_bca(data, stat_fn=np.mean, n_boot=10000,
+                  alpha=0.05, rng=None):
+    """Intervalle de confiance BCa (biais corrige, accelere)."""
+    rng = np.random.default_rng(rng)
+    data = np.asarray(data)
+    n = len(data)
+    boot_stats = np.array([
+        stat_fn(rng.choice(data, size=n, replace=True))
+        for _ in range(n_boot)])
+    theta_hat = stat_fn(data)
+
+    # Correction de biais
+    z0 = stats.norm.ppf(np.mean(boot_stats < theta_hat))
+    # Acceleration via jackknife
+    jack = np.array([
+        stat_fn(np.delete(data, i)) for i in range(n)])
+    jack_mean = np.mean(jack)
+    num = np.sum((jack_mean - jack) ** 3)
+    den = 6.0 * (np.sum((jack_mean - jack) ** 2) ** 1.5 + 1e-12)
+    a = num / den
+
+    z_a = stats.norm.ppf(alpha / 2)
+    z_1a = stats.norm.ppf(1 - alpha / 2)
+    a1 = stats.norm.cdf(z0 + (z0 + z_a) / (1 - a * (z0 + z_a)))
+    a2 = stats.norm.cdf(z0 + (z0 + z_1a) / (1 - a * (z0 + z_1a)))
+    return (np.quantile(boot_stats, a1),
+            np.quantile(boot_stats, a2))
+
+def compare_algorithms(results):
+    """results: dict {algo: array[10] de taux de succes}"""
+    keys = list(results.keys())
+    n_tests = len(keys) * (len(keys) - 1) // 2
+    alpha_corrected = 0.05 / n_tests  # Bonferroni
+
+    for i, a in enumerate(keys):
+        for b in keys[i+1:]:
+            stat, p = wilcoxon(results[a], results[b],
+                               alternative='two-sided')
+            rb = rank_biserial(results[a], results[b])
+            ci_a = bootstrap_bca(results[a])
+            print(f"{a} vs {b}: W={stat}, p={p:.4f}, "
+                  f"rb={rb:.2f}, signif={p < alpha_corrected}")
+\end{lstlisting}
+
+% -----------------------------------------------------------
+% CITATION FINALE
+% -----------------------------------------------------------
+\clearpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+  \begin{minipage}{0.75\textwidth}
+    \begin{center}
+      \itshape
+      \Large
+      « Nous n'imitons pas la nature pour la copier, mais pour comprendre
+      les principes qui en ordonnent la complexité ---\\
+      et mettre ces principes au service de ceux qui peinent à se mouvoir. »
+      \vspace{1em}
+
+      \normalsize
+      --- Toward a biologically inspired neuroprosthetics
+    \end{center}
+  \end{minipage}
+\end{center}
+\vspace*{\fill}

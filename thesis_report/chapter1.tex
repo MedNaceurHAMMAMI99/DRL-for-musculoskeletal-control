@@ -1,0 +1,199 @@
+% ===========================================================
+%  CHAPTER I — GENERAL INTRODUCTION
+% ===========================================================
+\chapter{General Introduction}
+\label{chap:intro}
+
+\epigraph{\itshape ``The question is not how to control the arm, but how the nervous
+system solves this redundant, nonlinear, and high-dimensional problem in real time.''}{--- Emanuel Todorov}
+
+% -----------------------------------------------------------
+\section{Context and Motivation}
+
+\subsection{A Fundamental Scientific Question}
+
+Human movement, in all its richness and complexity, results from a remarkable
+orchestration between the central nervous system~(CNS), the musculoskeletal
+structures, and the sensory organs. Understanding the mechanisms that govern this
+motor control is a major scientific challenge, with considerable implications for
+rehabilitation medicine~\parencite{Kwakkel2003}, bio-inspired robotics, the design of
+myoelectric prostheses, and neurocomputational modeling.
+
+Musculoskeletal models provide a formal framework for simulating the biomechanics of
+movement. Platforms such as OpenSim~\parencite{Delp2007} make it possible to
+faithfully reconstruct the anatomy and dynamics of the limbs. However, the optimal
+control of such models remains a fundamentally difficult problem --- often referred to
+as the ``inverse problem of movement'' --- because of (i)~motor
+redundancy~\parencite{Zajac1989}, (ii)~the strong nonlinearity of contractile
+elements, and (iii)~the high dimensionality of the state and action spaces.
+
+At the same time, the emergence of \textit{deep reinforcement learning}~(\DRL{}) has
+opened new perspectives for the automated learning of control strategies in complex
+environments~\parencite{Mnih2015, Sutton2018}. Pioneering work has demonstrated the
+ability of \DRL{} algorithms to master continuous-control tasks of remarkable
+sophistication~\parencite{Lillicrap2016, Schulman2017, Haarnoja2018}. More recently,
+Meta~AI's MyoSuite project~\parencite{Caggiano2022}, the
+MotorNet platform~\parencite{Codol2023}, and the \textit{Learning to
+Run} challenge~\parencite{Kidzinski2018} have established the feasibility of
+combining musculoskeletal models and \DRL{} to reproduce biologically plausible human
+motor strategies.
+
+These converging developments provide the framework within which the present work is
+situated.
+
+\subsection{Epidemiological and Clinical Challenges}
+\label{sec:epidemio}
+
+Beyond its fundamental scientific interest, the societal stake is considerable.
+According to the World Health Organization~(WHO), stroke is the world's second leading
+cause of death and the leading cause of acquired disability in adults~\parencite{WHO2023, Feigin2022}.
+In Tunisia, the annual incidence is estimated at about $110$~cases per $100\,000$
+inhabitants~\parencite{Mrabet2015}, corresponding to more than $12\,000$~new cases
+each year, with an aging population suggesting a substantial increase in the coming
+decades.
+
+Among stroke survivors, more than $60$~\% still present residual upper-limb motor
+impairment six months after the event~\parencite{Kwakkel2003}. Intensive,
+personalized rehabilitation, guided by robotic devices and assisted therapies,
+significantly improves recovery~\parencite{Lo2010}. Nevertheless, access to these
+technologies remains limited by their cost and by the shortage of trained therapists,
+particularly in developing countries. A musculoskeletal simulation environment capable
+of exploring rehabilitation strategies \textit{in silico} before clinical application
+therefore represents a major scientific and humanitarian opportunity.
+
+% -----------------------------------------------------------
+\section{Problem Statement}
+
+The central problem addressed in this thesis can be formulated as follows:
+
+\begin{quote}
+\itshape How can one design a realistic musculoskeletal simulation environment that
+integrates a complete Hill-type muscle model (including pennation dynamics, serial and
+parallel elasticity, and numerical integration of fiber--tendon equilibrium), and to
+what extent can a trained \DRL{} policy \emph{replace} the iterative
+Newton--Raphson solver at inference time --- trading a large but one-off training
+cost against virtually zero per-step computation --- while preserving biomechanical
+accuracy and enabling real-time rehabilitation control?
+\end{quote}
+
+This problem can be broken down into five research questions:
+\begin{enumerate}[label=\textbf{Q\arabic*.}, leftmargin=2.2em]
+  \item What level of physiological fidelity is necessary and sufficient for a
+        musculoskeletal model dedicated to \DRL{}?
+  \item Which reward-function formulations encourage biologically plausible motor
+        strategies while preserving learning efficiency?
+  \item Which \DRL{} algorithms provide the best compromise between convergence,
+        robustness, and energy efficiency on muscular state and action spaces?
+  \item Do the trained agents exhibit behaviors observed in humans
+        (co-contraction, \textit{jerk} minimization, energy efficiency,
+        triphasic profiles, muscle synergies)?
+  \item Does Domain Randomization improve the robustness of musculoskeletal policies,
+        and to what extent does it make transfer to real patients with varying
+        anatomical parameters conceivable?
+  \item[\textbf{Q6.}] Can a trained RL policy replace the Newton--Raphson solver for
+        real-time muscle force estimation --- producing sufficiently accurate control
+        signals without any iterative computation per step --- and what is the
+        resulting computational gain for embedded rehabilitation hardware?
+\end{enumerate}
+
+% -----------------------------------------------------------
+\section{Objectives}
+
+This thesis pursues the following objectives:
+
+\begin{enumerate}
+  \item Implement an articulated multibody dynamic model (6~DOF) of an upper limb in
+        \MuJoCo{}~\parencite{Todorov2012}, integrating a complete
+        Hill model~\parencite{Hill1938}: CE, SEE, PEE, pennation-angle dynamics,
+        and numerical integration of fiber--tendon equilibrium.
+  \item Validate the physical model by comparing passive mechanical properties and
+        FL/FV curves with data from the literature~\parencite{Holzbaur2005, Winter2009, Gordon1966}.
+  \item Develop a modular Gymnasium environment with Domain Randomization and
+        reproducible perturbations.
+  \item Define reference controllers (random policy, impedance PD controller) in
+        order to establish a meaningful evaluation baseline.
+  \item Compare four \DRL{} algorithms (PPO, SAC, TD3, DDPG) through a rigorous
+        experimental procedure: $10$~seeds, $2{\times}10^6$~steps, hyperparameters
+        optimized with Optuna~\parencite{Akiba2019}, and appropriate statistical tests.
+  \item Analyze and quantify emerging motor strategies: co-contraction
+        (CCI~\parencite{Falconer1985}), metabolic cost~\parencite{Bhargava2004},
+        robustness to perturbations, temporal activation profiles, and muscle
+        synergies obtained through non-negative matrix factorization~\parencite{dAvella2003}.
+  \item Discuss the implications for post-stroke rehabilitation and biomedical
+        robotics, including the ethical considerations specific to these
+        applications.
+  \item Benchmark the computational cost of the Newton--Raphson muscle
+        equilibrium solver (per-step wall-clock time for all 9 muscles) against
+        the inference latency of the trained RL policy, quantifying the
+        trade-off between physics-based exactness and real-time deployability on
+        embedded rehabilitation hardware.
+\end{enumerate}
+
+% -----------------------------------------------------------
+\section{Original Contributions}
+\label{sec:contributions}
+
+Compared with similar studies, this thesis makes the following contributions:
+
+\begin{enumerate}[label=\textbf{C\arabic*.}, leftmargin=2.2em]
+  \item \textbf{A complete Hill model in \MuJoCo{}}: explicit integration of the
+        SEE and PEE equations, as well as pennation-angle dynamics, with numerical
+        solution of fiber--tendon equilibrium using the Newton--Raphson method. We
+        mathematically justify each component and provide reference code
+        (Appendix~\ref{app:newton}), whereas most similar studies rely on
+        \MuJoCo{}'s internal simplified muscle model without mathematical
+        justification or validation protocol.
+  \item \textbf{A quantitative validation protocol}: comparison of FL and FV
+        curves and passive joint torques against reference anthropometric
+        data~\parencite{Holzbaur2005, Gordon1966}, with NRMSE reporting.
+  \item \textbf{A per-muscle comparison between \DRL{} and classical static
+        optimisation} (\cref{ch:forces}). Both methods are posed the identical
+        load-sharing problem on the identical trajectory, with the constraint
+        residual verified to machine precision, and agreement is reported muscle
+        by muscle. This is the contribution around which the present work is
+        organised, and it addresses the research question directly rather than
+        through task performance.
+  \item \textbf{Identification of an exploration default that prevents
+        precision} (\cref{sec:entropydefect}). The \SAC{} target entropy of
+        $-\dim(\mathcal{A})$ is shown to impose an error plateau that survives
+        three complete reward redesigns and a fourfold correction to the training
+        budget, and to be remediable by a single hyperparameter change.
+  \item \textbf{Evidence that tuning dominates algorithm selection}
+        (\cref{sec:benchmark}): a five-configuration comparison over three seeds
+        in which the effect of tuning is approximately six times the difference
+        between algorithms at default settings.
+  \item \textbf{A documented account of six substantive defects}
+        (\cref{sec:defects}), four of which produced plausible-looking but
+        incorrect results, together with the measurements that exposed each.
+  \item \textbf{A direct computational comparison between the physics-based
+        solver and RL inference}: we measure the per-step wall-clock time of the
+        Newton--Raphson equilibrium solver (9~muscles $\times$ 5--40~iterations each)
+        versus a single forward pass through the \SAC{} policy network, establishing
+        for the first time a quantitative basis for the claim that RL can replace
+        iterative biomechanical computation for real-time rehabilitation control.
+\end{enumerate}
+
+% -----------------------------------------------------------
+\section{Thesis Organization}
+
+This document is organized as follows:
+\begin{description}[leftmargin=3.5em, style=nextline]
+  \item[\textbf{Chapter~II}] presents the state of the art in musculoskeletal
+        modeling, computational theories of motor control, and \DRL{} for
+        continuous-action spaces.
+  \item[\textbf{Chapter~III}] describes the design of the complete
+        musculoskeletal model, its validation, and the simulation environment.
+  \item[\textbf{Chapter~IV}] presents the theoretical framework of the \DRL{}
+        algorithms used, from the policy-gradient theorem to actor--critic
+        architectures.
+  \item[\textbf{Chapter~V}] details the implementation and experimental
+        methodology, including baselines, the statistical protocol, and
+        reproducibility measures.
+  \item[\textbf{Chapter~VI}] analyzes and discusses the experimental results,
+        from convergence to emerging motor strategies and synergy analysis.
+  \item[\textbf{Chapter~VII}] interprets the results, confronts them with the
+        literature, addresses ethical considerations, and identifies the
+        limitations of the work.
+  \item[\textbf{Conclusion}] summarizes the contributions and outlines future
+        directions.
+\end{description}

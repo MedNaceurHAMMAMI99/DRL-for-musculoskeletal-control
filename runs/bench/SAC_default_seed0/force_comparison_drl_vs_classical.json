@@ -1,0 +1,96 @@
+{
+  "run": "C:\\Users\\moham\\thesis_run\\runs\\bench\\SAC_default_seed0",
+  "episodes": 10,
+  "timesteps": 951,
+  "verdict": "PATTERN AGREES, MAGNITUDE DOES NOT",
+  "validity": {
+    "mean_residual_policy_Nm": 4.601490053513353e-15,
+    "mean_residual_classical_Nm": 5.931042522872611e-15,
+    "solver_failures": 0
+  },
+  "effort": {
+    "policy_mean": 1.9270912802104248,
+    "classical_mean": 0.8613129913691164,
+    "ratio_aggregate": 2.237387917657181,
+    "ratio_median": 2.1432196134909622,
+    "ratio_median_loaded": 1.9407760666804013,
+    "ratio_iqr_loaded": [
+      1.5503439098787424,
+      2.4914297959883327
+    ],
+    "ratio_mean_SKEWED_DO_NOT_QUOTE": 2.731723698726746
+  },
+  "overall": {
+    "rmse_N": 198.95755850317408,
+    "nrmse_pct": 26.987460836903796,
+    "pearson_r": 0.6939525026342364,
+    "pattern_cosine_mean": 0.830024654301024,
+    "pattern_cosine_median": 0.8535736884649892
+  },
+  "per_muscle": {
+    "biceps_long": {
+      "policy_mean_N": 181.46641486442772,
+      "classical_mean_N": 120.45136492256184,
+      "rmse_N": 148.3953640370625,
+      "nrmse_pct_of_fmax": 23.781308339272837,
+      "pearson_r": 0.4877605113168364
+    },
+    "biceps_short": {
+      "policy_mean_N": 171.6885946962743,
+      "classical_mean_N": 70.81041918958778,
+      "rmse_N": 151.10138767740833,
+      "nrmse_pct_of_fmax": 34.73595119020881,
+      "pearson_r": 0.31205886158907126
+    },
+    "brachialis": {
+      "policy_mean_N": 454.80735590430055,
+      "classical_mean_N": 260.97942794601494,
+      "rmse_N": 289.11202067016984,
+      "nrmse_pct_of_fmax": 29.29199804155723,
+      "pearson_r": 0.6029093770936422
+    },
+    "triceps_long": {
+      "policy_mean_N": 315.9041546292451,
+      "classical_mean_N": 287.7545492788537,
+      "rmse_N": 155.33932914769676,
+      "nrmse_pct_of_fmax": 19.466081346829167,
+      "pearson_r": 0.6714654657483532
+    },
+    "triceps_lat": {
+      "policy_mean_N": 285.4645005927579,
+      "classical_mean_N": 28.30249922416642,
+      "rmse_N": 300.2725076190877,
+      "nrmse_pct_of_fmax": 48.12059416972559,
+      "pearson_r": 0.35581150673449635
+    },
+    "triceps_med": {
+      "policy_mean_N": 289.5641481279917,
+      "classical_mean_N": 28.358280389867517,
+      "rmse_N": 307.6370868163989,
+      "nrmse_pct_of_fmax": 49.300815194935716,
+      "pearson_r": 0.18558231359325753
+    },
+    "deltoid_ant": {
+      "policy_mean_N": 438.0671355628415,
+      "classical_mean_N": 412.14074586158785,
+      "rmse_N": 66.22138922082988,
+      "nrmse_pct_of_fmax": 5.7987205972705675,
+      "pearson_r": 0.9715579261191613
+    },
+    "deltoid_med": {
+      "policy_mean_N": 363.53066150648004,
+      "classical_mean_N": 347.473008169467,
+      "rmse_N": 99.4261641710171,
+      "nrmse_pct_of_fmax": 8.706319104292215,
+      "pearson_r": 0.8913198479912343
+    },
+    "deltoid_post": {
+      "policy_mean_N": 94.73891113893444,
+      "classical_mean_N": 60.266495807229425,
+      "rmse_N": 67.91994654948763,
+      "nrmse_pct_of_fmax": 26.223917586674762,
+      "pearson_r": 0.4704426690120402
+    }
+  },
+  "note": "tau taken as data.qfrc_actuator (exact, no inverse-dynamics noise; guarantees feasibility since f_policy is a witness). Fmax is peak isometric force; force-length-velocity modulation of the available force is NOT in the bound."
+}

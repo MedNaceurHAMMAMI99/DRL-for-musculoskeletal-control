@@ -1,0 +1,42 @@
+{
+  "algo": "SAC",
+  "seed": 1,
+  "steps": 300000,
+  "wall_clock_s": 5915.7700683,
+  "n_policy_params": 393750,
+  "eval_curve": [
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.2157155431888531,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 200000,
+      "success_rate": 0.2,
+      "mean_final_error": 0.2024903925095291,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 300000,
+      "success_rate": 0.4,
+      "mean_final_error": 0.06900492951044286,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "learning_rate": 0.00043997941251346594,
+    "gamma": 0.9568097976880915,
+    "batch_size": 128,
+    "tau": 0.018771833627238235,
+    "target_entropy": -19.64862576109677,
+    "gradient_steps": 8
+  },
+  "reward_weights": null,
+  "best_err": 0.06900492951044286,
+  "best_step": 300000
+}

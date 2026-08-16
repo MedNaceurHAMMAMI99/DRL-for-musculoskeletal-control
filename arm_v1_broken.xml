@@ -1,0 +1,118 @@
+<mujoco model="arm_9muscles">
+  <option timestep="0.002" iterations="50" solver="Newton"
+          integrator="implicit" cone="elliptic"/>
+
+  <default>
+    <muscle ctrllimited="true" ctrlrange="0 1"
+            force="-1" scale="200" lmin="0.5" lmax="1.6"
+            vmax="10" fpmax="1.5" fvmax="1.4"/>
+  </default>
+
+  <worldbody>
+    <body name="humerus" pos="0 0 -0.3">
+      <joint name="shoulder_flex" type="hinge" axis="0 1 0" range="-0.5 2.5" damping="0.1"/>
+      <joint name="shoulder_abd"  type="hinge" axis="1 0 0" range="-0.5 2.5" damping="0.1"/>
+      <joint name="shoulder_rot"  type="hinge" axis="0 0 1" range="-1.5 1.5" damping="0.1"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="1.98"/>
+
+      <!-- Muscle origin sites on humerus -->
+      <site name="bic_origin_long"  pos="0    0.01  0.05"/>
+      <site name="bic_s_origin"     pos="0.01 0.01  0.03"/>
+      <site name="bra_origin"       pos="0    0.00 -0.15"/>
+      <site name="tri_l_origin"     pos="0   -0.01  0.02"/>
+      <site name="delt_a_origin"    pos="0.05 0.00  0.05"/>
+      <site name="delt_m_origin"    pos="0.00 0.05  0.05"/>
+      <site name="delt_p_origin"    pos="-0.05 0.00 0.05"/>
+
+      <body name="radius" pos="0 0 -0.3">
+        <joint name="elbow_flex" type="hinge" axis="0 1 0" range="0 2.7" damping="0.1"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.27" size="0.03" mass="1.18"/>
+
+        <!-- Via / insertion sites on forearm -->
+        <site name="bic_via_1"        pos="0    0.02 -0.02"/>
+        <site name="bic_insertion"    pos="0    0.02 -0.08"/>
+        <site name="bic_s_insertion"  pos="0    0.02 -0.08"/>
+        <site name="bra_insertion"    pos="0    0.01 -0.05"/>
+        <site name="tri_l_insertion"  pos="0   -0.01 -0.01"/>
+        <site name="tri_la_origin"    pos="0.01 -0.01 -0.10"/>
+        <site name="tri_la_insertion" pos="0   -0.01 -0.01"/>
+        <site name="tri_m_origin"     pos="-0.01 -0.01 -0.10"/>
+        <site name="tri_m_insertion"  pos="0   -0.01 -0.01"/>
+        <site name="delt_a_insertion" pos="0.03 0.00 -0.15"/>
+        <site name="delt_m_insertion" pos="0.00 0.03 -0.15"/>
+        <site name="delt_p_insertion" pos="-0.03 0.00 -0.15"/>
+
+        <body name="hand" pos="0 0 -0.27">
+          <geom type="sphere" size="0.04" mass="0.45"/>
+          <site name="end_effector" pos="0 0 0"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <tendon>
+    <spatial name="biceps_long"  width="0.003">
+      <site site="bic_origin_long"/>
+      <site site="bic_via_1"/>
+      <site site="bic_insertion"/>
+    </spatial>
+    <spatial name="biceps_short" width="0.003">
+      <site site="bic_s_origin"/>
+      <site site="bic_s_insertion"/>
+    </spatial>
+    <spatial name="brachialis"   width="0.003">
+      <site site="bra_origin"/>
+      <site site="bra_insertion"/>
+    </spatial>
+    <spatial name="triceps_long" width="0.003">
+      <site site="tri_l_origin"/>
+      <site site="tri_l_insertion"/>
+    </spatial>
+    <spatial name="triceps_lat"  width="0.003">
+      <site site="tri_la_origin"/>
+      <site site="tri_la_insertion"/>
+    </spatial>
+    <spatial name="triceps_med"  width="0.003">
+      <site site="tri_m_origin"/>
+      <site site="tri_m_insertion"/>
+    </spatial>
+    <spatial name="deltoid_ant"  width="0.003">
+      <site site="delt_a_origin"/>
+      <site site="delt_a_insertion"/>
+    </spatial>
+    <spatial name="deltoid_med"  width="0.003">
+      <site site="delt_m_origin"/>
+      <site site="delt_m_insertion"/>
+    </spatial>
+    <spatial name="deltoid_post" width="0.003">
+      <site site="delt_p_origin"/>
+      <site site="delt_p_insertion"/>
+    </spatial>
+  </tendon>
+
+  <actuator>
+    <muscle name="biceps_long"  tendon="biceps_long"  force="624"  lengthrange="0.01 0.50"/>
+    <muscle name="biceps_short" tendon="biceps_short" force="435"  lengthrange="0.01 0.50"/>
+    <muscle name="brachialis"   tendon="brachialis"   force="987"  lengthrange="0.01 0.50"/>
+    <muscle name="triceps_long" tendon="triceps_long" force="798"  lengthrange="0.01 0.50"/>
+    <muscle name="triceps_lat"  tendon="triceps_lat"  force="624"  lengthrange="0.01 0.50"/>
+    <muscle name="triceps_med"  tendon="triceps_med"  force="624"  lengthrange="0.01 0.50"/>
+    <muscle name="deltoid_ant"  tendon="deltoid_ant"  force="1142" lengthrange="0.01 0.50"/>
+    <muscle name="deltoid_med"  tendon="deltoid_med"  force="1142" lengthrange="0.01 0.50"/>
+    <muscle name="deltoid_post" tendon="deltoid_post" force="259"  lengthrange="0.01 0.50"/>
+  </actuator>
+
+  <sensor>
+    <actuatorfrc name="f_bl"  actuator="biceps_long"/>
+    <actuatorfrc name="f_bs"  actuator="biceps_short"/>
+    <actuatorfrc name="f_bra" actuator="brachialis"/>
+    <actuatorfrc name="f_tl"  actuator="triceps_long"/>
+    <actuatorfrc name="f_tla" actuator="triceps_lat"/>
+    <actuatorfrc name="f_tm"  actuator="triceps_med"/>
+    <actuatorfrc name="f_da"  actuator="deltoid_ant"/>
+    <actuatorfrc name="f_dm"  actuator="deltoid_med"/>
+    <actuatorfrc name="f_dp"  actuator="deltoid_post"/>
+    <jointpos name="shf_q" joint="shoulder_flex"/>
+    <jointvel name="shf_v" joint="shoulder_flex"/>
+  </sensor>
+</mujoco>

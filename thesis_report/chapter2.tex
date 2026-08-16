@@ -1,0 +1,536 @@
+% ===========================================================
+%  CHAPTER II — STATE OF THE ART
+% ===========================================================
+\chapter{State of the Art}
+
+% -----------------------------------------------------------
+\section{Human Motor Control: Computational Perspectives}
+
+\subsection{The Motor Control Problem}
+
+Motor control refers to the full set of processes by which the CNS plans,
+initiates, and regulates voluntary and involuntary movements. From a computational
+perspective, it is an optimal control problem under constraints in a very high-
+dimensional state space~\parencite{Todorov2004, Scott2004}.
+
+Three major computational hypotheses guide the modeling of motor control:
+\begin{enumerate}
+  \item \textbf{\textit{Jerk} minimization}~\parencite{Flash1985}: trajectories
+        minimize the derivative of acceleration, producing smooth bell-shaped
+        velocity profiles characteristic of human pointing movements.
+  \item \textbf{End-point variance minimization}~\parencite{Harris1998}: this
+        integrates the stochastic nature of the neural signal
+        (\textit{signal-dependent noise}) and predicts curved trajectories for
+        large-amplitude movements.
+  \item \textbf{Stochastic optimal control}~\parencite{Todorov2002}: this unifies
+        the previous approaches within a Bayesian framework and underlies the theory
+        of Optimal Feedback Control~(OFC). OFC predicts that the CNS corrects only
+        errors that interfere with task achievement (the ``minimum intervention
+        principle''), thereby minimizing unnecessary co-contraction.
+\end{enumerate}
+
+\subsection{Internal Models and Efference Prediction}
+
+The CNS uses \textit{internal models} to predict the sensory consequences of motor
+commands and compensate for feedback delays~\parencite{Wolpert1998}. The MOSAIC
+model (\textit{Modular Selection and Identification for Control})~\parencite{Wolpert1998}
+proposes a modular architecture in which several internal models combine
+adaptively. This perspective is relevant to our work: the learned \DRL{} policies can
+be interpreted as \textit{implicit inverse models} of musculoskeletal dynamics.
+
+\subsection{Muscle Synergies and Modular Organization}
+\label{sec:synergies_related}
+
+A complementary theory, that of muscle synergies~\parencite{dAvella2003,
+Ting2007, Bizzi2013}, proposes that the CNS simplifies control by recruiting
+pre-structured neural modules, each activating a coherent subset of muscles.
+Mathematically, the observed activations $A(t) \in \R^{N}$ can be decomposed into a
+small number $k \ll N$ of synergies $W \in \R^{N \times k}$ activated by temporal
+coefficients $C(t) \in \R^k$:
+\begin{equation}
+  A(t) \approx W \cdot C(t), \quad W_{ij} \geq 0, \; C_{ij} \geq 0
+  \label{eq:nmf_principle}
+\end{equation}
+This decomposition, obtained through non-negative matrix factorization~(NMF), is
+robustly observed in humans, primates, and cats across a variety of tasks. Testing
+whether a \DRL{} agent produces similar synergies therefore constitutes a highly
+relevant \textit{biomimetic} validation.
+
+\subsection{Muscle Redundancy and the Inverse Problem}
+
+The human body exhibits significant muscular redundancy: the upper limb alone is
+driven by more than forty muscles, whereas the number of joint degrees of freedom is
+on the order of ten. This redundancy implies that an infinite number of muscular
+activation combinations can produce the same movement, which constitutes the
+\textit{indeterminacy problem} of motor control~\parencite{Zajac1989}.
+
+Classical approaches to resolving this indeterminacy include:
+\begin{itemize}
+  \item Static optimization with muscle-stress
+        minimization~\parencite{Crowninshield1981}:
+        $\min \sum_i (F_i^M / F_{0,i}^M)^2$.
+  \item Forward simulation with dynamic optimization of
+        controls~\parencite{Anderson2001}.
+  \item EMG-based approaches (\textit{EMG-driven simulation}).
+\end{itemize}
+These methods do not capture the learning dynamics characteristic of biological motor
+control, which motivates the \DRL{} approach.
+
+% -----------------------------------------------------------
+\section{Musculoskeletal Modeling}
+
+\subsection{Simulation Platforms}
+
+Several software platforms support musculoskeletal simulation
+(Table~\ref{tab:platforms}).
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Comparison of the main musculoskeletal simulation platforms.}
+  \label{tab:platforms}
+  \rowcolors{2}{lightblue!30}{white}
+  \begin{tabularx}{\textwidth}{@{} L{2.4cm} L{2.6cm} X c @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Platform} & \textbf{License} & \textbf{Strengths} & \textbf{Ref.} \\
+    \midrule
+    OpenSim     & Open-source & Validated anatomical models, rich GUI, motion library & \cite{Delp2007} \\
+    AnyBody     & Commercial  & Static/dynamic analysis, subject-specific parameters & --- \\
+    \MuJoCo     & Free         & Speed, robust contact handling, Python interface, native muscle actuators & \cite{Todorov2012} \\
+    MyoSuite    & Open-source & Musculoskeletal + DRL, detailed hand ($>$50~muscles) & \cite{Caggiano2022} \\
+    dm\_control & Open-source & Standardized RL environments, based on \MuJoCo{} & \cite{Tassa2020} \\
+    MotorNet    & Open-source & Differentiable, native PyTorch integration, planar arm & \cite{Codol2023} \\
+    \bottomrule
+  \end{tabularx}
+  \normalsize
+\end{table}
+
+\MuJoCo{}~\parencite{Todorov2012}, acquired by DeepMind in 2021 and later made
+freely available, represents the state of the art for \DRL{} thanks to its
+exceptional performance: up to one million simulation steps per second on a standard
+CPU, a robust contact solver, and native support for Hill-type muscle actuators.
+
+\subsection{Computational Bottleneck: the Real-Time Cost of Exact Solving}
+\label{sec:compute_bottleneck}
+
+A critical and often overlooked aspect of physics-based muscle control is its
+per-step computational cost. Because the fiber--tendon equilibrium
+equation~\eqref{eq:equilibrium} is implicit and nonlinear in~$l^M$, it cannot be
+solved analytically: Newton--Raphson iteration is required at \emph{every
+simulation timestep, for every muscle}. For a 9-muscle model running at
+\SI{100}{\hertz}, this amounts to approximately
+$9 \times (5\text{--}40) \times 100 = 4\,500$--$36\,000$~arithmetic iterations
+per second --- a workload that grows linearly with model complexity and control
+frequency.
+
+On a standard CPU, each Newton--Raphson solve requires 5--40 iterations and
+takes on the order of 10--100~\si{\micro\second} per muscle. While this is
+manageable in an offline simulation context, it represents a non-trivial burden
+for embedded systems (\eg{} wearable exoskeletons, myoelectric prostheses) where
+power and memory are constrained.
+
+This bottleneck motivates the central hypothesis of the present work: a
+\emph{trained RL policy}, which replaces iterative solving with a single matrix
+multiplication chain through a shallow MLP, can produce equally accurate muscle
+activation commands in \emph{microseconds}, with all the ``computation'' amortized
+into a one-time training phase. Whether this hypothesis holds --- and to what extent
+the quality of control is preserved --- is one of the core empirical questions
+addressed in Chapter~\ref{chap:impl} and the computational benchmark of
+Chapter~\ref{chap:drl} (Section~\ref{sec:compute_efficiency}).
+
+\subsection{The Hill Muscle Model: Complete Formulation}
+\label{sec:hill}
+
+The Hill muscle model~\parencite{Hill1938}, in its modern
+formulation~\parencite{Zajac1989, Millard2013}, is the reference biophysical
+representation. It decomposes the muscle--tendon complex into three functional
+elements (Figure~\ref{fig:hill}):
+
+\begin{itemize}
+  \item \textbf{Contractile element~(CE)}: generates active force and is governed by
+        activation $a(t) \in [0,1]$.
+  \item \textbf{Series elastic element~(SEE)}: models tendon elasticity,
+        storing and returning elastic energy.
+  \item \textbf{Parallel elastic element~(PEE)}: models the passive stiffness
+        of muscle tissue (fascia, sarcolemma).
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \resizebox{0.96\textwidth}{!}{%
+  \begin{tikzpicture}[x=1.15cm, y=0.82cm]
+    % PEE
+    \draw[thick, accentblue] (0,1.55) -- (0.5,1.55);
+    \draw[thick, accentblue, decorate, decoration={zigzag, segment length=4pt, amplitude=3pt}]
+         (0.5,1.55) -- (2.5,1.55);
+    \draw[thick, accentblue] (2.5,1.55) -- (3,1.55);
+    \node[above, accentblue, font=\footnotesize] at (1.5,1.95) {PEE};
+    % CE
+    \draw[thick, navyblue, fill=lightblue!40] (0.5,0.5) rectangle (2.5,1.15);
+    \node[navyblue, font=\footnotesize] at (1.5,0.83)
+         {CE \quad $f_\text{FL}(\lnorm)\,f_\text{FV}(\vnorm)$};
+    % Outer box
+    \draw[thick] (0,0.3) -- (0,1.8);
+    \draw[thick] (0,0.3) -- (0.5,0.3) -- (0.5,0.5);
+    \draw[thick] (0,1.8) -- (0.5,1.8) -- (0.5,1.55);
+    \draw[thick] (2.5,0.5) -- (2.5,1.8) -- (3,1.8);
+    \draw[thick] (2.5,0.3) -- (3,0.3);
+    \draw[thick] (3,0.3) -- (3,1.8);
+    % Pennation marker
+    \draw[dashed, midgrey] (3,1.05) -- (3.35,1.05);
+    \draw[midgrey, ->, >=stealth] (3.25,1.05) arc[start angle=0, end angle=15, radius=0.3];
+    \node[right, midgrey, font=\tiny] at (3.4,1.15) {$\alpha$};
+    % SEE
+    \draw[thick, successgreen] (3,1.05) -- (3.5,1.05);
+    \draw[thick, successgreen, decorate, decoration={zigzag, segment length=4pt, amplitude=3pt}]
+         (3.5,1.05) -- (5.0,1.05);
+    \draw[thick, successgreen] (5.0,1.05) -- (5.5,1.05);
+    \node[above, successgreen, font=\footnotesize] at (4.25,1.4) {SEE (tendon)};
+    % Anchors
+    \draw[thick,|-] (-0.5,1.05) -- (0,1.05);
+    \draw[thick,-|] (5.5,1.05) -- (6.0,1.05);
+    \node[font=\footnotesize] at (-1.0,1.05) {Orig.};
+    \node[font=\footnotesize] at (6.55,1.05) {Ins.};
+    % Lengths
+    \draw[<->, thick, midgrey] (0,-0.15) -- (3,-0.15)
+          node[midway, below, font=\footnotesize] {$l^M$ (fibre)};
+    \draw[<->, thick, successgreen] (3,-0.15) -- (5.5,-0.15)
+          node[midway, below, font=\footnotesize] {$l^T$ (tendon)};
+  \end{tikzpicture}%
+  }
+  \caption{Complete diagram of the Hill muscle--tendon model. The pennation
+           angle~$\alpha$ between the fiber and the line of action is shown at the
+           insertion point. The total length of the muscle--tendon unit is
+           $l^\text{MT} = l^M \cos\alpha + l^T$.}
+  \label{fig:hill}
+\end{figure}
+
+\subsubsection{Force-Length Relationship (FL)}
+
+Maximum isometric force varies as a function of normalized muscle length according
+to a bell-shaped curve, reflecting the optimal \textit{overlap} of actin and myosin
+filaments~\parencite{Gordon1966}:
+\begin{equation}
+  f_\text{FL}(\lnorm) = \exp\!\left(-\left(\frac{\lnorm - 1}{\gamma_\text{FL}}\right)^{\!2}\right),
+  \qquad \lnorm = \frac{l^M}{l^M_\text{opt}}
+  \label{eq:fl}
+\end{equation}
+where $\gamma_\text{FL} \approx 0{,}45$ is a shape parameter and $l^M_\text{opt}$ is
+the optimal fiber length at which the muscle produces its maximum isometric
+force~$F_0^M$.
+
+\subsubsection{Force-Velocity Relationship (FV)}
+
+Hill's equation~\parencite{Hill1938} describes the hyperbolic force--velocity
+relationship for concentric contractions; a linear extension is used for eccentric
+contractions~\parencite{Zajac1989}:
+\begin{equation}
+  f_\text{FV}(\vnorm) =
+  \begin{cases}
+    \dfrac{v_\text{max} - \vnorm}{v_\text{max} + k_\text{ce}\,\vnorm}
+      & \vnorm \leq 0 \quad \text{(concentric)} \\[10pt]
+    \dfrac{f_\text{max} + k_\text{ec}\,\vnorm}{1 + k_\text{ec}\,\vnorm}
+      & \vnorm > 0 \quad \text{(eccentric)}
+  \end{cases}
+  \label{eq:fv}
+\end{equation}
+where $\vnorm = \dot{l}^M / (v_\text{max}\,l^M_\text{opt})$ is the normalized
+contraction velocity, $v_\text{max} \approx 10$ (optimal lengths/s),
+$k_\text{ce} \approx 0{,}25$, and $f_\text{max} \approx 1{,}3$ (maximum eccentric
+coefficient).
+
+\subsubsection{Parallel Elastic Element (PEE)}
+
+The passive force generated by muscle tissue when
+$\lnorm > 1$~\parencite{Zajac1989}:
+\begin{equation}
+  F_\text{PEE}(\lnorm) =
+  \begin{cases}
+    F_0^M \cdot k_\text{PE} \left(\lnorm - 1\right)^2 & \lnorm > 1 \\
+    0 & \lnorm \leq 1
+  \end{cases}
+  \label{eq:pee}
+\end{equation}
+with $k_\text{PE} \approx 5{,}0$ a dimensionless stiffness coefficient such that
+$F_\text{PEE}(\lnorm = 1{,}6) \approx F_0^M$.
+
+\subsubsection{Series Elastic Element (SEE) --- Tendon}
+
+The tendon is modeled by a quadratic law for small strains and a quasi-linear one
+beyond the zero-load length
+$l^T_\text{slack}$~\parencite{Thelen2003}:
+\begin{equation}
+  F_\text{SEE}(\lnorm^T) =
+  \begin{cases}
+    0 & \lnorm^T \leq 1 \\
+    F_0^M \dfrac{(\lnorm^T - 1)^2}{k_T + \lnorm^T - 1} & \lnorm^T > 1
+  \end{cases}
+  \label{eq:see}
+\end{equation}
+where $\lnorm^T = l^T / l^T_\text{slack}$ is the normalized tendon length and
+$k_T \approx 0{,}0475$ is a dimensionless stiffness coefficient.
+
+\subsubsection{Pennation Angle Dynamics}
+
+The pennation angle $\alpha$ (angle between the muscle fibers and the tendon line of
+action) varies with fiber length according to the constant-volume
+constraint~\parencite{Zajac1989}:
+\begin{equation}
+  \alpha(l^M) = \arcsin\!\left(\frac{\sin\alpha_0 \cdot l^M_\text{opt}}{l^M}\right)
+  \label{eq:pennation}
+\end{equation}
+where $\alpha_0$ is the pennation angle at optimal length. The muscle force
+transmitted to the tendon is projected by $\cos\alpha$. The total length of the
+muscle--tendon unit satisfies the geometric constraint:
+\begin{equation}
+  l^\text{MT} = l^M \cos\alpha(l^M) + l^T
+  \label{eq:lmt}
+\end{equation}
+
+\subsubsection{Activation Dynamics}
+
+Muscle activation dynamics introduce an electromechanical delay between the neural
+command $u(t)$ and the activation $a(t)$~\parencite{Thelen2003}:
+\begin{equation}
+  \dot{a}(t) = \frac{u(t) - a(t)}{\tau(u,a)}, \qquad
+  \tau(u,a) = \begin{cases} \tau_\text{act}   & u(t) > a(t) \\
+                            \tau_\text{deact} & u(t) \leq a(t) \end{cases}
+  \label{eq:activation}
+\end{equation}
+where $u(t) \in [0,1]$ is the neural excitation, $a(t) \in [0,1]$ the activation,
+and $\tau_\text{act} \approx 10$--$20$~ms, $\tau_\text{deact} \approx 40$--$70$~ms.
+
+\subsubsection{Fiber-Tendon Equilibrium Equation and Total Force}
+
+The quasi-static equilibrium between contractile-element force, passive force,
+and tendon force gives:
+\begin{equation}
+  F_\text{SEE}(l^T) = \left[a\,F_0^M\,f_\text{FL}(\lnorm)\,f_\text{FV}(\vnorm)
+                      + F_\text{PEE}(\lnorm)\right] \cos\alpha
+  \label{eq:equilibrium}
+\end{equation}
+
+Given $l^\text{MT}$ (computed from kinematics),
+Equation~\eqref{eq:equilibrium} combined with the geometric
+constraint~\eqref{eq:lmt} defines an implicit nonlinear equation in $l^M$
+(fiber length), solved numerically at each simulation step
+(Appendix~\ref{app:newton}).
+
+The total muscle force applied to the skeleton is:
+\begin{equation}
+  F^\text{muscle}(a,l^M,\dot{l}^M) = F_\text{SEE}(l^T)
+  \label{eq:fmuscle}
+\end{equation}
+
+% -----------------------------------------------------------
+\section{Deep Reinforcement Learning for Continuous Control}
+
+\subsection{Theoretical Foundations}
+\label{sec:rl_foundations}
+
+Reinforcement learning~(\RL{}) is formalized as a Markov Decision
+Process~(MDP) defined by the five-tuple
+$(\mathcal{S}, \mathcal{A}, P, R, \gamma)$~\parencite{Bellman1957, Sutton2018}:
+\begin{itemize}
+  \item $\mathcal{S}$: state space (continuous, $\subset \R^{38}$ in this work).
+  \item $\mathcal{A}$: action space (continuous, $= [0,1]^9$ in this work).
+  \item $P : \mathcal{S} \times \mathcal{A} \times \mathcal{S} \to [0,1]$:
+        transition probability.
+  \item $R : \mathcal{S} \times \mathcal{A} \to \R$: reward signal.
+  \item $\gamma \in [0,1)$: temporal discount factor.
+\end{itemize}
+
+The objective is to find a policy
+$\pi : \mathcal{S} \to \mathcal{A}$ that maximizes the expected discounted return:
+\begin{equation}
+  J(\pi) = \E_{\tau \sim \pi}\!\left[\sum_{t=0}^{\infty} \gamma^t\,r(s_t, a_t)\right]
+  \label{eq:rl_objective}
+\end{equation}
+
+The modern actor--critic framework~\parencite{Konda2000} combines value estimation
+(the critic) and policy improvement (the actor), and forms the basis of DDPG, TD3,
+and SAC.
+
+\subsection{Policy Gradient Theorem}
+
+The policy-gradient theorem~\parencite{Sutton2018} provides the gradient of
+$J(\pi_\theta)$ with respect to the parameters $\theta$:
+\begin{equation}
+  \nabla_\theta J(\pi_\theta) = \E_{\tau \sim \pi_\theta}\!\left[
+    \sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t
+  \right]
+  \label{eq:pg_theorem}
+\end{equation}
+where $G_t = \sum_{k=t}^{T} \gamma^{k-t}\,r_k$ is the cumulative return from step~$t$.
+The variance of this estimator is reduced by introducing an advantage function
+$A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$ in place of~$G_t$.
+
+\subsection{State-of-the-Art Algorithms}
+\label{sec:algorithms}
+
+\subsubsection{DDPG — Deep Deterministic Policy Gradient}
+
+\textcite{Lillicrap2016} introduce DDPG, the first modern actor-critic algorithm
+for continuous action spaces. The actor learns a deterministic policy
+$\mu_\theta : \mathcal{S} \to \mathcal{A}$; the critic evaluates $Q_\phi(s,a)$.
+
+Critic update (Bellman-error minimization):
+\begin{equation}
+  \mathcal{L}(\phi) = \E_{(s,a,r,s') \sim \mathcal{B}}\!\left[\bigl(Q_\phi(s,a) - y\bigr)^2\right],
+  \quad y = r + \gamma\,Q_{\phi'}(s', \mu_{\theta'}(s'))
+  \label{eq:ddpg_critic}
+\end{equation}
+
+Actor update:
+\begin{equation}
+  \nabla_\theta J \approx \E\!\left[\nabla_a Q_\phi(s,a)\big|_{a=\mu_\theta(s)}
+  \cdot \nabla_\theta \mu_\theta(s)\right]
+  \label{eq:ddpg_actor}
+\end{equation}
+
+Target-network update (\textit{Polyak averaging}, $\tau = 0{,}005$):
+\begin{equation}
+  \phi' \leftarrow \tau\phi + (1-\tau)\phi', \qquad
+  \theta' \leftarrow \tau\theta + (1-\tau)\theta'
+  \label{eq:polyak}
+\end{equation}
+
+Exploration is ensured by an additive Ornstein--Uhlenbeck process on the
+actions. DDPG suffers from systematic overestimation of $Q$ values and strong
+sensitivity to hyperparameters~\parencite{Fujimoto2018}.
+
+\subsubsection{TD3 — Twin Delayed DDPG}
+
+\textcite{Fujimoto2018} correct DDPG's $Q$-overestimation bias through three
+complementary mechanisms:
+
+\begin{enumerate}
+  \item \textbf{Twin critics}: two critics $Q_{\phi_1}, Q_{\phi_2}$; the target
+        uses the minimum:
+        \begin{equation}
+          y = r + \gamma \min_{i=1,2} Q_{\phi'_i}\!\left(s',\, \tilde{a}\right),
+          \quad \tilde{a} = \mu_{\theta'}(s') + \epsilon, \;
+          \epsilon \sim \mathrm{clip}\!\left(\mathcal{N}(0,\sigma), -c, c\right)
+          \label{eq:td3_target}
+        \end{equation}
+  \item \textbf{Delayed actor update}: the actor is updated every $d=2$
+        critic iterations, reducing error propagation.
+  \item \textbf{Target policy smoothing}: the noise $\epsilon$
+        in~\eqref{eq:td3_target} regularises the target by smoothing peaks of the
+        $Q$ function.
+\end{enumerate}
+
+\subsubsection{SAC — Soft Actor-Critic}
+
+SAC~\parencite{Haarnoja2018} adopts a maximum-entropy optimisation framework.
+The augmented objective is:
+\begin{equation}
+  J(\pi) = \E\!\left[\sum_t \gamma^t \Bigl(r(s_t, a_t)
+         + \alpha\,\mathcal{H}\bigl(\pi(\cdot|s_t)\bigr)\Bigr)\right]
+  \label{eq:sac_objective}
+\end{equation}
+where $\mathcal{H}(\pi(\cdot|s)) = -\E_{a\sim\pi}[\log\pi(a|s)]$ is the entropy and
+$\alpha > 0$ is a temperature coefficient learned automatically:
+\begin{equation}
+  J(\alpha) = \E_{a\sim\pi}\!\left[-\alpha\log\pi(a|s) - \alpha\bar{\mathcal{H}}\right],
+  \qquad \bar{\mathcal{H}} = -\dim(\mathcal{A})
+  \label{eq:sac_alpha}
+\end{equation}
+The policy is parameterized as a squashed Gaussian through reparameterization:
+\begin{equation}
+  a_t = \tanh\!\left(\mu_\theta(s_t) + \varepsilon \odot \sigma_\theta(s_t)\right),
+  \quad \varepsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+  \label{eq:sac_policy}
+\end{equation}
+
+\subsubsection{PPO --- Proximal Policy Optimization}
+
+PPO~\parencite{Schulman2017} optimizes a clipped objective function to prevent
+overly aggressive policy updates:
+\begin{equation}
+  \mathcal{L}^\text{CLIP}(\theta) =
+  \E_t\!\left[\min\!\left(r_t(\theta)\,\hat{A}_t,\;
+  \mathrm{clip}\!\left(r_t(\theta), 1-\varepsilon, 1+\varepsilon\right)\hat{A}_t\right)\right]
+  \label{eq:ppo_clip}
+\end{equation}
+where $r_t(\theta) = \pi_\theta(a_t|s_t)/\pi_{\theta_\text{old}}(a_t|s_t)$ is the
+probability ratio and $\hat{A}_t$ is the advantage estimated via GAE~\parencite{Schulman2016}:
+\begin{equation}
+  \hat{A}_t = \sum_{l=0}^{\infty} (\gamma\lambda)^l\,\delta_{t+l}, \qquad
+  \delta_t = r_t + \gamma\,V(s_{t+1}) - V(s_t)
+  \label{eq:gae}
+\end{equation}
+with $\lambda \in [0,1]$ controlling the bias--variance trade-off. PPO is an
+\textit{on-policy} algorithm: it uses only recent trajectories, which implies lower
+data efficiency but greater stability compared with DDPG.
+
+\subsection{Applications of DRL to Musculoskeletal Control}
+
+\textcite{Rajeswaran2017} use natural policy-gradient methods to learn dexterous
+movements in musculoskeletal models, demonstrating the feasibility of \DRL{} on
+highly redundant systems.
+
+The \textit{Learning to Run} challenge~\parencite{Kidzinski2018} stimulated a
+worldwide competition on the control of a bipedal musculoskeletal model, revealing
+the superiority of \textit{off-policy} algorithms with replay memory for long-horizon
+tasks. \textcite{Song2021} extend this approach to modeling human locomotion
+control in a more general neuromechanical framework.
+
+\textcite{Peng2018} introduce DeepMimic, which combines human motion-capture
+data and \DRL{} to learn physically realistic behaviors, demonstrating the value of
+combining \textit{imitation learning} with \DRL{}.
+
+\textcite{Caggiano2022} present MyoSuite, with highly detailed hand and wrist
+models ($>50$~muscles) for the study of fine motor control and rehabilitation, and
+simultaneously launch MyoChallenge as a public benchmark.
+\textcite{Codol2023} propose MotorNet, a differentiable simulator of a two-joint,
+nine-muscle planar arm, fully integrated into PyTorch and enabling training by
+backpropagation through physics.
+
+\subsection{Domain Randomization and Sim-to-Real Transfer}
+
+Domain Randomization~\parencite{Tobin2017, Peng2018SimToReal} consists of training
+the agent on distributions of random physical parameters (masses, segment lengths,
+muscle parameters, perturbations) in order to improve the robustness and
+generalizability of the learned policies. This technique, initially developed for
+sim-to-real transfer in robotics, applies naturally to musculoskeletal control by
+making policies robust to inter-individual variability and modeling errors.
+
+\subsection{Reproducibility and Statistical Rigor in \DRL{}}
+
+\textcite{Henderson2018} highlighted the reproducibility fragility of published
+\DRL{} results: inter-seed variance is often of the same order as the gap between
+algorithms. \textcite{Agarwal2021} formalized a set of good practices (bootstrap
+confidence intervals, \textit{interquartile mean}, performance profiles) that are now
+considered standard for any serious benchmarking effort. Our experimental protocol
+(Chapter~\ref{chap:impl}) adopts these recommendations.
+
+% -----------------------------------------------------------
+\section{Synthesis and Positioning}
+
+The analysis of the state of the art reveals several gaps:
+
+\begin{enumerate}[label=(\roman*)]
+  \item Most studies compare \DRL{} algorithms on models without an explicit,
+        mathematically complete Hill-type muscle model (SEE, PEE, pennation).
+  \item The systematic analysis of emerging motor strategies, with quantitative
+        comparison to human EMG data and synergy decomposition, remains underdeveloped.
+  \item Rigorous comparative benchmarks including classical controller baselines
+        (impedance PD) and adopting modern statistical standards~\parencite{Agarwal2021}
+        are rare.
+  \item The effect of Domain Randomization on the robustness of musculoskeletal
+        policies, applied across all compared algorithms, has been little studied in a
+        systematic way.
+  \item The analysis of real-time computational feasibility (inference latency
+        $<$~\SI{5}{\milli\second}) for clinical applications is rarely addressed.
+  \item[\textit{(vi)}] \textbf{No study has directly benchmarked the per-step
+        computational cost of physics-based muscle control} (Newton--Raphson
+        equilibrium solving over all muscles) \textbf{against RL policy inference},
+        making it impossible to quantify the computational argument for replacing the
+        solver with a trained network. This gap leaves the core trade-off ---
+        training cost vs.\ deployment efficiency --- empirically unresolved.
+\end{enumerate}
+
+Our contribution is distinguished by points~C1--C6 detailed in
+Section~\ref{sec:contributions}, with~C6 specifically addressing gap~(vi).

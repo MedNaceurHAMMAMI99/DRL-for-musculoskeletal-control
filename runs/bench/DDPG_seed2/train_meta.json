@@ -1,0 +1,29 @@
+{
+  "algo": "DDPG",
+  "seed": 2,
+  "steps": 100000,
+  "wall_clock_s": 1436.8068505999981,
+  "n_policy_params": 312852,
+  "eval_curve": [
+    {
+      "t": 50000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.4081528334580856,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.4518407548367067,
+      "blow_up_rate": 0.2,
+      "mean_episode_len": 81.6
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "gradient_steps": 8
+  },
+  "best_err": 0.4081528334580856,
+  "best_step": 50000
+}

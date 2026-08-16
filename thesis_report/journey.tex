@@ -1,0 +1,470 @@
+% ============================================================
+%  THE JOURNEY — a plain-language account of how this work was done
+%  Standalone document. Build: pdflatex journey
+% ============================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper, margin=2.6cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{navyblue}{HTML}{1F3864}
+\definecolor{accentblue}{HTML}{2E5FA3}
+\definecolor{lightblue}{HTML}{D9E8F5}
+\definecolor{midgrey}{HTML}{555555}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\titleformat{\section}{\Large\bfseries\color{navyblue}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.7em}{}
+
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+
+\newcommand{\lesson}[1]{%
+  \par\vspace{4pt}%
+  \noindent\colorbox{lightblue}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+  \textbf{The lesson.} #1}}\par\vspace{4pt}}
+
+\title{\textbf{How This Thesis Was Actually Built}\\[6pt]
+       \large A step-by-step account, in plain language}
+\author{Mohamed Naceur Hammami}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+This document explains, without assuming any background, what was done in this
+project, what went wrong, how each problem was found, and what was learned. It is
+written to be read on its own. Technical terms are explained the first time they
+appear.
+
+It exists because the interesting part of this project is not the final number.
+It is the sequence of six defects that each produced believable but wrong
+results, and the measurements that eventually caught them. Anyone building a
+similar system will meet the same traps.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% ============================================================
+\section{The question, and why it is hard}
+
+\subsection{What we wanted to know}
+
+When you reach out to touch something, your brain has to decide how hard to pull
+with each of dozens of muscles. Working out those forces is a standard problem in
+biomechanics, and it is normally solved with mathematics that is accurate but
+slow. This project asked a simple question:
+
+\begin{quote}
+\textit{Can a neural network, trained by trial and error, work out the same
+muscle forces --- and does its answer agree with the mathematical one?}
+\end{quote}
+
+\subsection{Why it is not obvious}
+
+Your arm has more muscles than it has ways to bend. In our model: nine muscles,
+four axes of rotation. That means \textbf{infinitely many combinations of muscle
+pulls produce exactly the same arm movement}.
+
+\begin{quote}
+Picture nine people pulling ropes tied to one heavy door, and you want the door at
+a particular angle. They could all pull gently. Three could pull hard while six
+rest. Or --- wastefully --- some could pull one way while others pull the opposite
+way, cancelling out, everyone exhausted, the door in the same place. From across
+the room, all three look identical.
+\end{quote}
+
+This is called the \textbf{muscle redundancy problem}. Because the movement alone
+does not tell you the forces, you need an extra rule to pick one answer. The
+classical rule, in use since 1981, is \emph{minimum effort}: of all the
+combinations that work, choose the one where the muscles work least hard. The
+method built on that rule is called \textbf{static optimisation}, and it is what
+this project compares against.
+
+% ============================================================
+\section{Step 0: discovering the starting point was fiction}
+
+Before any new work could begin, the existing results had to be checked.
+
+The previous version of this thesis reported a comparison of four learning
+algorithms, with statistical tests, across ten repeated experiments. It reported
+that the best method succeeded 91.4\,\% of the time and stopped within
+\SI{1.4}{\centi\meter} of the target.
+
+Reading the code that produced those numbers revealed lines of this form:
+
+\begin{quote}\ttfamily
+\# Simulated multi-seed results (replace with real evaluation data)\\
+np.clip(rng.normal(0.82, 0.05, 10), 0, 1)
+\end{quote}
+
+In plain terms: \textbf{the results were random numbers drawn from a bell curve
+with a hand-chosen average.} The comment shows they were always meant to be
+replaced by real measurements. That replacement never happened.
+
+Supporting checks confirmed it. No code existed anywhere that trained three of
+the four algorithms. No code existed to compute the muscle-synergy or
+co-contraction analyses the text described. Two trained models existed on disk,
+against the forty the text said were archived.
+
+\lesson{Before building on any result, find the line of code that produced it.
+A number in a document is not evidence; the computation that generated it is.}
+
+% ============================================================
+\section{Step 1: six defects, each of which looked fine}
+
+With the old results discarded, the system had to be made to work. Six separate
+faults were found. What makes them worth documenting is that \emph{four of them
+produced perfectly believable results while being completely wrong}.
+
+\subsection{Defect 1 --- the arm was frozen, in degrees}
+
+The physics software reads angles in degrees unless told otherwise. The model was
+written in radians. Every joint limit was therefore read as under
+$3^{\circ}$, and the arm could barely move.
+
+\textbf{What it looked like:} every algorithm scored zero. Which looks exactly
+like ``machine learning does not work on this problem''.
+
+\subsection{Defect 2 --- the arm dissolved over time}
+
+To test robustness, the arm's weight is randomly varied each attempt. The code
+multiplied the \emph{current} weight rather than resetting to the true weight
+first.
+
+\begin{quote}
+Intended: ``each attempt, make the arm 85--115\,\% of its normal weight.''\\
+Implemented: ``each attempt, multiply whatever it weighs \emph{now} by
+0.85--1.15.''
+\end{quote}
+
+Repeat a thousand times and the arm weighs almost nothing. A drift measure, where
+1.0 means no drift, read \textbf{0.013}. After the fix: \textbf{0.998}.
+
+\subsection{Defect 3 --- the agent was paid to destroy the arm}
+
+This is the most instructive fault in the project.
+
+The agent earns points for its behaviour. Two design choices interacted
+catastrophically: every point score was zero or negative, and if the simulation
+broke down, the attempt simply ended with no penalty.
+
+In this kind of learning, an attempt that \emph{ends} earns nothing more --- its
+remaining value is exactly zero. An attempt that runs its full length accumulated
+about $-20$ points.
+
+So: breaking the simulation was worth $0$. Behaving properly was worth $-20$.
+\textbf{Destroying the arm was the best possible strategy}, and easier to achieve
+than success.
+
+The agent found it. A diagnostic over 50 attempts showed \textbf{100\,\% ended in
+a deliberate breakdown at step 7 of 100}. Not one ran to completion.
+
+\textbf{Why nobody noticed for weeks:} the recorded measurements could not reveal
+it. The reported distance was still a plausible number, and still slowly
+improving. Nothing recorded how \emph{long} attempts lasted. An agent that quit
+after 7 steps of 100 looked identical to one that tried hard and plateaued.
+
+\lesson{The agent optimises exactly what you asked for. When behaviour is
+strange, suspect the request before the learner. And record enough to tell the
+difference between ``trying and failing'' and ``not trying''.}
+
+\subsection{Defect 4 --- the simulator quietly cleaned up after itself}
+
+When the physics breaks down, the software silently resets the arm to its
+starting position and carries on. By the time our code looked, everything seemed
+normal --- the arm was just mysteriously back at the start.
+
+The measurements therefore recorded the distance from the \emph{starting pose} to
+the target and filed it as real data.
+
+\subsection{Defect 5 --- training was doing a quarter of the work}
+
+The trainer ran four copies of the simulation at once to gather experience
+faster. But because of how the learning library counts, each round of four
+experiences was followed by only \emph{one} round of learning --- not four.
+
+Measured directly: \textbf{0.233} learning updates per experience, where the
+standard is about 1.0. \textbf{Every experiment had been doing roughly a quarter
+of its intended training.}
+
+An independent check confirmed it: 233\,000 updates at the measured 17
+milliseconds each predicts 71 minutes; the runs took 78.8 and 80.6 minutes.
+
+\lesson{Measure what your tools actually do rather than what you believe they do.
+This defect was invisible in every graph and cost weeks.}
+
+\subsection{Defect 6 --- a standard setting that made precision impossible}
+
+After the first five fixes, the arm reached the target region reliably and then
+stopped improving. The closest it ever got stayed near \SI{0.10}{\meter} through
+\emph{three complete redesigns of the scoring system} and the fourfold training
+correction.
+
+The cause was a setting called \textbf{target entropy}, which controls how much
+deliberate randomness the learner keeps in its actions. Randomness helps early ---
+it is how the agent discovers what works. It must fade for the hand to hold
+still. The software's default sets it in proportion to the number of muscles,
+and for nine muscles that default keeps roughly twice as much randomness as this
+task tolerates.
+
+\textbf{The hand was being deliberately jiggled and could not settle.}
+
+\lesson{A default value is a guess made by someone who had not seen your problem.
+This one produced a failure that looked like insufficient training --- and
+survived every attempt to fix it as though it were.}
+
+% ============================================================
+\section{Step 2: what happened when it finally worked}
+
+\begin{table}[h]
+\centering
+\caption{Progress across the four main experiments. ``Closest approach'' is the
+nearest the hand ever got; ``final error'' is where it ended up.}
+\small
+\begin{tabular}{@{} L{4.6cm} C{2.4cm} C{2.6cm} C{3.0cm} @{}}
+\toprule
+\textbf{Experiment} & \textbf{Final error} & \textbf{Closest} & \textbf{What changed} \\
+\midrule
+Pilot 4 & \SI{0.242}{\meter} & \SI{0.178}{\meter} & scoring fixed \\
+Pilot 5 & \SI{0.254}{\meter} & \SI{0.134}{\meter} & scoring refined \\
+Pilot 6 & \SI{0.204}{\meter} & \SI{0.132}{\meter} & training budget fixed \\
+\textbf{Final} & \SI{0.106}{\meter} & \textbf{\SI{0.074}{\meter}} & settings tuned \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Notice the third column. Closest approach barely moved across the first three
+experiments --- \SI{0.178}{}, \SI{0.134}{}, \SI{0.132}{\meter} --- despite huge
+changes to the scoring system and the training. That refusal to move is what
+finally pointed at the settings rather than the design.
+
+For scale: a controller \emph{given information the learner never sees} manages
+about \SI{0.08}{\meter}. The tuned policy reaches \SI{0.074}{\meter}. It matched
+a controller that was effectively cheating.
+
+The behaviour changed in kind, not just degree. Before tuning, the hand swept
+past the target and wandered; the total path travelled was \SI{3.55}{\meter} for
+a reach of \SI{0.80}{\meter}. After tuning: \SI{1.64}{\meter}, with the hand
+arriving by step 25 of 100 and \emph{staying}.
+
+% ============================================================
+\section{Step 3: the real test --- are the muscle forces right?}
+
+Everything above measures \emph{where the hand ended up}. None of it checks
+whether the \emph{muscles} were doing sensible things --- which is the actual
+research question.
+
+\begin{quote}
+A student can reach the right answer to a maths problem by a completely wrong
+method. Checking only the answer would never reveal it.
+\end{quote}
+
+So at every instant of a movement, we asked the classical method the same
+question the policy had just answered: \emph{given this exact motion, what is the
+cheapest set of muscle forces that produces it?} Then we compared, muscle by
+muscle.
+
+\subsection{The result: right pattern, wrong economy}
+
+\textbf{The pattern matches.} The correlation between the learned forces and the
+classical ones is about 0.82. The learner recruits broadly the right muscles in
+broadly the right proportions.
+
+\textbf{The economy does not.} Producing \emph{identical} joint movements, the
+learned controller uses about \textbf{1.9 times} the muscle effort the classical
+method says is needed.
+
+\textbf{And the waste has an address.} The shoulder muscles agree closely --- one
+to within 2.5\,\%. Almost all the excess is in two muscles that straighten the
+elbow, driven at three to four times the necessary force \emph{while the muscles
+that bend the elbow are also pulling}. The two fight each other. The elbow ends
+up roughly right, and both groups are exhausted.
+
+This is called \textbf{co-contraction}. Humans do it deliberately when they need
+a joint to be stiff --- carrying something fragile, for instance. Doing it
+constantly during an ordinary reach is simply wasteful.
+
+\subsection{Three independent checks agreed}
+
+What makes this trustworthy is that three unrelated methods pointed at the same
+muscles:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
+\item the effort comparison above;
+\item a standard clinical index of co-contraction, computed from the elbow
+      muscles alone;
+\item a decomposition that asks how many independent ``muscle groups'' the
+      controller really uses --- the classical solution needs 4--5, the learned
+      one needs 6--9.
+\end{enumerate}
+
+Three methods that share no mathematics, locating the same fault in the same
+muscles, is much stronger evidence than any one of them alone.
+
+% ============================================================
+\section{Step 4: checking our own claims, and withdrawing two}
+
+Once results existed, they were attacked deliberately. Two did not survive.
+
+\subsection{A number that flattered itself}
+
+The agreement between the learned and classical forces was first reported as a
+``cosine similarity'' of 0.933, which sounds close to perfect.
+
+But muscle forces are never negative --- a muscle pulls or does nothing, it never
+pushes. When all the numbers in two lists are positive, the lists agree
+substantially \emph{by construction}. Shuffling which muscle each force belonged
+to --- destroying the correspondence entirely --- still scored \textbf{0.373}.
+
+So roughly the first 0.37 of that 0.933 was floor, not evidence. The honest
+figure to quote is the correlation (0.82), which does not have this problem. The
+agreement is real; it was simply being reported in a flattering unit.
+
+\subsection{The speed argument, withdrawn entirely}
+
+The original motivation was that a neural network answers instantly while the
+classical method must solve equations step by step. A measurement supported this:
+\SI{295}{\micro\second} for the network against \SI{2165}{\micro\second} for the
+classical solver, a $7.3\times$ advantage.
+
+Two problems. It timed the wrong calculation --- a different piece of the physics,
+not the muscle-force problem. And both sides were written in unoptimised Python.
+
+Re-measured properly, on the actual muscle-force problem:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{} L{8.0cm} R{3.0cm} @{}}
+\toprule
+\textbf{Method} & \textbf{Time} \\
+\midrule
+Neural network & \SI{289}{\micro\second} \\
+Classical, general-purpose solver & \SI{2371}{\micro\second} \\
+\textbf{Classical, solved directly} & \textbf{\SI{24}{\micro\second}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Done properly, \textbf{the classical method is about twelve times faster than the
+network.} The speed argument was withdrawn from the thesis.
+
+\lesson{The most valuable check is the one that can destroy your own claim. This
+one did, and the thesis is more trustworthy without it.}
+
+% ============================================================
+\section{Step 5: repeating it, because once is not evidence}
+
+Every headline number came from a single training run. Training involves
+randomness, so one run could be lucky. The experiment was repeated with different
+random starting points.
+
+\begin{table}[h]
+\centering
+\caption{The same configuration, trained five times from different random starts.}
+\small
+\begin{tabular}{@{} C{2.2cm} C{2.8cm} C{2.6cm} C{2.6cm} C{2.2cm} @{}}
+\toprule
+\textbf{Run} & \textbf{Final error} & \textbf{Closest} & \textbf{Effort ratio} & \textbf{Success} \\
+\midrule
+1 (original) & 0.1063 & 0.0740 & 1.71 & 4\,\% \\
+2 & 0.1019 & 0.0742 & 1.91 & 20\,\% \\
+3 & 0.0988 & 0.0728 & 2.12 & 0\,\% \\
+4 & 0.1070 & 0.0760 & 1.86 & 8\,\% \\
+5 & 0.1023 & 0.0676 & 1.97 & 6\,\% \\
+\midrule
+\textbf{average} & \textbf{0.1033} & \textbf{0.0729} & \textbf{1.91} & 8\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three things came out of this, and only the first was expected.
+
+\textbf{The accuracy is solid.} Final error varies by 3.3\,\% and closest approach by 4.4\,\% across runs. That result is a genuine property of the method, not luck.
+
+\textbf{The original run was the luckiest.} On effort it scored 1.71, the best of
+the four (the others: 1.86, 1.91, 1.97, 2.12). The corrected average is \textbf{1.91}.
+Reporting the single original run had flattered the result, and the thesis was
+updated.
+
+\textbf{The success rate is meaningless.} Across five identical configurations it
+read 0\,\%, 4\,\%, 6\,\%, 8\,\% and 20\,\%. A measurement that varies twentyfold on
+identical settings measures noise. It is reported, with that warning attached,
+and never used as a headline.
+
+\subsection{An unexpected finding}
+
+Accuracy barely varied between runs --- but the \emph{muscle energy} varied by
+77\,\%. Different runs reached the same place, equally well, using very different
+patterns of muscle force.
+
+That is the redundancy problem from Section 1, appearing in the results. There
+really are many different ways to make the same movement, and the learner lands
+on a different one each time.
+
+% ============================================================
+\section{What the answer actually is}
+
+\textbf{For \emph{which} muscles to use and in what proportion: yes.} The learned
+controller recovers the structure of the classical solution without ever being
+shown it.
+
+\textbf{For \emph{how much} force: not yet.} It uses about 1.9 times the minimum-effort ideal --- and, more meaningfully,
+about 44\,\% more than a conventional controller actually achieves on the same
+task --- concentrated in one pair of opposing elbow muscles.
+
+\textbf{For speed: no.} The classical method, properly implemented, is faster.
+
+\subsection{Honest limits}
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+\item Everything is simulated. No real arm, no measurements from a human body.
+      The classical method is itself a \emph{theory} of how muscles share load,
+      not ground truth.
+\item Nine muscles is a heavy simplification; the rotator cuff is absent
+      entirely, which forced one joint to be restrained.
+\item The comparison is conditional: the classical method is handed the movement
+      the learner produced and asked only how to share the force. It never picks
+      a movement of its own, so nothing here shows the movement itself is
+      natural.
+\item The task is not solved to the strict standard set at the outset. Under a
+      demanding definition of success, performance is near zero --- but that
+      standard is one a cheating controller only meets 7\,\% of the time, so it
+      was the wrong yardstick.
+\end{itemize}
+
+% ============================================================
+\section{The single most useful thing learned}
+
+Four of the six defects produced results that looked entirely reasonable.
+
+\begin{quote}
+\textbf{A measurement that cannot fail cannot detect failure.}
+\end{quote}
+
+Distance-to-target could not reveal that the agent had stopped trying. It could
+not reveal that training was doing a quarter of its work. It could not reveal
+that the muscle forces were 90\,\% wasteful.
+
+Each of those needed a measurement designed specifically to catch that failure ---
+which means somebody had to imagine the failure first. That, more than any
+number in this project, is what the work actually taught.
+\end{document}

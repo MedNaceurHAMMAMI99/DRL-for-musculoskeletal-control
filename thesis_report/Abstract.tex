@@ -1,0 +1,146 @@
+% ===========================================================
+%  RESEARCH ABSTRACT
+%  Self-contained fragment — use \input{Abstract} in main doc,
+%  or uncomment the preamble below for standalone compilation.
+% ===========================================================
+
+% --- Standalone preamble (uncomment to compile independently) ---
+\documentclass[12pt, a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage{siunitx}
+\begin{document}
+% ----------------------------------------------------------------
+
+\begin{center}
+  {\large\bfseries
+    Learning Motor Control Strategies in Musculoskeletal Systems\\[4pt]
+    Using Deep Reinforcement Learning:\\[2pt]
+    Replacing Physics-Based Muscle Solvers with Trained Policies}\\[10pt]
+  {\normalsize Mohamed Naceur Hammami 
+  %\quad|\quad
+   %Supervisor: Prof.\ Taysir Rezgui
+   }\\[4pt]
+  %{\small\itshape
+   %Master's in Complex and Intelligent Systems ---
+   %\'{E}cole Polytechnique de Tunisie, University of Carthage, 2026}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.6pt}
+\smallskip
+\begin{center}{\large\bfseries Abstract}\end{center}
+\smallskip
+\noindent\rule{\textwidth}{0.6pt}
+\bigskip
+
+% ---- PROBLEM STATEMENT ----------------------------------------
+\noindent
+Real-time musculoskeletal control requires solving the Hill fiber--tendon
+equilibrium at each simulation timestep to obtain per-muscle forces. The
+standard Newton--Raphson approach iterates 5--40 times per muscle, imposing
+runtime computation that scales with both the number of muscles and the
+control frequency --- a meaningful burden for resource-constrained embedded
+rehabilitation systems. This work proposes replacing the online iterative
+Newton--Raphson solver with a trained deep reinforcement learning (DRL)
+policy that shifts computation entirely to an offline training phase,
+enabling control via a single neural network forward pass at deployment;
+the policy outputs steady-state muscle activations $a \in [0,1]^9$, which
+are then passed directly to the MuJoCo physics engine.
+
+% ---- METHOD ---------------------------------------------------
+\medskip\noindent
+A nine-muscle upper-limb model was implemented in MuJoCo~3.2 with a
+Hill-type muscle representation including tendon compliance, pennation
+dynamics, and first-order activation dynamics, with anatomical parameters
+drawn from Holzbaur et~al.\ (2005) and Winter (2009). Four DRL algorithms
+--- DDPG, TD3, SAC, and PPO --- were trained over $2 \times 10^{6}$ steps
+with domain randomization ($\pm15$\,\% segment mass, $\pm20$\,\% actuator
+gain, $\pm30$\,\% joint damping) across ten independent random seeds with
+Optuna-optimized hyperparameters. Statistical significance and effect sizes
+were assessed using non-parametric testing and bootstrap confidence intervals.
+
+% ---- COMPUTATIONAL PERFORMANCE --------------------------------
+\medskip\noindent
+\textbf{Computational performance.}\;
+Under identical framework conditions (Python/PyTorch on a host CPU), the
+trained SAC policy executes in $295\,\mu\text{s}$ per control step versus
+$2165\,\mu\text{s}$ for the Newton--Raphson equilibrium solver. This figure is
+reported for completeness but does \emph{not} support a deployment claim: it
+times forward simulation rather than load sharing, and against a direct solve
+of the load-sharing problem the network is roughly an order of magnitude
+slower. Critically, the policy's execution time
+is \emph{deterministic and branch-free} --- it consists of two fixed matrix
+multiplications regardless of the biomechanical state --- whereas the N-R
+solver's loop count varies with convergence conditions, precluding hard
+real-time guarantees on embedded hardware. This property makes the policy
+directly deployable on neural processing units (NPUs). The parameter count
+($393{,}750$) and memory footprint (\SI{1.5}{\mega\byte} single precision,
+\SI{385}{\kilo\byte} at eight-bit quantisation) are likewise fixed and
+independent of the biomechanical state.
+
+% ---- TASK PERFORMANCE -----------------------------------------
+\medskip\noindent
+\textbf{Task performance.}\;
+On a three-dimensional reaching task, the best configuration attained a mean
+final error of \SI{0.106}{\meter} and a closest approach of
+\SI{0.074}{\meter}, ending within \SI{5}{\centi\meter} in $34$\,\% of episodes
+and within \SI{10}{\centi\meter} in $58$\,\%. Under a strict success criterion
+--- within \SI{2}{\centi\meter} and stationary --- performance was
+$0$--$4$\,\%, a criterion that a privileged controller with full state access
+satisfies only $\approx 7$\,\% of the time on this model. No statistical
+significance testing is reported: the comparison uses three seeds and the
+principal analysis a single seed.
+
+% ---- MUSCLE FORCE FIDELITY ------------------------------------
+\medskip\noindent
+\textbf{Load-sharing fidelity.}\;
+The learned per-muscle forces were compared against classical static
+optimisation, posed on the identical trajectory with the identical required
+joint torques and verified to machine precision. The comparison is conditional:
+static optimisation is given the policy's own movement and asked only how to
+distribute force across it, so trajectory realism is not assessed. The policy reproduces the
+coordination pattern of the classical solution ($r = 0.81 \pm 0.04$ over five
+independent training runs; pattern cosine $0.813$ against a shuffled null of
+$0.372$) but expends $1.91 \pm 0.15$ times the minimum effort needed to generate
+those torques --- about 44\,\% above the $1.33$ a conventional controller
+attains on the same task. The excess is anatomically localised: the
+three deltoids agree to within $2.5$--$10$\,\% normalised RMSE, whereas the
+lateral and medial heads of triceps are driven at three to four and a half
+times the prescribed force, indicating sustained co-contraction against the
+biceps group. Across all fifteen trained policies the discrepancy ranges from
+$1.21$ to $2.30\times$, and the ordering by muscular economy is approximately
+the inverse of the ordering by reaching accuracy.
+
+% ---- CONCLUSION -----------------------------------------------
+\medskip\noindent
+These results support replacing the Newton--Raphson solver with a trained
+policy where the quantity of interest is which muscles act and in what
+relative proportion, and do not support it where the absolute magnitude of
+individual muscle forces matters. Amortising solver computation into a
+one-time training phase is computationally viable; the learned solution
+recovers the structure of the classical load-sharing criterion without ever
+being shown it, but not its efficiency.
+
+\bigskip
+\noindent\textbf{Keywords:}
+musculoskeletal model,
+Hill muscle model,
+Newton--Raphson solver,
+deep reinforcement learning,
+Soft Actor-Critic,
+motor control,
+muscle synergies,
+domain randomization,
+amortized computation,
+embedded rehabilitation,
+MuJoCo.
+
+% --- End standalone document (uncomment if compiling independently) ---
+\end{document}
+% ----------------------------------------------------------------------

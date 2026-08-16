@@ -1,0 +1,48 @@
+{
+  "gains": {
+    "kp": 60.0,
+    "kd": 25.0
+  },
+  "PD": {
+    "controller": "PD",
+    "episodes": 50,
+    "mean_final_error": 0.19845269578879232,
+    "mean_min_error": 0.17382822041012538,
+    "success_rate": 0.02,
+    "reach_2cm": 0.06,
+    "reach_5cm": 0.12,
+    "reach_10cm": 0.28,
+    "touch_2cm": 0.08,
+    "touch_5cm": 0.12,
+    "mean_energy": 102876.47919215243,
+    "blow_up_rate": 0.0,
+    "mean_episode_len": 100.0,
+    "effort_ratio": 1.333956736812403,
+    "pattern_cosine_mean": 0.9552238190343982,
+    "pattern_cosine_null_mean": 0.4215137666263884,
+    "pearson_r": 0.9154868498489188,
+    "control_step_us_mean": 18420.506239880342,
+    "control_step_us_p95": 36322.43000247399
+  },
+  "Random": {
+    "controller": "Random",
+    "episodes": 50,
+    "mean_final_error": 0.4154439205578727,
+    "mean_min_error": 0.28699139042649585,
+    "success_rate": 0.0,
+    "reach_2cm": 0.0,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.02,
+    "touch_2cm": 0.0,
+    "touch_5cm": 0.0,
+    "mean_energy": 1236567.8109340556,
+    "blow_up_rate": 0.18,
+    "mean_episode_len": 83.7,
+    "effort_ratio": 2.129260698966348,
+    "pattern_cosine_mean": 0.8080131431089105,
+    "pattern_cosine_null_mean": 0.6441756460781581,
+    "pearson_r": 0.5954687593668495,
+    "control_step_us_mean": 11.464540137722421,
+    "control_step_us_p95": 17.380001372657688
+  }
+}

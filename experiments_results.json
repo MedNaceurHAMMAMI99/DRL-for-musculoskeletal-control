@@ -1,0 +1,90 @@
+{
+  "sanity_check_success_pct": 0.0,
+  "timing": {
+    "nr_mean_us": 2165.3215773403645,
+    "nr_std_us": 318.87660314074185,
+    "nr_p95_us": 2656.7650376819074,
+    "nr_p99_us": 2896.529932040721,
+    "policy_mean_us": 294.78252571272225,
+    "policy_std_us": 44.581503985317894,
+    "policy_p95_us": 364.25491562113166,
+    "policy_p99_us": 480.4199328646064,
+    "speedup_mean": 7.345488244613793,
+    "speedup_p95": 7.293697143802606,
+    "n_queries": 950,
+    "platform_note": "Benchmarked on host CPU (see hardware in chapter 5). These numbers establish relative speedup on identical hardware; absolute latency will differ on embedded targets."
+  },
+  "force_comparison": {
+    "n_samples": 12048,
+    "force_mae_N": 13.86626994772225,
+    "force_rmse_N": 15.472162621111075,
+    "force_nrmse_pct": 5.251616250666272,
+    "pearson_r_abs": 0.9888059571571911,
+    "nr_mean_iters": 31.22941567065073,
+    "mujoco_mean_abs_N": 294.61715940541086,
+    "nr_mean_abs_N": 281.183944191265,
+    "note": "Force magnitudes compared: MuJoCo actuator_force uses a signed convention (negative = flexion); N-R returns unsigned tension. Comparison uses |force| for both."
+  },
+  "generalization": {
+    "training_success_pct": 0.0,
+    "training_mean_final_error_cm": 71.60502624511719,
+    "extended_success_pct": 0.0,
+    "extended_mean_final_error_cm": 73.8047866821289,
+    "generalization_drop_pp": 0.0
+  },
+  "robustness": {
+    "Clean": {
+      "success_pct": 0.0,
+      "mean_error_cm": 70.53265380859375
+    },
+    "Obs noise sigma=0.01": {
+      "success_pct": 0.0,
+      "mean_error_cm": 71.11172485351562
+    },
+    "Obs noise sigma=0.03": {
+      "success_pct": 0.0,
+      "mean_error_cm": 66.93798828125
+    },
+    "Obs noise sigma=0.05": {
+      "success_pct": 0.0,
+      "mean_error_cm": 70.60974884033203
+    },
+    "Force 5N": {
+      "success_pct": 0.0,
+      "mean_error_cm": 72.120361328125
+    },
+    "Force 10N": {
+      "success_pct": 0.0,
+      "mean_error_cm": 71.44170379638672
+    },
+    "Noise+Force (0.03,10N)": {
+      "success_pct": 0.0,
+      "mean_error_cm": 69.04486846923828
+    }
+  },
+  "failure_analysis": {
+    "n_episodes": 200,
+    "n_success": 0,
+    "n_failure": 200,
+    "success_rate_pct": 0.0,
+    "failures_near_miss": 0,
+    "failures_far_off": 200,
+    "failures_mid_range": 0,
+    "mean_err_success_cm": 0,
+    "mean_err_failure_cm": 70.75720542907715
+  },
+  "policy_characterization": {
+    "n_parameters": 393750,
+    "n_trainable": 393750,
+    "memory_fp32_kb": 1538.0859375,
+    "memory_int8_kb_est": 384.521484375,
+    "input_dim": 38,
+    "output_dim": 9,
+    "hidden_dims": [
+      256,
+      256
+    ],
+    "activation": "ReLU",
+    "platform_note": "Latency benchmarked on host CPU only. Actual embedded performance (Jetson, Raspberry Pi, STM32) was not measured -- this is an acknowledged limitation. INT8 memory estimate assumes uniform quantization."
+  }
+}

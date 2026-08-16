@@ -1,0 +1,167 @@
+% ============================================================
+%  CHAPTER 8 — Discussion
+% ============================================================
+
+\chapter{Discussion}
+\label{chap:discussion}
+
+\section{Interpretation of the principal result}
+
+The comparison of \cref{ch:forces} separates two properties of a motor controller
+that are ordinarily conflated: the \emph{pattern} of muscle recruitment and the
+\emph{economy} of it. The learned controller reproduces the first and not the
+second.
+
+This is a more informative outcome than either extreme would have been. Complete
+agreement would have established only that reinforcement learning can rediscover
+a known optimisation criterion when the reward is arranged to favour it. Complete
+disagreement would have indicated that the approach is unsuited to the problem.
+The observed result --- close agreement in direction, systematic excess in
+magnitude, anatomically localised to the elbow antagonists --- identifies both
+what the method captures and precisely where it fails.
+
+The localisation is itself evidence. Had the discrepancy been distributed evenly
+across the nine muscles, it would have been consistent with generic noise in the
+learned policy. Its concentration in two elbow extensors, driven at three to four
+and a half times the prescribed force while the shoulder group agrees to within a
+few per cent, identifies a specific and interpretable behaviour: sustained
+co-contraction of an antagonist pair. That this is independently corroborated by
+the co-contraction index (\cref{sec:icc}), computed by an unrelated method over
+the same muscle groups, strengthens the inference considerably.
+
+\section{The exploration parameter}
+
+\Cref{sec:tuning} established that the \SAC default target entropy of
+$-\dim(\mathcal{A})$ prevents this task from being solved to better than
+approximately \SI{0.10}{\meter}, and that reducing it to roughly $-19$ halves the
+error.
+
+The value itself is specific to this problem. What is transferable is the
+diagnostic difficulty. The failure does not present as a hyperparameter problem:
+it presents as a policy that approaches its target and then departs from it,
+which is naturally attributed to insufficient training, to a poorly shaped
+reward, or to a target beyond the arm's reach. In the present work the symptom
+persisted through three complete redesigns of the reward function, a fourfold
+correction to the effective training budget, and a doubling of the control rate
+before its actual cause was identified.
+
+The mechanism is intelligible. \SAC augments its objective with an entropy term
+that rewards stochasticity, with the weight adapted automatically to meet a
+target entropy set by default in proportion to the action-space dimension. For a
+nine-muscle action space this default retains substantial randomness in the
+commanded activations. Exploration of that magnitude is productive early in
+training, when the policy must discover which muscles produce which motions, and
+counterproductive later, when the end effector must be held stationary within
+centimetres. A high-dimensional action space inflates the default precisely when
+the task also demands fine terminal precision.
+
+Any application of \SAC to a musculoskeletal model with comparable action
+dimensionality is likely to encounter this, and likely to misattribute it in the
+same manner.
+
+\section{Tuning against algorithm selection}
+
+\Cref{sec:benchmark} found the effect of tuning \SAC to be approximately six
+times the magnitude of the difference between untuned \SAC and \TDIII.
+
+The implication is methodological. A comparison of learning algorithms conducted
+at library defaults --- the common practice, and that of the earlier version of
+this work --- measures which algorithm's defaults happen to suit the problem at
+hand rather than which algorithm is intrinsically better. Where the decisive
+hyperparameter differs structurally between algorithms, as the exploration
+parameter does here, no common default exists and the comparison has no neutral
+setting to adopt.
+
+This does not invalidate algorithm comparison as an exercise; it constrains what
+such a comparison can claim. The defensible form tunes the corresponding
+parameter of each algorithm under an equal budget, which is the recommendation of
+\cref{ch:conclusion}.
+
+\section{Accuracy and physiological economy as separate axes}
+
+\Cref{sec:effortall} found that across fifteen trained policies the ordering by
+muscular economy is approximately the inverse of the ordering by reaching
+accuracy.
+
+This bears on a common assumption in the application of reinforcement learning to
+musculoskeletal models. Such work routinely reports task performance --- success
+rate, endpoint error, completion time --- and treats good performance as evidence
+that the controller behaves in a physiologically plausible manner. The present
+result shows that the two properties can move in opposite directions across
+algorithms trained on the same reward, on the same model, for the same task.
+
+A controller may therefore appear excellent by every measure of what it achieves
+while being unrealistic in how it achieves it, and, as \PPO demonstrates, the
+converse is equally possible. If the objective is to understand or reproduce
+human motor control rather than merely to displace a simulated limb, task
+performance is not sufficient evidence and the muscle forces must be examined
+directly.
+
+The caveat recorded in \cref{sec:effortall} applies: \PPO's favourable economy is
+not independent of its passivity, and the present data cannot fully separate the
+two.
+
+\section{Implications for the intended applications}
+
+The clinical and assistive applications motivating this work --- prosthesis
+control, exoskeleton assistance, rehabilitation devices --- require force
+estimates in real time, and the original motivation for a learned controller was
+that it would supply them faster than iterative solution.
+
+\textbf{That motivation does not survive measurement.} As
+\cref{sec:latencycaveat} establishes, a direct solve of the load-sharing problem
+runs in roughly \SI{24}{\micro\second} against the network's
+\SI{289}{\micro\second}: the classical method is about an order of magnitude
+faster, and the $7.3\times$ advantage reported earlier compared the wrong
+computation between two unoptimised implementations. Speed is therefore not a
+reason to prefer a learned controller for this task, and the case must rest on
+other grounds.
+
+Two such grounds remain, both weaker than the original claim. The network's cost
+is fixed and branch-free irrespective of biomechanical state, which matters where
+a hard real-time bound is required rather than a good average. And a learned
+policy maps observation directly to activation without requiring the moment-arm
+matrix, the inverse-dynamics torque or a constrained solver at run time --- an
+integration advantage on hardware where those are awkward to supply, though not a
+computational one.
+
+The results of \cref{ch:forces} qualify the prospect further. Where the quantity
+of interest is which muscles are active and in what relative proportion --- for
+instance in driving a myoelectric interface, or in classifying movement intent
+--- a correlation of 0.865 may well be sufficient.
+Where the absolute magnitude of individual muscle forces is the quantity of
+interest --- estimating joint loading, assessing injury risk, planning surgical
+intervention --- a systematic 71\,\% excess concentrated in one antagonist pair
+is not acceptable, and static optimisation remains the appropriate method.
+
+The proposed remedy of \cref{sec:whygap} is directly relevant here, since a
+reward employing the classical criterion would, if the prediction holds, remove
+the principal obstacle to the second class of application.
+
+\section{Threats to validity}
+
+The work is entirely computational. There is no physical arm, no
+electromyographic recording and no human participant, and \MuJoCo's muscle
+implementation is itself an approximation of the Hill formulation.
+
+Static optimisation, the reference throughout \cref{ch:forces}, is a model of
+human load sharing rather than ground truth. It encodes the assumption that the
+central nervous system minimises summed squared activation, which remains
+contested. A controller that departs from static optimisation is not thereby
+shown to be unphysiological; it is shown to depart from the standard
+computational method.
+
+The muscle set is incomplete. The rotator cuff is absent, which required
+constraining shoulder rotation (\cref{sec:rotation}), so the conclusions apply to
+reaching with a restrained rotational degree of freedom.
+
+The magnitude of the effort discrepancy is a property of the reward employed. Its
+effort term is a normalised sum of squared forces weighted for numerical balance
+against the distance term, which is neither the classical criterion nor scaled to
+match it. A different formulation would yield a different figure, which is
+precisely the experiment proposed in \cref{sec:whygap}.
+
+Finally, the statistical basis is limited throughout. The principal result rests
+on a single training seed, the algorithm comparison on three, and no significance
+test is reported anywhere in this work. These constraints are set out in full in
+\cref{ch:conclusion}.

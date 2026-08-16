@@ -1,0 +1,634 @@
+% =============================================================================
+% REFERENCES BIBLIOGRAPHIQUES
+% Memoire de Mastere : Implementation et Apprentissage par Renforcement d'un
+% Modele Musculo-Squelettique pour le Controle Moteur et la Rehabilitation
+% Auteur : Mohamed Naceur Hammami
+% =============================================================================
+
+% -----------------------------------------------------------------------------
+% BIOMECANIQUE ET MODELISATION MUSCULO-SQUELETTIQUE
+% -----------------------------------------------------------------------------
+
+@article{Hill1938,
+  author       = {Hill, A. V.},
+  title        = {The Heat of Shortening and the Dynamic Constants of Muscle},
+  journal      = {Proceedings of the Royal Society of London. Series B, Biological Sciences},
+  volume       = {126},
+  number       = {843},
+  pages        = {136--195},
+  year         = {1938},
+  doi          = {10.1098/rspb.1938.0050}
+}
+
+@article{Zajac1989,
+  author       = {Zajac, Felix E.},
+  title        = {Muscle and Tendon: Properties, Models, Scaling, and Application to Biomechanics and Motor Control},
+  journal      = {Critical Reviews in Biomedical Engineering},
+  volume       = {17},
+  number       = {4},
+  pages        = {359--411},
+  year         = {1989}
+}
+
+@article{Millard2013,
+  author       = {Millard, Matthew and Uchida, Thomas and Seth, Ajay and Delp, Scott L.},
+  title        = {Flexing Computational Muscle: Modeling and Simulation of Musculotendon Dynamics},
+  journal      = {Journal of Biomechanical Engineering},
+  volume       = {135},
+  number       = {2},
+  pages        = {021005},
+  year         = {2013},
+  doi          = {10.1115/1.4023390}
+}
+
+@article{Thelen2003,
+  author       = {Thelen, Darryl G.},
+  title        = {Adjustment of Muscle Mechanics Model Parameters to Simulate Dynamic Contractions in Older Adults},
+  journal      = {Journal of Biomechanical Engineering},
+  volume       = {125},
+  number       = {1},
+  pages        = {70--77},
+  year         = {2003},
+  doi          = {10.1115/1.1531112}
+}
+
+@article{Gordon1966,
+  author       = {Gordon, A. M. and Huxley, A. F. and Julian, F. J.},
+  title        = {The Variation in Isometric Tension with Sarcomere Length in Vertebrate Muscle Fibres},
+  journal      = {The Journal of Physiology},
+  volume       = {184},
+  number       = {1},
+  pages        = {170--192},
+  year         = {1966},
+  doi          = {10.1113/jphysiol.1966.sp007909}
+}
+
+@article{Holzbaur2005,
+  author       = {Holzbaur, Katherine R. S. and Murray, Wendy M. and Delp, Scott L.},
+  title        = {A Model of the Upper Extremity for Simulating Musculoskeletal Surgery and Analyzing Neuromuscular Control},
+  journal      = {Annals of Biomedical Engineering},
+  volume       = {33},
+  number       = {6},
+  pages        = {829--840},
+  year         = {2005},
+  doi          = {10.1007/s10439-005-3320-7}
+}
+
+@book{Winter2009,
+  author       = {Winter, David A.},
+  title        = {Biomechanics and Motor Control of Human Movement},
+  edition      = {4},
+  publisher    = {John Wiley \& Sons},
+  address      = {Hoboken, NJ},
+  year         = {2009},
+  isbn         = {9780470398180}
+}
+
+@article{Murray1995,
+  author       = {Murray, Wendy M. and Delp, Scott L. and Buchanan, Thomas S.},
+  title        = {Variation of Muscle Moment Arms with Elbow and Forearm Position},
+  journal      = {Journal of Biomechanics},
+  volume       = {28},
+  number       = {5},
+  pages        = {513--525},
+  year         = {1995},
+  doi          = {10.1016/0021-9290(94)00114-J}
+}
+
+@article{Delp2007,
+  author       = {Delp, Scott L. and Anderson, Frank C. and Arnold, Allison S. and Loan, Peter and Habib, Ayman and John, Chand T. and Guendelman, Eran and Thelen, Darryl G.},
+  title        = {{OpenSim}: Open-Source Software to Create and Analyze Dynamic Simulations of Movement},
+  journal      = {IEEE Transactions on Biomedical Engineering},
+  volume       = {54},
+  number       = {11},
+  pages        = {1940--1950},
+  year         = {2007},
+  doi          = {10.1109/TBME.2007.901024}
+}
+
+@inproceedings{Todorov2012,
+  author       = {Todorov, Emanuel and Erez, Tom and Tassa, Yuval},
+  title        = {{MuJoCo}: A Physics Engine for Model-Based Control},
+  booktitle    = {2012 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages        = {5026--5033},
+  year         = {2012},
+  publisher    = {IEEE},
+  doi          = {10.1109/IROS.2012.6386109}
+}
+
+@article{Caggiano2022,
+  author       = {Caggiano, Vittorio and Wang, Huawei and Durandau, Guillaume and Sartori, Massimo and Kumar, Vikash},
+  title        = {{MyoSuite}: A Contact-Rich Simulation Suite for Musculoskeletal Motor Control},
+  journal      = {Proceedings of Machine Learning Research},
+  volume       = {168},
+  pages        = {492--507},
+  year         = {2022},
+  note         = {L4DC 2022}
+}
+
+@article{Codol2023,
+  author       = {Codol, Olivier and Michaels, Jonathan A. and Kashefi, Mehrdad and Pruszynski, J. Andrew and Gribble, Paul L.},
+  title        = {{MotorNet}: A {Python} Toolbox for Controlling Differentiable Biomechanical Effectors with Artificial Neural Networks},
+  journal      = {eLife},
+  volume       = {12},
+  pages        = {RP88591},
+  year         = {2024},
+  doi          = {10.7554/eLife.88591}
+}
+
+@article{Tassa2020,
+  author       = {Tassa, Yuval and Tunyasuvunakool, Saran and Muldal, Alistair and Doron, Yotam and Trochim, Piotr and Liu, Siqi and Bohez, Steven and Merel, Josh and Erez, Tom and Lillicrap, Timothy and Heess, Nicolas},
+  title        = {{dm\_control}: Software and Tasks for Continuous Control},
+  journal      = {Software Impacts},
+  volume       = {6},
+  pages        = {100022},
+  year         = {2020},
+  doi          = {10.1016/j.simpa.2020.100022}
+}
+
+@article{Bhargava2004,
+  author       = {Bhargava, Lalit J. and Pandy, Marcus G. and Anderson, Frank C.},
+  title        = {A Phenomenological Model for Estimating Metabolic Energy Consumption in Muscle Contraction},
+  journal      = {Journal of Biomechanics},
+  volume       = {37},
+  number       = {1},
+  pages        = {81--88},
+  year         = {2004},
+  doi          = {10.1016/S0021-9290(03)00239-2}
+}
+
+% -----------------------------------------------------------------------------
+% CONTROLE MOTEUR ET NEUROSCIENCES COMPUTATIONNELLES
+% -----------------------------------------------------------------------------
+
+@article{Todorov2002,
+  author       = {Todorov, Emanuel and Jordan, Michael I.},
+  title        = {Optimal Feedback Control as a Theory of Motor Coordination},
+  journal      = {Nature Neuroscience},
+  volume       = {5},
+  number       = {11},
+  pages        = {1226--1235},
+  year         = {2002},
+  doi          = {10.1038/nn963}
+}
+
+@article{Todorov2004,
+  author       = {Todorov, Emanuel},
+  title        = {Optimality Principles in Sensorimotor Control},
+  journal      = {Nature Neuroscience},
+  volume       = {7},
+  number       = {9},
+  pages        = {907--915},
+  year         = {2004},
+  doi          = {10.1038/nn1309}
+}
+
+@article{Flash1985,
+  author       = {Flash, Tamar and Hogan, Neville},
+  title        = {The Coordination of Arm Movements: An Experimentally Confirmed Mathematical Model},
+  journal      = {The Journal of Neuroscience},
+  volume       = {5},
+  number       = {7},
+  pages        = {1688--1703},
+  year         = {1985},
+  doi          = {10.1523/JNEUROSCI.05-07-01688.1985}
+}
+
+@article{Harris1998,
+  author       = {Harris, Christopher M. and Wolpert, Daniel M.},
+  title        = {Signal-Dependent Noise Determines Motor Planning},
+  journal      = {Nature},
+  volume       = {394},
+  number       = {6695},
+  pages        = {780--784},
+  year         = {1998},
+  doi          = {10.1038/29528}
+}
+
+@article{Wolpert1998,
+  author       = {Wolpert, Daniel M. and Kawato, Mitsuo},
+  title        = {Multiple Paired Forward and Inverse Models for Motor Control},
+  journal      = {Neural Networks},
+  volume       = {11},
+  number       = {7--8},
+  pages        = {1317--1329},
+  year         = {1998},
+  doi          = {10.1016/S0893-6080(98)00066-5}
+}
+
+@article{Scott2004,
+  author       = {Scott, Stephen H.},
+  title        = {Optimal Feedback Control and the Neural Basis of Volitional Motor Control},
+  journal      = {Nature Reviews Neuroscience},
+  volume       = {5},
+  number       = {7},
+  pages        = {532--546},
+  year         = {2004},
+  doi          = {10.1038/nrn1427}
+}
+
+@article{Shadmehr2008,
+  author       = {Shadmehr, Reza and Krakauer, John W.},
+  title        = {A Computational Neuroanatomy for Motor Control},
+  journal      = {Experimental Brain Research},
+  volume       = {185},
+  number       = {3},
+  pages        = {359--381},
+  year         = {2008},
+  doi          = {10.1007/s00221-008-1280-5}
+}
+
+@article{Crowninshield1981,
+  author       = {Crowninshield, Roy D. and Brand, Richard A.},
+  title        = {A Physiologically Based Criterion of Muscle Force Prediction in Locomotion},
+  journal      = {Journal of Biomechanics},
+  volume       = {14},
+  number       = {11},
+  pages        = {793--801},
+  year         = {1981},
+  doi          = {10.1016/0021-9290(81)90035-X}
+}
+
+@article{Anderson2001,
+  author       = {Anderson, Frank C. and Pandy, Marcus G.},
+  title        = {Static and Dynamic Optimization Solutions for Gait Are Practically Equivalent},
+  journal      = {Journal of Biomechanics},
+  volume       = {34},
+  number       = {2},
+  pages        = {153--161},
+  year         = {2001},
+  doi          = {10.1016/S0021-9290(00)00155-X}
+}
+
+@article{Thoroughman1999,
+  author       = {Thoroughman, Kurt A. and Shadmehr, Reza},
+  title        = {Electromyographic Correlates of Learning an Internal Model of Reaching Movements},
+  journal      = {The Journal of Neuroscience},
+  volume       = {19},
+  number       = {19},
+  pages        = {8573--8588},
+  year         = {1999},
+  doi          = {10.1523/JNEUROSCI.19-19-08573.1999}
+}
+
+@article{Wadman1979,
+  author       = {Wadman, W. J. and Denier van der Gon, J. J. and Geuze, R. H. and Mol, C. R.},
+  title        = {Control of Fast Goal-Directed Arm Movements},
+  journal      = {Journal of Human Movement Studies},
+  volume       = {5},
+  pages        = {3--17},
+  year         = {1979}
+}
+
+@article{Falconer1985,
+  author       = {Falconer, K. and Winter, David A.},
+  title        = {Quantitative Assessment of Co-Contraction at the Ankle Joint in Walking},
+  journal      = {Electromyography and Clinical Neurophysiology},
+  volume       = {25},
+  number       = {2--3},
+  pages        = {135--149},
+  year         = {1985}
+}
+
+@article{dAvella2003,
+  author       = {d'Avella, Andrea and Saltiel, Philippe and Bizzi, Emilio},
+  title        = {Combinations of Muscle Synergies in the Construction of a Natural Motor Behavior},
+  journal      = {Nature Neuroscience},
+  volume       = {6},
+  number       = {3},
+  pages        = {300--308},
+  year         = {2003},
+  doi          = {10.1038/nn1010}
+}
+
+@article{dAvella2006,
+  author       = {d'Avella, Andrea and Portone, Alessandro and Fernandez, Laure and Lacquaniti, Francesco},
+  title        = {Control of Fast-Reaching Movements by Muscle Synergy Combinations},
+  journal      = {The Journal of Neuroscience},
+  volume       = {26},
+  number       = {30},
+  pages        = {7791--7810},
+  year         = {2006},
+  doi          = {10.1523/JNEUROSCI.0830-06.2006}
+}
+
+@article{Ting2007,
+  author       = {Ting, Lena H. and McKay, J. Lucas},
+  title        = {Neuromechanics of Muscle Synergies for Posture and Movement},
+  journal      = {Current Opinion in Neurobiology},
+  volume       = {17},
+  number       = {6},
+  pages        = {622--628},
+  year         = {2007},
+  doi          = {10.1016/j.conb.2008.01.002}
+}
+
+@article{Bizzi2013,
+  author       = {Bizzi, Emilio and Cheung, Vincent C. K.},
+  title        = {The Neural Origin of Muscle Synergies},
+  journal      = {Frontiers in Computational Neuroscience},
+  volume       = {7},
+  pages        = {51},
+  year         = {2013},
+  doi          = {10.3389/fncom.2013.00051}
+}
+
+% -----------------------------------------------------------------------------
+% APPRENTISSAGE PAR RENFORCEMENT : FONDEMENTS
+% -----------------------------------------------------------------------------
+
+@book{Bellman1957,
+  author       = {Bellman, Richard},
+  title        = {Dynamic Programming},
+  publisher    = {Princeton University Press},
+  address      = {Princeton, NJ},
+  year         = {1957}
+}
+
+@book{Sutton2018,
+  author       = {Sutton, Richard S. and Barto, Andrew G.},
+  title        = {Reinforcement Learning: An Introduction},
+  edition      = {2},
+  publisher    = {MIT Press},
+  address      = {Cambridge, MA},
+  year         = {2018},
+  isbn         = {9780262039246}
+}
+
+@article{Konda2000,
+  author       = {Konda, Vijay R. and Tsitsiklis, John N.},
+  title        = {Actor-Critic Algorithms},
+  journal      = {Advances in Neural Information Processing Systems},
+  volume       = {12},
+  pages        = {1008--1014},
+  year         = {2000}
+}
+
+@article{Mnih2015,
+  author       = {Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A. and Veness, Joel and Bellemare, Marc G. and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K. and Ostrovski, Georg and others},
+  title        = {Human-Level Control through Deep Reinforcement Learning},
+  journal      = {Nature},
+  volume       = {518},
+  number       = {7540},
+  pages        = {529--533},
+  year         = {2015},
+  doi          = {10.1038/nature14236}
+}
+
+@inproceedings{Lillicrap2016,
+  author       = {Lillicrap, Timothy P. and Hunt, Jonathan J. and Pritzel, Alexander and Heess, Nicolas and Erez, Tom and Tassa, Yuval and Silver, David and Wierstra, Daan},
+  title        = {Continuous Control with Deep Reinforcement Learning},
+  booktitle    = {International Conference on Learning Representations (ICLR)},
+  year         = {2016}
+}
+
+@inproceedings{Schulman2016,
+  author       = {Schulman, John and Moritz, Philipp and Levine, Sergey and Jordan, Michael I. and Abbeel, Pieter},
+  title        = {High-Dimensional Continuous Control Using Generalized Advantage Estimation},
+  booktitle    = {International Conference on Learning Representations (ICLR)},
+  year         = {2016}
+}
+
+@article{Schulman2017,
+  author       = {Schulman, John and Wolski, Filip and Dhariwal, Prafulla and Radford, Alec and Klimov, Oleg},
+  title        = {Proximal Policy Optimization Algorithms},
+  journal      = {arXiv preprint arXiv:1707.06347},
+  year         = {2017}
+}
+
+@inproceedings{Haarnoja2018,
+  author       = {Haarnoja, Tuomas and Zhou, Aurick and Abbeel, Pieter and Levine, Sergey},
+  title        = {Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor},
+  booktitle    = {International Conference on Machine Learning (ICML)},
+  volume       = {80},
+  pages        = {1861--1870},
+  year         = {2018}
+}
+
+@inproceedings{Fujimoto2018,
+  author       = {Fujimoto, Scott and {van Hoof}, Herke and Meger, David},
+  title        = {Addressing Function Approximation Error in Actor-Critic Methods},
+  booktitle    = {International Conference on Machine Learning (ICML)},
+  volume       = {80},
+  pages        = {1587--1596},
+  year         = {2018}
+}
+
+% -----------------------------------------------------------------------------
+% APPRENTISSAGE PAR RENFORCEMENT : APPLICATIONS BIOMECANIQUES
+% -----------------------------------------------------------------------------
+
+@inproceedings{Rajeswaran2017,
+  author       = {Rajeswaran, Aravind and Lowrey, Kendall and Todorov, Emanuel and Kakade, Sham},
+  title        = {Towards Generalization and Simplicity in Continuous Control},
+  booktitle    = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume       = {30},
+  pages        = {6550--6561},
+  year         = {2017}
+}
+
+@inproceedings{Kidzinski2018,
+  author       = {Kidzinski, Lukasz and Mohanty, Sharada P. and Ong, Carmichael F. and Huang, Zhewei and Zhou, Shuchang and Pechenko, Anton and Stelmaszczyk, Adam and Jarosik, Piotr and Pavlov, Mikhail and Kolesnikov, Sergey and others},
+  title        = {Learning to Run Challenge Solutions: Adapting Reinforcement Learning Methods for Neuromusculoskeletal Environments},
+  booktitle    = {The NIPS '17 Competition: Building Intelligent Systems},
+  pages        = {121--153},
+  year         = {2018},
+  publisher    = {Springer},
+  doi          = {10.1007/978-3-319-94042-7\_7}
+}
+
+@article{Peng2018,
+  author       = {Peng, Xue Bin and Abbeel, Pieter and Levine, Sergey and {van de Panne}, Michiel},
+  title        = {{DeepMimic}: Example-Guided Deep Reinforcement Learning of Physics-Based Character Skills},
+  journal      = {ACM Transactions on Graphics},
+  volume       = {37},
+  number       = {4},
+  pages        = {143:1--143:14},
+  year         = {2018},
+  doi          = {10.1145/3197517.3201311}
+}
+
+@inproceedings{Peng2018SimToReal,
+  author       = {Peng, Xue Bin and Andrychowicz, Marcin and Zaremba, Wojciech and Abbeel, Pieter},
+  title        = {Sim-to-Real Transfer of Robotic Control with Dynamics Randomization},
+  booktitle    = {IEEE International Conference on Robotics and Automation (ICRA)},
+  pages        = {3803--3810},
+  year         = {2018},
+  doi          = {10.1109/ICRA.2018.8460528}
+}
+
+@article{Song2021,
+  author       = {Song, Seungmoon and Kidzinski, Lukasz and Peng, Xue Bin and Ong, Carmichael and Hicks, Jennifer and Levine, Sergey and Atkeson, Christopher G. and Delp, Scott L.},
+  title        = {Deep Reinforcement Learning for Modeling Human Locomotion Control in Neuromechanical Simulation},
+  journal      = {Journal of NeuroEngineering and Rehabilitation},
+  volume       = {18},
+  number       = {1},
+  pages        = {126},
+  year         = {2021},
+  doi          = {10.1186/s12984-021-00919-y}
+}
+
+@inproceedings{Tobin2017,
+  author       = {Tobin, Josh and Fong, Rachel and Ray, Alex and Schneider, Jonas and Zaremba, Wojciech and Abbeel, Pieter},
+  title        = {Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World},
+  booktitle    = {2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages        = {23--30},
+  year         = {2017},
+  doi          = {10.1109/IROS.2017.8202133}
+}
+
+% -----------------------------------------------------------------------------
+% METHODES ET OUTILS
+% -----------------------------------------------------------------------------
+
+@article{Raffin2021,
+  author       = {Raffin, Antonin and Hill, Ashley and Gleave, Adam and Kanervisto, Anssi and Ernestus, Maximilian and Dormann, Noah},
+  title        = {Stable-Baselines3: Reliable Reinforcement Learning Implementations},
+  journal      = {Journal of Machine Learning Research},
+  volume       = {22},
+  number       = {268},
+  pages        = {1--8},
+  year         = {2021}
+}
+
+@inproceedings{Akiba2019,
+  author       = {Akiba, Takuya and Sano, Shotaro and Yanase, Toshihiko and Ohta, Takeru and Koyama, Masanori},
+  title        = {{Optuna}: A Next-Generation Hyperparameter Optimization Framework},
+  booktitle    = {Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining},
+  pages        = {2623--2631},
+  year         = {2019},
+  doi          = {10.1145/3292500.3330701}
+}
+
+@inproceedings{Glorot2010,
+  author       = {Glorot, Xavier and Bengio, Yoshua},
+  title        = {Understanding the Difficulty of Training Deep Feedforward Neural Networks},
+  booktitle    = {Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics},
+  volume       = {9},
+  pages        = {249--256},
+  year         = {2010}
+}
+
+% -----------------------------------------------------------------------------
+% RIGUEUR METHODOLOGIQUE ET REPRODUCTIBILITE
+% -----------------------------------------------------------------------------
+
+@inproceedings{Henderson2018,
+  author       = {Henderson, Peter and Islam, Riashat and Bachman, Philip and Pineau, Joelle and Precup, Doina and Meger, David},
+  title        = {Deep Reinforcement Learning That Matters},
+  booktitle    = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume       = {32},
+  number       = {1},
+  pages        = {3207--3214},
+  year         = {2018},
+  doi          = {10.1609/aaai.v32i1.11694}
+}
+
+@inproceedings{Agarwal2021,
+  author       = {Agarwal, Rishabh and Schwarzer, Max and Castro, Pablo Samuel and Courville, Aaron C. and Bellemare, Marc G.},
+  title        = {Deep Reinforcement Learning at the Edge of the Statistical Precipice},
+  booktitle    = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume       = {34},
+  pages        = {29304--29320},
+  year         = {2021}
+}
+
+@article{Pineau2021,
+  author       = {Pineau, Joelle and Vincent-Lamarre, Philippe and Sinha, Koustuv and Larivi{\`e}re, Vincent and Beygelzimer, Alina and d'Alch{\'e}-Buc, Florence and Fox, Emily and Larochelle, Hugo},
+  title        = {Improving Reproducibility in Machine Learning Research},
+  journal      = {Journal of Machine Learning Research},
+  volume       = {22},
+  number       = {164},
+  pages        = {1--20},
+  year         = {2021}
+}
+
+@inproceedings{Finn2017,
+  author       = {Finn, Chelsea and Abbeel, Pieter and Levine, Sergey},
+  title        = {Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks},
+  booktitle    = {International Conference on Machine Learning (ICML)},
+  volume       = {70},
+  pages        = {1126--1135},
+  year         = {2017}
+}
+
+% -----------------------------------------------------------------------------
+% EPIDEMIOLOGIE ET REHABILITATION CLINIQUE
+% -----------------------------------------------------------------------------
+
+@article{Kwakkel2003,
+  author       = {Kwakkel, Gert and Kollen, Boudewijn J. and van der Grond, Jeroen and Prevo, Arie J. H.},
+  title        = {Probability of Regaining Dexterity in the Flaccid Upper Limb: Impact of Severity of Paresis and Time Since Onset in Acute Stroke},
+  journal      = {Stroke},
+  volume       = {34},
+  number       = {9},
+  pages        = {2181--2186},
+  year         = {2003},
+  doi          = {10.1161/01.STR.0000087172.16305.CD}
+}
+
+@article{Lo2010,
+  author       = {Lo, Albert C. and Guarino, Peter D. and Richards, Lorie G. and Haselkorn, Jodie K. and Wittenberg, George F. and Federman, Daniel G. and Ringer, Robert J. and Wagner, Todd H. and Krebs, Hermano I. and Volpe, Bruce T. and others},
+  title        = {Robot-Assisted Therapy for Long-Term Upper-Limb Impairment after Stroke},
+  journal      = {New England Journal of Medicine},
+  volume       = {362},
+  number       = {19},
+  pages        = {1772--1783},
+  year         = {2010},
+  doi          = {10.1056/NEJMoa0911341}
+}
+
+@misc{WHO2023,
+  author       = {{World Health Organization}},
+  title        = {Global Status Report on Rehabilitation},
+  year         = {2023},
+  publisher    = {World Health Organization},
+  address      = {Geneva},
+  howpublished = {\url{https://www.who.int/health-topics/rehabilitation}}
+}
+
+@article{Feigin2022,
+  author       = {Feigin, Valery L. and Brainin, Michael and Norrving, Bo and Martins, Sheila and Sacco, Ralph L. and Hacke, Werner and Fisher, Marc and Pandian, Jeyaraj and Lindsay, Patrice},
+  title        = {World Stroke Organization (WSO): Global Stroke Fact Sheet 2022},
+  journal      = {International Journal of Stroke},
+  volume       = {17},
+  number       = {1},
+  pages        = {18--29},
+  year         = {2022},
+  doi          = {10.1177/17474930211065917}
+}
+
+@article{Mrabet2015,
+  author       = {Mrabet, Saloua and Ben Ali, Nadia and Kchaou, Mariem and Belal, Samir},
+  title        = {{\'E}pid{\'e}miologie des accidents vasculaires c{\'e}r{\'e}braux en {T}unisie},
+  journal      = {Revue Neurologique},
+  volume       = {171},
+  pages        = {A194},
+  year         = {2015},
+  doi          = {10.1016/j.neurol.2015.01.436}
+}
+
+% -----------------------------------------------------------------------------
+% STATISTIQUES
+% -----------------------------------------------------------------------------
+
+@article{Wilcoxon1945,
+  author       = {Wilcoxon, Frank},
+  title        = {Individual Comparisons by Ranking Methods},
+  journal      = {Biometrics Bulletin},
+  volume       = {1},
+  number       = {6},
+  pages        = {80--83},
+  year         = {1945},
+  doi          = {10.2307/3001968}
+}
+
+@book{Cohen1988,
+  author       = {Cohen, Jacob},
+  title        = {Statistical Power Analysis for the Behavioral Sciences},
+  edition      = {2},
+  publisher    = {Lawrence Erlbaum Associates},
+  address      = {Hillsdale, NJ},
+  year         = {1988},
+  isbn         = {9780805802832}
+}

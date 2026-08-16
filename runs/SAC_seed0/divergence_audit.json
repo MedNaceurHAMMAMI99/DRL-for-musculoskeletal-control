@@ -1,0 +1,10 @@
+{
+  "n_episodes": 50,
+  "warned_episodes": 0,
+  "flagged_episodes": 0,
+  "warn_kinds": {},
+  "mean_final_error": 0.10568567149576852,
+  "mean_min_error": 0.0739817970473243,
+  "success_rate": 0.02,
+  "mean_episode_len": 100.0
+}

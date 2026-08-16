@@ -1,0 +1,1112 @@
+{
+  "SAC_default_seed0": {
+    "config": "SAC_default",
+    "seed": 0,
+    "effort_ratio": 2.237387917657181,
+    "pattern_cosine": 0.830024654301024,
+    "pearson_r": 0.6939525026342364,
+    "nrmse_pct": 26.987460836903796,
+    "residual": 4.601490053513353e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 181.46641486442772,
+        "classical_mean_N": 120.45136492256184,
+        "rmse_N": 148.3953640370625,
+        "nrmse_pct_of_fmax": 23.781308339272837,
+        "pearson_r": 0.4877605113168364
+      },
+      "biceps_short": {
+        "policy_mean_N": 171.6885946962743,
+        "classical_mean_N": 70.81041918958778,
+        "rmse_N": 151.10138767740833,
+        "nrmse_pct_of_fmax": 34.73595119020881,
+        "pearson_r": 0.31205886158907126
+      },
+      "brachialis": {
+        "policy_mean_N": 454.80735590430055,
+        "classical_mean_N": 260.97942794601494,
+        "rmse_N": 289.11202067016984,
+        "nrmse_pct_of_fmax": 29.29199804155723,
+        "pearson_r": 0.6029093770936422
+      },
+      "triceps_long": {
+        "policy_mean_N": 315.9041546292451,
+        "classical_mean_N": 287.7545492788537,
+        "rmse_N": 155.33932914769676,
+        "nrmse_pct_of_fmax": 19.466081346829167,
+        "pearson_r": 0.6714654657483532
+      },
+      "triceps_lat": {
+        "policy_mean_N": 285.4645005927579,
+        "classical_mean_N": 28.30249922416642,
+        "rmse_N": 300.2725076190877,
+        "nrmse_pct_of_fmax": 48.12059416972559,
+        "pearson_r": 0.35581150673449635
+      },
+      "triceps_med": {
+        "policy_mean_N": 289.5641481279917,
+        "classical_mean_N": 28.358280389867517,
+        "rmse_N": 307.6370868163989,
+        "nrmse_pct_of_fmax": 49.300815194935716,
+        "pearson_r": 0.18558231359325753
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 438.0671355628415,
+        "classical_mean_N": 412.14074586158785,
+        "rmse_N": 66.22138922082988,
+        "nrmse_pct_of_fmax": 5.7987205972705675,
+        "pearson_r": 0.9715579261191613
+      },
+      "deltoid_med": {
+        "policy_mean_N": 363.53066150648004,
+        "classical_mean_N": 347.473008169467,
+        "rmse_N": 99.4261641710171,
+        "nrmse_pct_of_fmax": 8.706319104292215,
+        "pearson_r": 0.8913198479912343
+      },
+      "deltoid_post": {
+        "policy_mean_N": 94.73891113893444,
+        "classical_mean_N": 60.266495807229425,
+        "rmse_N": 67.91994654948763,
+        "nrmse_pct_of_fmax": 26.223917586674762,
+        "pearson_r": 0.4704426690120402
+      }
+    }
+  },
+  "SAC_default_seed1": {
+    "config": "SAC_default",
+    "seed": 1,
+    "effort_ratio": 2.2614718110112606,
+    "pattern_cosine": 0.8151826477551287,
+    "pearson_r": 0.6651927615824723,
+    "nrmse_pct": 29.188942747823212,
+    "residual": 4.846855466809224e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 281.85742077536224,
+        "classical_mean_N": 133.5354858662503,
+        "rmse_N": 220.20299314988853,
+        "nrmse_pct_of_fmax": 35.288941209918036,
+        "pearson_r": 0.44304514096816444
+      },
+      "biceps_short": {
+        "policy_mean_N": 161.8478194037099,
+        "classical_mean_N": 64.47514600768112,
+        "rmse_N": 162.58713275194262,
+        "nrmse_pct_of_fmax": 37.37635235676842,
+        "pearson_r": 0.22469052677247517
+      },
+      "brachialis": {
+        "policy_mean_N": 441.80128987217654,
+        "classical_mean_N": 222.56633052369125,
+        "rmse_N": 345.72170049907294,
+        "nrmse_pct_of_fmax": 35.027527912773344,
+        "pearson_r": 0.4203065316351572
+      },
+      "triceps_long": {
+        "policy_mean_N": 307.4023599853257,
+        "classical_mean_N": 280.1098457808211,
+        "rmse_N": 136.9706522056312,
+        "nrmse_pct_of_fmax": 17.16424213103148,
+        "pearson_r": 0.7919383051629506
+      },
+      "triceps_lat": {
+        "policy_mean_N": 334.10741648152873,
+        "classical_mean_N": 33.17206551040699,
+        "rmse_N": 340.2112633382627,
+        "nrmse_pct_of_fmax": 54.52103579138826,
+        "pearson_r": 0.3153993318449322
+      },
+      "triceps_med": {
+        "policy_mean_N": 247.9259849176145,
+        "classical_mean_N": 29.490420239440066,
+        "rmse_N": 267.6024219061747,
+        "nrmse_pct_of_fmax": 42.885003510604925,
+        "pearson_r": 0.4365572533082334
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 410.437964913934,
+        "classical_mean_N": 421.0053188159931,
+        "rmse_N": 65.36004758296274,
+        "nrmse_pct_of_fmax": 5.7232966359862285,
+        "pearson_r": 0.9703082153268916
+      },
+      "deltoid_med": {
+        "policy_mean_N": 424.43834198035523,
+        "classical_mean_N": 399.9456327335807,
+        "rmse_N": 93.41234711159352,
+        "nrmse_pct_of_fmax": 8.179715158633408,
+        "pearson_r": 0.9123380971227887
+      },
+      "deltoid_post": {
+        "policy_mean_N": 86.4655210879457,
+        "classical_mean_N": 69.8305786221534,
+        "rmse_N": 56.47563215162452,
+        "nrmse_pct_of_fmax": 21.805263379005602,
+        "pearson_r": 0.5470090495443433
+      }
+    }
+  },
+  "SAC_default_seed2": {
+    "config": "SAC_default",
+    "seed": 2,
+    "effort_ratio": 2.4109921208865863,
+    "pattern_cosine": 0.7938730892215681,
+    "pearson_r": 0.6559842078232212,
+    "nrmse_pct": 29.410238765187383,
+    "residual": 4.369835347465572e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 277.5077962277265,
+        "classical_mean_N": 92.75035684347571,
+        "rmse_N": 269.6265816466547,
+        "nrmse_pct_of_fmax": 43.20938808439979,
+        "pearson_r": 0.12473538847053635
+      },
+      "biceps_short": {
+        "policy_mean_N": 125.8728064705205,
+        "classical_mean_N": 39.02448182938796,
+        "rmse_N": 141.44344147900833,
+        "nrmse_pct_of_fmax": 32.51573367333525,
+        "pearson_r": 0.37289286071226774
+      },
+      "brachialis": {
+        "policy_mean_N": 289.3993222389197,
+        "classical_mean_N": 144.6736368064639,
+        "rmse_N": 250.28266542597285,
+        "nrmse_pct_of_fmax": 25.35791949604588,
+        "pearson_r": 0.6586589610067624
+      },
+      "triceps_long": {
+        "policy_mean_N": 427.9177593181086,
+        "classical_mean_N": 301.2252326207778,
+        "rmse_N": 234.6980557737366,
+        "nrmse_pct_of_fmax": 29.41078393154594,
+        "pearson_r": 0.53926224451277
+      },
+      "triceps_lat": {
+        "policy_mean_N": 269.12944658545314,
+        "classical_mean_N": 59.05820085581731,
+        "rmse_N": 301.33164006504865,
+        "nrmse_pct_of_fmax": 48.29032693350138,
+        "pearson_r": 0.08905089230302957
+      },
+      "triceps_med": {
+        "policy_mean_N": 292.4788637499657,
+        "classical_mean_N": 49.23226433496156,
+        "rmse_N": 319.96188909953776,
+        "nrmse_pct_of_fmax": 51.27594376595157,
+        "pearson_r": -0.035482539185980815
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 352.5785099843107,
+        "classical_mean_N": 366.50635726169867,
+        "rmse_N": 71.0088178506928,
+        "nrmse_pct_of_fmax": 6.2179350131955164,
+        "pearson_r": 0.972419314430706
+      },
+      "deltoid_med": {
+        "policy_mean_N": 370.7489786589681,
+        "classical_mean_N": 324.85864944011246,
+        "rmse_N": 105.21649560227645,
+        "nrmse_pct_of_fmax": 9.213353380234365,
+        "pearson_r": 0.9220971550782631
+      },
+      "deltoid_post": {
+        "policy_mean_N": 92.19357844831595,
+        "classical_mean_N": 86.09288835671649,
+        "rmse_N": 58.09585444362168,
+        "nrmse_pct_of_fmax": 22.430831831514162,
+        "pearson_r": 0.5074902158011763
+      }
+    }
+  },
+  "SAC_tuned_seed0": {
+    "config": "SAC_tuned",
+    "seed": 0,
+    "effort_ratio": 1.9430338467983481,
+    "pattern_cosine": 0.8292690637100164,
+    "pearson_r": 0.7710856445445476,
+    "nrmse_pct": 18.771001537564167,
+    "residual": 2.2616699936805713e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 139.33631940359993,
+        "classical_mean_N": 81.88228991127062,
+        "rmse_N": 107.01374485200613,
+        "nrmse_pct_of_fmax": 17.149638598077907,
+        "pearson_r": 0.7396585930442299
+      },
+      "biceps_short": {
+        "policy_mean_N": 113.03202885784957,
+        "classical_mean_N": 56.999966383492996,
+        "rmse_N": 112.5226759276139,
+        "nrmse_pct_of_fmax": 25.867281822439978,
+        "pearson_r": 0.6089813580681541
+      },
+      "brachialis": {
+        "policy_mean_N": 217.49720045506587,
+        "classical_mean_N": 151.01278818257455,
+        "rmse_N": 170.390730201972,
+        "nrmse_pct_of_fmax": 17.263498500706383,
+        "pearson_r": 0.7289895581325754
+      },
+      "triceps_long": {
+        "policy_mean_N": 211.30598764491967,
+        "classical_mean_N": 180.02148759085247,
+        "rmse_N": 157.44626043604552,
+        "nrmse_pct_of_fmax": 19.730107824065854,
+        "pearson_r": 0.7514510825055641
+      },
+      "triceps_lat": {
+        "policy_mean_N": 44.656345921934005,
+        "classical_mean_N": 33.400225432159,
+        "rmse_N": 108.11920001383768,
+        "nrmse_pct_of_fmax": 17.32679487401245,
+        "pearson_r": 0.20926442074943766
+      },
+      "triceps_med": {
+        "policy_mean_N": 167.08564318637872,
+        "classical_mean_N": 28.20430196598006,
+        "rmse_N": 224.20988327874758,
+        "nrmse_pct_of_fmax": 35.93107103826083,
+        "pearson_r": 0.6175562184920145
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 75.23716014019243,
+        "classical_mean_N": 82.15895717983584,
+        "rmse_N": 41.858678080568225,
+        "nrmse_pct_of_fmax": 3.6653833695769023,
+        "pearson_r": 0.9702225063593621
+      },
+      "deltoid_med": {
+        "policy_mean_N": 345.71718714855007,
+        "classical_mean_N": 275.13018639339555,
+        "rmse_N": 167.091950173241,
+        "nrmse_pct_of_fmax": 14.6315192796183,
+        "pearson_r": 0.8521454718523153
+      },
+      "deltoid_post": {
+        "policy_mean_N": 59.98069682838957,
+        "classical_mean_N": 52.70531955566368,
+        "rmse_N": 52.76218209928758,
+        "nrmse_pct_of_fmax": 20.371498880033812,
+        "pearson_r": 0.664319160043951
+      }
+    }
+  },
+  "SAC_tuned_seed1": {
+    "config": "SAC_tuned",
+    "seed": 1,
+    "effort_ratio": 1.6772422881721585,
+    "pattern_cosine": 0.8699927149937142,
+    "pearson_r": 0.8450552353018954,
+    "nrmse_pct": 15.293724607370727,
+    "residual": 2.1832482401314823e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 94.75495316173473,
+        "classical_mean_N": 62.18900747289857,
+        "rmse_N": 90.18185683915642,
+        "nrmse_pct_of_fmax": 14.45222064730071,
+        "pearson_r": 0.7543375137430733
+      },
+      "biceps_short": {
+        "policy_mean_N": 80.60538750469676,
+        "classical_mean_N": 43.02072679135619,
+        "rmse_N": 81.53925371863913,
+        "nrmse_pct_of_fmax": 18.74465602727336,
+        "pearson_r": 0.7021869651416005
+      },
+      "brachialis": {
+        "policy_mean_N": 205.31734654911105,
+        "classical_mean_N": 129.65658869575057,
+        "rmse_N": 165.31615408122585,
+        "nrmse_pct_of_fmax": 16.74935704976959,
+        "pearson_r": 0.7598999083566814
+      },
+      "triceps_long": {
+        "policy_mean_N": 287.35840905719976,
+        "classical_mean_N": 213.55879340643992,
+        "rmse_N": 137.76583476349734,
+        "nrmse_pct_of_fmax": 17.263889068107435,
+        "pearson_r": 0.8858392080874814
+      },
+      "triceps_lat": {
+        "policy_mean_N": 86.64112894397879,
+        "classical_mean_N": 34.41361597764121,
+        "rmse_N": 145.07648470858544,
+        "nrmse_pct_of_fmax": 23.2494366520169,
+        "pearson_r": 0.3409224652365257
+      },
+      "triceps_med": {
+        "policy_mean_N": 78.37139164040485,
+        "classical_mean_N": 27.8383472278041,
+        "rmse_N": 129.8803512568682,
+        "nrmse_pct_of_fmax": 20.814158855267344,
+        "pearson_r": 0.2409986648645945
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 149.39616695713804,
+        "classical_mean_N": 146.99913568994236,
+        "rmse_N": 35.69988753088824,
+        "nrmse_pct_of_fmax": 3.126084722494592,
+        "pearson_r": 0.9879883911312295
+      },
+      "deltoid_med": {
+        "policy_mean_N": 234.48965219709868,
+        "classical_mean_N": 186.4845147904306,
+        "rmse_N": 113.90313711160128,
+        "nrmse_pct_of_fmax": 9.974005001015874,
+        "pearson_r": 0.9106520025186288
+      },
+      "deltoid_post": {
+        "policy_mean_N": 27.606116806960692,
+        "classical_mean_N": 37.332195713963785,
+        "rmse_N": 33.995972712564466,
+        "nrmse_pct_of_fmax": 13.125858190179331,
+        "pearson_r": 0.7130221031867867
+      }
+    }
+  },
+  "SAC_tuned_seed2": {
+    "config": "SAC_tuned",
+    "seed": 2,
+    "effort_ratio": 2.28796490501707,
+    "pattern_cosine": 0.7449413225617563,
+    "pearson_r": 0.7107535521588503,
+    "nrmse_pct": 20.960162125273794,
+    "residual": 2.1256364845830947e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 84.07068240325555,
+        "classical_mean_N": 52.8808158248494,
+        "rmse_N": 81.30653268966383,
+        "nrmse_pct_of_fmax": 13.029893059240997,
+        "pearson_r": 0.8417508836575813
+      },
+      "biceps_short": {
+        "policy_mean_N": 101.14942121319092,
+        "classical_mean_N": 39.094754751096204,
+        "rmse_N": 128.07609821871108,
+        "nrmse_pct_of_fmax": 29.4427811997037,
+        "pearson_r": 0.5016351181463149
+      },
+      "brachialis": {
+        "policy_mean_N": 255.98435776590375,
+        "classical_mean_N": 91.7155955270438,
+        "rmse_N": 248.49615020295403,
+        "nrmse_pct_of_fmax": 25.176914914179736,
+        "pearson_r": 0.5335307854108607
+      },
+      "triceps_long": {
+        "policy_mean_N": 183.56933936286632,
+        "classical_mean_N": 190.581076281374,
+        "rmse_N": 103.70431907066053,
+        "nrmse_pct_of_fmax": 12.995528705596557,
+        "pearson_r": 0.8924809693574858
+      },
+      "triceps_lat": {
+        "policy_mean_N": 261.19245792585303,
+        "classical_mean_N": 38.642074928659234,
+        "rmse_N": 293.47109117164473,
+        "nrmse_pct_of_fmax": 47.03062358519948,
+        "pearson_r": 0.3568034504657182
+      },
+      "triceps_med": {
+        "policy_mean_N": 108.16814388400097,
+        "classical_mean_N": 30.162095071726878,
+        "rmse_N": 165.50780213373497,
+        "nrmse_pct_of_fmax": 26.523686239380606,
+        "pearson_r": 0.194195434676968
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 141.6041932789255,
+        "classical_mean_N": 147.78253847826855,
+        "rmse_N": 28.965733641072717,
+        "nrmse_pct_of_fmax": 2.536403996591306,
+        "pearson_r": 0.9929799949901968
+      },
+      "deltoid_med": {
+        "policy_mean_N": 202.467645152285,
+        "classical_mean_N": 190.04511740029352,
+        "rmse_N": 59.91209589257044,
+        "nrmse_pct_of_fmax": 5.246243072904592,
+        "pearson_r": 0.9692470463605779
+      },
+      "deltoid_post": {
+        "policy_mean_N": 54.7830162980103,
+        "classical_mean_N": 49.53746848638674,
+        "rmse_N": 37.82055173773831,
+        "nrmse_pct_of_fmax": 14.602529628470393,
+        "pearson_r": 0.8397442449965595
+      }
+    }
+  },
+  "TD3_seed0": {
+    "config": "TD3",
+    "seed": 0,
+    "effort_ratio": 2.109698734491104,
+    "pattern_cosine": 0.8395356469827124,
+    "pearson_r": 0.7108612834700365,
+    "nrmse_pct": 28.7193496926485,
+    "residual": 4.554393785453297e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 303.2197862972871,
+        "classical_mean_N": 184.18595437254777,
+        "rmse_N": 212.67565451230084,
+        "nrmse_pct_of_fmax": 34.08263694107385,
+        "pearson_r": 0.48719357596616497
+      },
+      "biceps_short": {
+        "policy_mean_N": 203.84445055844256,
+        "classical_mean_N": 101.31289477527599,
+        "rmse_N": 166.29743865403069,
+        "nrmse_pct_of_fmax": 38.22929624230591,
+        "pearson_r": 0.4215659072486532
+      },
+      "brachialis": {
+        "policy_mean_N": 317.08873142545355,
+        "classical_mean_N": 206.7024857200624,
+        "rmse_N": 271.0725040943843,
+        "nrmse_pct_of_fmax": 27.464286129116953,
+        "pearson_r": 0.6474735309990932
+      },
+      "triceps_long": {
+        "policy_mean_N": 226.20064665212456,
+        "classical_mean_N": 226.02114397889451,
+        "rmse_N": 174.99143698115012,
+        "nrmse_pct_of_fmax": 21.928751501397258,
+        "pearson_r": 0.8118551049286183
+      },
+      "triceps_lat": {
+        "policy_mean_N": 295.02934533912565,
+        "classical_mean_N": 16.780996360044114,
+        "rmse_N": 345.80163361780575,
+        "nrmse_pct_of_fmax": 55.41692846439195,
+        "pearson_r": 0.07490348730377439
+      },
+      "triceps_med": {
+        "policy_mean_N": 192.211810619352,
+        "classical_mean_N": 17.295392277120932,
+        "rmse_N": 295.00076838858297,
+        "nrmse_pct_of_fmax": 47.275764164837014,
+        "pearson_r": 0.08851890415998293
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 414.07465260754475,
+        "classical_mean_N": 416.0087531212071,
+        "rmse_N": 56.08629461019495,
+        "nrmse_pct_of_fmax": 4.911234204045091,
+        "pearson_r": 0.9765009659983445
+      },
+      "deltoid_med": {
+        "policy_mean_N": 464.34046048039806,
+        "classical_mean_N": 434.32499497036713,
+        "rmse_N": 105.14304521123971,
+        "nrmse_pct_of_fmax": 9.20692164721889,
+        "pearson_r": 0.9418300895043685
+      },
+      "deltoid_post": {
+        "policy_mean_N": 93.73071187962097,
+        "classical_mean_N": 68.03685800859185,
+        "rmse_N": 75.205575734834,
+        "nrmse_pct_of_fmax": 29.036901828121238,
+        "pearson_r": 0.4549526760423041
+      }
+    }
+  },
+  "TD3_seed1": {
+    "config": "TD3",
+    "seed": 1,
+    "effort_ratio": 2.0155047231377026,
+    "pattern_cosine": 0.8397414366605254,
+    "pearson_r": 0.7212524082866052,
+    "nrmse_pct": 32.09313509423382,
+    "residual": 4.851372432230377e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 346.5110142073105,
+        "classical_mean_N": 226.59466958068393,
+        "rmse_N": 210.06759732627427,
+        "nrmse_pct_of_fmax": 33.6646790586978,
+        "pearson_r": 0.44574284663202424
+      },
+      "biceps_short": {
+        "policy_mean_N": 243.61602125953647,
+        "classical_mean_N": 92.07049036021446,
+        "rmse_N": 205.1208666881228,
+        "nrmse_pct_of_fmax": 47.15422222715467,
+        "pearson_r": 0.3753198137384143
+      },
+      "brachialis": {
+        "policy_mean_N": 538.044427079726,
+        "classical_mean_N": 215.37894967601582,
+        "rmse_N": 445.987512518882,
+        "nrmse_pct_of_fmax": 45.186171481143056,
+        "pearson_r": 0.36620952195168893
+      },
+      "triceps_long": {
+        "policy_mean_N": 266.00821800970357,
+        "classical_mean_N": 252.13006105735062,
+        "rmse_N": 129.49932318107585,
+        "nrmse_pct_of_fmax": 16.227985361037074,
+        "pearson_r": 0.8911356051354541
+      },
+      "triceps_lat": {
+        "policy_mean_N": 185.81463143749866,
+        "classical_mean_N": 5.643997340071069,
+        "rmse_N": 276.1291355675323,
+        "nrmse_pct_of_fmax": 44.25146403325838,
+        "pearson_r": 0.05040294118560398
+      },
+      "triceps_med": {
+        "policy_mean_N": 266.8478722751306,
+        "classical_mean_N": 11.786635178748398,
+        "rmse_N": 344.0360767141097,
+        "nrmse_pct_of_fmax": 55.1339866529022,
+        "pearson_r": -0.1149043439210424
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 548.305573332567,
+        "classical_mean_N": 562.3772063439781,
+        "rmse_N": 47.36539919144757,
+        "nrmse_pct_of_fmax": 4.147583116589104,
+        "pearson_r": 0.9851881968627695
+      },
+      "deltoid_med": {
+        "policy_mean_N": 472.4680725824661,
+        "classical_mean_N": 460.2779871031131,
+        "rmse_N": 43.5198013501687,
+        "nrmse_pct_of_fmax": 3.8108407487012874,
+        "pearson_r": 0.9926400068478167
+      },
+      "deltoid_post": {
+        "policy_mean_N": 81.34954991095488,
+        "classical_mean_N": 74.76487147166618,
+        "rmse_N": 56.416918307237694,
+        "nrmse_pct_of_fmax": 21.782593941018416,
+        "pearson_r": 0.7591630006709881
+      }
+    }
+  },
+  "TD3_seed2": {
+    "config": "TD3",
+    "seed": 2,
+    "effort_ratio": 2.2312524712503556,
+    "pattern_cosine": 0.8275952700320933,
+    "pearson_r": 0.7167262328038201,
+    "nrmse_pct": 28.078782467677684,
+    "residual": 4.935953239131373e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 181.1895948517541,
+        "classical_mean_N": 116.10259079501748,
+        "rmse_N": 144.5624214005092,
+        "nrmse_pct_of_fmax": 23.167054711620064,
+        "pearson_r": 0.7741659784170785
+      },
+      "biceps_short": {
+        "policy_mean_N": 193.6378513477834,
+        "classical_mean_N": 55.97007211226202,
+        "rmse_N": 197.7108540568407,
+        "nrmse_pct_of_fmax": 45.45077104754959,
+        "pearson_r": 0.10950483143396787
+      },
+      "brachialis": {
+        "policy_mean_N": 214.08915936665585,
+        "classical_mean_N": 156.31532256764913,
+        "rmse_N": 221.71274130711512,
+        "nrmse_pct_of_fmax": 22.463296991602345,
+        "pearson_r": 0.6660429221787478
+      },
+      "triceps_long": {
+        "policy_mean_N": 183.5075448608994,
+        "classical_mean_N": 304.76544134646866,
+        "rmse_N": 225.93820205181927,
+        "nrmse_pct_of_fmax": 28.313057901230486,
+        "pearson_r": 0.6309773123765141
+      },
+      "triceps_lat": {
+        "policy_mean_N": 244.43910601392426,
+        "classical_mean_N": 61.74971649466431,
+        "rmse_N": 268.50200005271,
+        "nrmse_pct_of_fmax": 43.02916667511378,
+        "pearson_r": 0.45775628805104296
+      },
+      "triceps_med": {
+        "policy_mean_N": 360.84357023649704,
+        "classical_mean_N": 59.915809792183715,
+        "rmse_N": 366.6747191361804,
+        "nrmse_pct_of_fmax": 58.761974220541724,
+        "pearson_r": 0.4109606466744761
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 410.5141939036296,
+        "classical_mean_N": 404.9387721826057,
+        "rmse_N": 53.42513495017102,
+        "nrmse_pct_of_fmax": 4.678207964113049,
+        "pearson_r": 0.9902272359827449
+      },
+      "deltoid_med": {
+        "policy_mean_N": 500.3530703898956,
+        "classical_mean_N": 465.90152967360774,
+        "rmse_N": 72.03616524762646,
+        "nrmse_pct_of_fmax": 6.307895380702842,
+        "pearson_r": 0.9761908705766045
+      },
+      "deltoid_post": {
+        "policy_mean_N": 137.06305447005914,
+        "classical_mean_N": 66.04188746570844,
+        "rmse_N": 104.2720177103096,
+        "nrmse_pct_of_fmax": 40.25946629741683,
+        "pearson_r": 0.4243917909799185
+      }
+    }
+  },
+  "DDPG_seed0": {
+    "config": "DDPG",
+    "seed": 0,
+    "effort_ratio": 2.059343481516453,
+    "pattern_cosine": 0.8230634047091885,
+    "pearson_r": 0.6876359594996148,
+    "nrmse_pct": 32.380455199673115,
+    "residual": 4.2555800331666395e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 270.72728293897705,
+        "classical_mean_N": 196.3773863968028,
+        "rmse_N": 194.28145393471848,
+        "nrmse_pct_of_fmax": 31.134848386974117,
+        "pearson_r": 0.5838812945593078
+      },
+      "biceps_short": {
+        "policy_mean_N": 215.05912106346744,
+        "classical_mean_N": 91.51114369439382,
+        "rmse_N": 205.1116041592144,
+        "nrmse_pct_of_fmax": 47.15209291016423,
+        "pearson_r": 0.297759362184259
+      },
+      "brachialis": {
+        "policy_mean_N": 585.4501917767717,
+        "classical_mean_N": 336.04724680443286,
+        "rmse_N": 413.6390578740094,
+        "nrmse_pct_of_fmax": 41.908719136171165,
+        "pearson_r": 0.49712544141299225
+      },
+      "triceps_long": {
+        "policy_mean_N": 379.3291210418674,
+        "classical_mean_N": 337.50486576363886,
+        "rmse_N": 210.56238655222262,
+        "nrmse_pct_of_fmax": 26.38626397897527,
+        "pearson_r": 0.7206904602865741
+      },
+      "triceps_lat": {
+        "policy_mean_N": 310.9135102800125,
+        "classical_mean_N": 61.999690656460096,
+        "rmse_N": 332.0937891518938,
+        "nrmse_pct_of_fmax": 53.2201585179317,
+        "pearson_r": 0.37149697460905157
+      },
+      "triceps_med": {
+        "policy_mean_N": 238.0649070377789,
+        "classical_mean_N": 52.79321380749654,
+        "rmse_N": 295.7788514822573,
+        "nrmse_pct_of_fmax": 47.400456968310465,
+        "pearson_r": 0.29356104762486274
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 271.5216166208154,
+        "classical_mean_N": 267.74197284547085,
+        "rmse_N": 82.89685319121395,
+        "nrmse_pct_of_fmax": 7.258918843363745,
+        "pearson_r": 0.9652319938481321
+      },
+      "deltoid_med": {
+        "policy_mean_N": 381.0632711291697,
+        "classical_mean_N": 375.76634571136975,
+        "rmse_N": 79.39416642274414,
+        "nrmse_pct_of_fmax": 6.952203714776195,
+        "pearson_r": 0.9709790279555777
+      },
+      "deltoid_post": {
+        "policy_mean_N": 128.38000609509757,
+        "classical_mean_N": 101.59456106924253,
+        "rmse_N": 81.67618447032416,
+        "nrmse_pct_of_fmax": 31.53520635919852,
+        "pearson_r": 0.5793348929206368
+      }
+    }
+  },
+  "DDPG_seed1": {
+    "config": "DDPG",
+    "seed": 1,
+    "effort_ratio": 1.624080998726944,
+    "pattern_cosine": 0.8789125562286192,
+    "pearson_r": 0.8056152651043845,
+    "nrmse_pct": 24.025713838752807,
+    "residual": 4.146024006268745e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 304.8660896577008,
+        "classical_mean_N": 224.2141210748126,
+        "rmse_N": 166.04839501181002,
+        "nrmse_pct_of_fmax": 26.610319713431092,
+        "pearson_r": 0.7590265739292873
+      },
+      "biceps_short": {
+        "policy_mean_N": 175.98630784767485,
+        "classical_mean_N": 81.8132207748281,
+        "rmse_N": 160.05158631443587,
+        "nrmse_pct_of_fmax": 36.79346811826112,
+        "pearson_r": 0.5424524731438196
+      },
+      "brachialis": {
+        "policy_mean_N": 275.13632875006255,
+        "classical_mean_N": 235.0199209709789,
+        "rmse_N": 236.85477886811017,
+        "nrmse_pct_of_fmax": 23.997444667488367,
+        "pearson_r": 0.6944115683637063
+      },
+      "triceps_long": {
+        "policy_mean_N": 313.65000726996243,
+        "classical_mean_N": 315.5577134722859,
+        "rmse_N": 116.67435992205574,
+        "nrmse_pct_of_fmax": 14.620847108027034,
+        "pearson_r": 0.9078692886359159
+      },
+      "triceps_lat": {
+        "policy_mean_N": 259.20233643493873,
+        "classical_mean_N": 89.71031229908695,
+        "rmse_N": 282.38842602853043,
+        "nrmse_pct_of_fmax": 45.25455545329014,
+        "pearson_r": 0.480430513227518
+      },
+      "triceps_med": {
+        "policy_mean_N": 280.03084179837253,
+        "classical_mean_N": 133.99417183222195,
+        "rmse_N": 243.06655494725277,
+        "nrmse_pct_of_fmax": 38.952973549239225,
+        "pearson_r": 0.6065648719970608
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 261.747013223309,
+        "classical_mean_N": 259.22637021329143,
+        "rmse_N": 67.75496869230635,
+        "nrmse_pct_of_fmax": 5.933009517715091,
+        "pearson_r": 0.9762699098966896
+      },
+      "deltoid_med": {
+        "policy_mean_N": 423.68786679239236,
+        "classical_mean_N": 422.06786472964893,
+        "rmse_N": 107.0535005280376,
+        "nrmse_pct_of_fmax": 9.374211955169667,
+        "pearson_r": 0.9555401597982662
+      },
+      "deltoid_post": {
+        "policy_mean_N": 72.2193426764774,
+        "classical_mean_N": 50.43963626103729,
+        "rmse_N": 67.64071751489743,
+        "nrmse_pct_of_fmax": 26.116107148609046,
+        "pearson_r": 0.6711317791940258
+      }
+    }
+  },
+  "DDPG_seed2": {
+    "config": "DDPG",
+    "seed": 2,
+    "effort_ratio": 2.2975591584599235,
+    "pattern_cosine": 0.8106420333592962,
+    "pearson_r": 0.6778313358280688,
+    "nrmse_pct": 31.67248593292011,
+    "residual": 5.145583642111501e-15,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 278.28240401197723,
+        "classical_mean_N": 180.36213054358842,
+        "rmse_N": 183.9896469102931,
+        "nrmse_pct_of_fmax": 29.485520338187996,
+        "pearson_r": 0.7244472587832065
+      },
+      "biceps_short": {
+        "policy_mean_N": 221.87182723550757,
+        "classical_mean_N": 46.487789670573136,
+        "rmse_N": 230.3531738914835,
+        "nrmse_pct_of_fmax": 52.95475261873184,
+        "pearson_r": 0.2798505771387313
+      },
+      "brachialis": {
+        "policy_mean_N": 249.43671772727276,
+        "classical_mean_N": 188.56354691168156,
+        "rmse_N": 257.8499186651702,
+        "nrmse_pct_of_fmax": 26.12461182017935,
+        "pearson_r": 0.5577684531774502
+      },
+      "triceps_long": {
+        "policy_mean_N": 305.54503423961364,
+        "classical_mean_N": 322.60858530189745,
+        "rmse_N": 182.73758925074574,
+        "nrmse_pct_of_fmax": 22.89944727452954,
+        "pearson_r": 0.7793223324055278
+      },
+      "triceps_lat": {
+        "policy_mean_N": 351.8171077921651,
+        "classical_mean_N": 75.21213571367643,
+        "rmse_N": 368.21419271263824,
+        "nrmse_pct_of_fmax": 59.00868472958946,
+        "pearson_r": 0.1936474091265686
+      },
+      "triceps_med": {
+        "policy_mean_N": 364.18212151532344,
+        "classical_mean_N": 63.328623354766926,
+        "rmse_N": 383.67169981846786,
+        "nrmse_pct_of_fmax": 61.48584932988266,
+        "pearson_r": 0.11835579458714726
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 325.7872258080715,
+        "classical_mean_N": 329.6189585400587,
+        "rmse_N": 80.22979017757366,
+        "nrmse_pct_of_fmax": 7.025375672291914,
+        "pearson_r": 0.9732635642115188
+      },
+      "deltoid_med": {
+        "policy_mean_N": 466.71021552254143,
+        "classical_mean_N": 476.2714465882693,
+        "rmse_N": 79.50133688339828,
+        "nrmse_pct_of_fmax": 6.961588168423667,
+        "pearson_r": 0.9695689981032433
+      },
+      "deltoid_post": {
+        "policy_mean_N": 131.39876060088417,
+        "classical_mean_N": 84.09547936280326,
+        "rmse_N": 91.3709506697579,
+        "nrmse_pct_of_fmax": 35.278359331952856,
+        "pearson_r": 0.6226481117847215
+      }
+    }
+  },
+  "PPO_seed0": {
+    "config": "PPO",
+    "seed": 0,
+    "effort_ratio": 1.3392486017079182,
+    "pattern_cosine": 0.8693710328915966,
+    "pearson_r": 0.875837823044604,
+    "nrmse_pct": 7.113175265254637,
+    "residual": 4.448755165945886e-16,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 23.130772565800253,
+        "classical_mean_N": 36.990517196795274,
+        "rmse_N": 29.26753031460171,
+        "nrmse_pct_of_fmax": 4.690309345288735,
+        "pearson_r": 0.8786908313068146
+      },
+      "biceps_short": {
+        "policy_mean_N": 72.52027776094718,
+        "classical_mean_N": 56.38245468862596,
+        "rmse_N": 51.97646936556487,
+        "nrmse_pct_of_fmax": 11.94861364725629,
+        "pearson_r": 0.4220614104575861
+      },
+      "brachialis": {
+        "policy_mean_N": 313.2871380849844,
+        "classical_mean_N": 238.20353208482942,
+        "rmse_N": 124.2269783502976,
+        "nrmse_pct_of_fmax": 12.586319994964295,
+        "pearson_r": 0.6810387077408631
+      },
+      "triceps_long": {
+        "policy_mean_N": 0.9829125546148336,
+        "classical_mean_N": 20.95443525086392,
+        "rmse_N": 35.757258889389256,
+        "nrmse_pct_of_fmax": 4.480859509948528,
+        "pearson_r": 0.11369857711117018
+      },
+      "triceps_lat": {
+        "policy_mean_N": 34.98790815790161,
+        "classical_mean_N": 0.5034864674161363,
+        "rmse_N": 62.62040366816931,
+        "nrmse_pct_of_fmax": 10.035321100668158,
+        "pearson_r": 0.0334152653066662
+      },
+      "triceps_med": {
+        "policy_mean_N": 0.06757095443116337,
+        "classical_mean_N": 4.42660969665568,
+        "rmse_N": 12.46009401290111,
+        "nrmse_pct_of_fmax": 1.9968099379649213,
+        "pearson_r": -0.04156215289834123
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 0.0,
+        "classical_mean_N": 1.554352419256662,
+        "rmse_N": 8.050763438146017,
+        "nrmse_pct_of_fmax": 0.7049705287343273,
+        "pearson_r": NaN
+      },
+      "deltoid_med": {
+        "policy_mean_N": 77.35584533863886,
+        "classical_mean_N": 72.90292838361306,
+        "rmse_N": 14.482208140707442,
+        "nrmse_pct_of_fmax": 1.2681443205523153,
+        "pearson_r": 0.9884923455586014
+      },
+      "deltoid_post": {
+        "policy_mean_N": 45.75619091510806,
+        "classical_mean_N": 40.6148273713085,
+        "rmse_N": 11.371579623314885,
+        "nrmse_pct_of_fmax": 4.39057128313316,
+        "pearson_r": 0.9515171237401414
+      }
+    }
+  },
+  "PPO_seed1": {
+    "config": "PPO",
+    "seed": 1,
+    "effort_ratio": 1.2171687779905767,
+    "pattern_cosine": 0.9081071794859108,
+    "pearson_r": 0.9446649848275573,
+    "nrmse_pct": 2.9555711508247784,
+    "residual": 6.590000919672402e-16,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 72.75208154881146,
+        "classical_mean_N": 69.04755253879986,
+        "rmse_N": 12.9686166743431,
+        "nrmse_pct_of_fmax": 2.0783039542216506,
+        "pearson_r": 0.9534493530393053
+      },
+      "biceps_short": {
+        "policy_mean_N": 1.8306599542419222,
+        "classical_mean_N": 3.5418559168113317,
+        "rmse_N": 8.463785004740911,
+        "nrmse_pct_of_fmax": 1.9456977022392898,
+        "pearson_r": 0.429663171442634
+      },
+      "brachialis": {
+        "policy_mean_N": 28.651853506162997,
+        "classical_mean_N": 20.978850986327533,
+        "rmse_N": 27.642687885770233,
+        "nrmse_pct_of_fmax": 2.8006775973424753,
+        "pearson_r": 0.8990993437165877
+      },
+      "triceps_long": {
+        "policy_mean_N": 6.988289563022821,
+        "classical_mean_N": 4.952738763134904,
+        "rmse_N": 9.588755930202256,
+        "nrmse_pct_of_fmax": 1.2015984874940169,
+        "pearson_r": 0.796539398099063
+      },
+      "triceps_lat": {
+        "policy_mean_N": 29.13800834941517,
+        "classical_mean_N": 12.439027352967276,
+        "rmse_N": 50.112114315072716,
+        "nrmse_pct_of_fmax": 8.030787550492422,
+        "pearson_r": 0.3954820982674884
+      },
+      "triceps_med": {
+        "policy_mean_N": 24.780305064054627,
+        "classical_mean_N": 16.4863773389178,
+        "rmse_N": 24.793052558570686,
+        "nrmse_pct_of_fmax": 3.9732456023350458,
+        "pearson_r": 0.7535785200652728
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 133.67095730116074,
+        "classical_mean_N": 134.89977701057904,
+        "rmse_N": 4.994766072547117,
+        "nrmse_pct_of_fmax": 0.4373700588920418,
+        "pearson_r": 0.9990988554559025
+      },
+      "deltoid_med": {
+        "policy_mean_N": 14.8460232078167,
+        "classical_mean_N": 14.876596229186001,
+        "rmse_N": 3.466455074017651,
+        "nrmse_pct_of_fmax": 0.30354247583341953,
+        "pearson_r": 0.9971385253398118
+      },
+      "deltoid_post": {
+        "policy_mean_N": 15.004765966926804,
+        "classical_mean_N": 15.950498637085216,
+        "rmse_N": 3.7587310653672854,
+        "nrmse_pct_of_fmax": 1.4512475155858244,
+        "pearson_r": 0.9755015634402047
+      }
+    }
+  },
+  "PPO_seed2": {
+    "config": "PPO",
+    "seed": 2,
+    "effort_ratio": 1.0633601030068758,
+    "pattern_cosine": 0.9469578433613965,
+    "pearson_r": 0.9721004445772913,
+    "nrmse_pct": 5.437132715593996,
+    "residual": 6.877150990828663e-16,
+    "per_muscle": {
+      "biceps_long": {
+        "policy_mean_N": 223.76765546616957,
+        "classical_mean_N": 195.70967238279553,
+        "rmse_N": 54.72716954479136,
+        "nrmse_pct_of_fmax": 8.770379734742205,
+        "pearson_r": 0.8459158930861154
+      },
+      "biceps_short": {
+        "policy_mean_N": 22.110530622807886,
+        "classical_mean_N": 31.733818252252707,
+        "rmse_N": 27.99486437328873,
+        "nrmse_pct_of_fmax": 6.435601005353732,
+        "pearson_r": 0.7235625002168129
+      },
+      "brachialis": {
+        "policy_mean_N": 423.5969988676718,
+        "classical_mean_N": 399.83859133386864,
+        "rmse_N": 78.24371536921804,
+        "nrmse_pct_of_fmax": 7.927428102251067,
+        "pearson_r": 0.9368419169388306
+      },
+      "triceps_long": {
+        "policy_mean_N": 283.9980784090854,
+        "classical_mean_N": 250.24373264280106,
+        "rmse_N": 59.68598614023183,
+        "nrmse_pct_of_fmax": 7.479446884740831,
+        "pearson_r": 0.9643307005519048
+      },
+      "triceps_lat": {
+        "policy_mean_N": 0.0015700295034198413,
+        "classical_mean_N": 0.14772646205996767,
+        "rmse_N": 1.1280417338943407,
+        "nrmse_pct_of_fmax": 0.18077591889332384,
+        "pearson_r": -0.007162371083102232
+      },
+      "triceps_med": {
+        "policy_mean_N": 37.09994736031267,
+        "classical_mean_N": 33.61712216937085,
+        "rmse_N": 20.286521823141918,
+        "nrmse_pct_of_fmax": 3.251045163965051,
+        "pearson_r": 0.8905673406338798
+      },
+      "deltoid_ant": {
+        "policy_mean_N": 0.4334368278758199,
+        "classical_mean_N": 5.091072943333784,
+        "rmse_N": 9.662142574268398,
+        "nrmse_pct_of_fmax": 0.8460720292704376,
+        "pearson_r": 0.4931423206254708
+      },
+      "deltoid_med": {
+        "policy_mean_N": 1.206317139266164,
+        "classical_mean_N": 4.1633635089422585,
+        "rmse_N": 12.900192220269131,
+        "nrmse_pct_of_fmax": 1.129614029795896,
+        "pearson_r": 0.5408933947845622
+      },
+      "deltoid_post": {
+        "policy_mean_N": 18.754191196469755,
+        "classical_mean_N": 29.254448786329412,
+        "rmse_N": 18.014014645071544,
+        "nrmse_pct_of_fmax": 6.9552180096801335,
+        "pearson_r": 0.7294553097223514
+      }
+    }
+  }
+}

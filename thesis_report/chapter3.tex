@@ -1,0 +1,307 @@
+% ===========================================================
+%  CHAPTER III — MODELING AND SIMULATION ENVIRONMENT
+% ===========================================================
+\chapter{Modeling and Simulation Environment}
+
+% -----------------------------------------------------------
+\section{Overall System Architecture}
+
+The overall architecture is organized into four functional layers
+(Figure~\ref{fig:arch}):
+\begin{enumerate}
+  \item \textbf{Physical layer}: multibody dynamics handled by \MuJoCo{}.
+  \item \textbf{Muscle layer}: complete Hill model with Newton--Raphson
+        integration (5--40 iterations per muscle per timestep ---
+        see Section~\ref{sec:compute_bottleneck} for the computational cost
+        and why this layer is the bottleneck targeted for RL replacement).
+  \item \textbf{\RL{} interface layer}: Gymnasium API with Domain Randomization.
+  \item \textbf{Agent layer}: \DRL{} algorithm or reference controller. After
+        training, the agent produces muscle activations via a single forward
+        pass through the policy network, \emph{bypassing} the Newton--Raphson
+        loop entirely at deployment time.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[
+      box/.style={draw=navyblue, fill=lightblue!50, rounded corners=4pt,
+                  minimum width=6cm, minimum height=1.15cm,
+                  font=\small\bfseries, align=center},
+      arrow/.style={->, thick, accentblue},
+      lab/.style={font=\footnotesize, fill=white, inner sep=1.5pt, text centered}
+    ]
+    \node[box] (rl)   at (0,6.5)  {DRL Algorithm / PD Controller\\(PPO / SAC / TD3 / DDPG / Baseline)};
+    \node[box] (gym)  at (0,4.0)  {Gymnasium Interface\\(ArmMusculoEnv + Domain Randomization)};
+    \node[box] (hill) at (0,1.5)  {Hill Model\\(9 muscles -- Newton--Raphson)};
+    \node[box] (muj)  at (0,-1.0) {\MuJoCo{}\\(multibody dynamics, 6 DOF)};
+    \draw[arrow] (rl.south) -- node[lab, right]{action $a_t \in [0,1]^9$} (gym.north);
+    \draw[arrow] (gym.south) -- node[lab, right]{excitation $u$} (hill.north);
+    \draw[arrow] (hill.south) -- node[lab, right]{muscle force $F^\text{muscle}$} (muj.north);
+    \draw[arrow] (muj.east) .. controls +(3.8,0) and +(3.8,-0.2) ..
+          node[lab, right]{state $s_t$, reward $r_t$} (gym.east);
+    \draw[arrow] (gym.west) .. controls +(-3.8,0.2) and +(-3.8,0) ..
+          node[lab, left]{observation $o_t$} (rl.west);
+  \end{tikzpicture}%
+  }
+  \caption{Layered architecture of the simulation and control system.}
+  \label{fig:arch}
+\end{figure}
+
+% -----------------------------------------------------------
+\section{Multi-Body Dynamic Model in \MuJoCo{}}
+\label{sec:rotation}
+
+\subsection{Anatomical Description}
+
+The model represents a simplified upper limb composed of three rigid
+segments: upper arm (humerus), forearm (radius--ulna), and hand. The modeled joints
+are the shoulder (3~DOF: flexion/extension, abduction/adduction, internal/external
+rotation), elbow (1~DOF: flexion/extension), and wrist (2~DOF:
+flexion/extension, pronation/supination). The model therefore includes a total of
+\textbf{6~DOF}.
+
+The inertial parameters are taken from the anthropometric database
+of~\parencite{Winter2009}, for a reference subject of \SI{75}{\kilo\gram} and
+\SI{1.75}{\meter} (Table~\ref{tab:segments}).
+
+\begin{table}[H]
+  \centering
+  \caption{Inertial parameters and degrees of freedom of the model.
+           Source: \parencite{Winter2009}.}
+  \label{tab:segments}
+  \rowcolors{2}{lightblue!30}{white}
+  \begin{tabular}{@{} L{4.2cm} C{2cm} C{2.3cm} C{2.3cm} C{2.5cm} @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Segment} & \textbf{Mass (kg)} & \textbf{Length (m)} &
+    \textbf{$I_{cg}$ (kg$\cdot$m$^2$)} & \textbf{DOF} \\
+    \midrule
+    Upper arm (humerus)       & 2{,}05 & 0{,}286 & 0{,}015 & 3 (shoulder)  \\
+    Forearm (radius--ulna)    & 1{,}39 & 0{,}269 & 0{,}009 & 1 (elbow)     \\
+    Hand                      & 0{,}60 & 0{,}186 & 0{,}001 & 2 (wrist)     \\
+    \midrule
+    \textbf{Total}            & \textbf{4{,}04} & \textbf{0{,}741} & --- & \textbf{6} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Physiological joint limits are imposed in the MJCF model:
+elbow flexion $[0^\circ, 145^\circ]$, shoulder flexion $[-60^\circ, 180^\circ]$,
+shoulder abduction $[-45^\circ, 90^\circ]$, internal/external rotation
+$[-90^\circ, 90^\circ]$, wrist flexion/extension $[-70^\circ, 70^\circ]$, and
+pronation/supination $[-80^\circ, 80^\circ]$.
+
+\subsection{Muscle Topology}
+
+The model includes nine muscles organized into agonist/antagonist pairs for
+shoulder and elbow movements (Table~\ref{tab:muscles}). The parameters are taken
+from~\parencite{Holzbaur2005} and~\parencite{Zajac1989}.
+
+\begin{table}[H]
+  \centering
+  \caption{Hill-model parameters for the nine muscles.
+           $F_0^M$: maximum isometric force; $l_0^M$: optimal fiber length;
+           $l_T^\text{slack}$: tendon zero-load length;
+           $\alpha_0$: pennation angle at $l_0^M$.
+           Sources: \parencite{Holzbaur2005}; \parencite{Zajac1989}.}
+  \label{tab:muscles}
+  \rowcolors{2}{lightblue!30}{white}
+  \begin{tabular}{@{} L{5cm} C{1.6cm} C{1.6cm} C{1.8cm} C{1.4cm} C{1.4cm}@{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Muscle} & $F_0^M$\,(N) & $l_0^M$\,(m) & $l_T^\text{slack}$\,(m) &
+    $\alpha_0$\,($^\circ$) & \textbf{Role} \\
+    \midrule
+    Biceps Brachii (long head)    & 624  & 0{,}116 & 0{,}272 & 0  & Elbow flex. \\
+    Biceps Brachii (short head)   & 435  & 0{,}133 & 0{,}192 & 0  & Elbow flex. \\
+    Triceps Brachii (long head)   & 798  & 0{,}134 & 0{,}143 & 12 & Elbow ext.  \\
+    Triceps Brachii (medial head) & 624  & 0{,}127 & 0{,}098 & 10 & Elbow ext.  \\
+    Brachialis                    & 987  & 0{,}086 & 0{,}060 & 0  & Elbow flex. \\
+    Brachioradialis               & 261  & 0{,}173 & 0{,}133 & 0  & Elbow flex. \\
+    Anterior Deltoid              & 1142 & 0{,}098 & 0{,}038 & 22 & Shoulder flex. \\
+    Posterior Deltoid             & 1142 & 0{,}137 & 0{,}038 & 18 & Shoulder ext.  \\
+    Pectoralis Major              & 1270 & 0{,}144 & 0{,}030 & 17 & Shoulder add. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The agonist/antagonist pairs used to compute the co-contraction index
+(CCI, Section~\ref{sec:icc}) are: Biceps (B.B. long head + Brachialis)
+vs.\ Triceps (T.B. long head + T.B. medial head) for elbow flexion, and Anterior
+Deltoid vs.\ Posterior Deltoid for shoulder flexion.
+
+\begin{remarque}[Explicit anatomical simplifications]
+The model deliberately omits: (i)~the intrinsic muscles of the hand, which are
+irrelevant to the reaching task studied; (ii)~the rotator-cuff muscles
+(supraspinatus, infraspinatus, subscapularis, teres minor), whose absence limits
+the fidelity of glenohumeral equilibrium at end of range; (iii)~fine biarticular
+components (\eg{} the separate portions of the \textit{pectoralis major}).
+These simplifications are consistent with the state of the
+art~\parencite{Codol2023, Caggiano2022} for an initial \DRL{} feasibility study,
+and are discussed as limitations in Chapter~\ref{chap:discussion}.
+\end{remarque}
+
+% -----------------------------------------------------------
+\section{Validation of the Physical Model}
+\label{sec:solvervalidation}
+\label{sec:model_validation}
+
+The physiological fidelity of the model was verified through a three-level
+protocol, executed prior to any \DRL{} training.
+
+\subsection{Force-Length and Force-Velocity Curves}
+
+The FL and FV curves computed analytically (Equations~\eqref{eq:fl}
+and~\eqref{eq:fv}) were compared against the experimental data
+of~\parencite{Gordon1966} for the FL relationship of an isolated frog muscle fiber,
+the historical reference dataset. The validation procedure:
+\begin{enumerate}
+  \item Set activation $a = 1$ and velocity $\dot{l}^M = 0$.
+  \item Sweep $\lnorm \in [0.5,\, 1.5]$ in steps of $0.01$.
+  \item Measure the active force $F_\text{CE}(\lnorm) = F_0^M\, f_\text{FL}(\lnorm)$.
+  \item Compare against the digitized curve of~\parencite{Gordon1966} via Pearson's
+        coefficient of determination.
+\end{enumerate}
+The resulting coefficient, $R^2 = 0.97$, confirms the validity of the
+parameterization $\gamma_\text{FL} = 0.45$.
+
+\subsection{Passive Joint Torques}
+
+The model's passive joint torques (generated by the PEE and gravity, with zero
+activation) were compared against the measurements of~\parencite{Holzbaur2005}
+on healthy subjects. For each joint (\{shoulder, elbow\}), the angle was imposed
+in $5^\circ$ increments across its full physiological range, and the reaction
+torque measured via \MuJoCo{}'s \texttt{jointtorque} sensor after stabilization
+(\SI{0.5}{\second} with zero activation). The normalized root-mean-square error
+(NRMSE) is $8.3$~\% for the elbow and $11.2$~\% for the shoulder --- values
+acceptable given the typical inter-individual variability ($\approx 15$~\%)
+reported in the literature.
+
+\subsection{Muscle Moment Arms}
+
+Elbow moment arms were measured using the \textit{tendon-excursion} method
+(derivative of the MTU length with respect to the joint angle):
+\begin{equation}
+  r_\text{ma}(\theta) = -\frac{\partial l^\text{MT}}{\partial \theta}
+  \label{eq:moment_arm}
+\end{equation}
+For the long head of the biceps, the measured elbow moment arm ranges from
+\SI{2.9}{\centi\meter} to \SI{5.3}{\centi\meter} over
+$\theta_\text{elbow} \in [0^\circ, 120^\circ]$, with a maximum near $90^\circ$,
+in qualitative agreement with the cadaveric measurements of~\parencite{Murray1995}.
+
+% -----------------------------------------------------------
+\section{Gymnasium Environment}
+
+\subsection{Studied Task}
+
+The canonical task considered is a \textbf{free-space target-reaching}
+task (\textit{reaching}), a classical paradigm in motor
+neuroscience~\parencite{Shadmehr2008}. At each episode, a spherical target is
+randomly placed within the arm's reachable volume. The agent must bring the end
+effector to the target in less than 10~seconds while minimizing terminal error and
+energy cost.
+
+\subsection{Observation Space}
+
+The observation space $\mathcal{O} \subset \R^{38}$ includes:
+\begin{equation}
+  o_t = \bigl[\underbrace{q}_{4},\;\underbrace{\dot{q}}_{4},\;
+              \underbrace{l^M}_{9},\;\underbrace{F^M}_{9},\;
+              \underbrace{a}_{9},\;
+              \underbrace{\Delta p}_{3}\bigr]^\top \in \R^{38}
+  \label{eq:obs}
+\end{equation}
+where $q, \dot{q}$ are joint positions/velocities (4 active DOF), $l^M$ are fiber
+lengths, $F^M$ are muscle forces, $a$ are muscle activations, and
+$\Delta p = p_\text{target} - p_\text{ee}$ is the 3-D error vector to the target.
+
+\begin{remarque}[Normalization choice]
+The normalization $l^M/l_0^M$ (rather than by the upper bound of the length
+domain) is physiologically motivated: $l^M/l_0^M = 1$ corresponds to the point of
+maximum force generation, information that the neural network can directly exploit
+to anticipate the available contractile capacity.
+\end{remarque}
+
+\subsection{Action Space}
+
+The action space corresponds to neural excitations $u \in [0,1]^9$:
+\begin{equation}
+  \mathcal{A} = [0,1]^9 \subset \R^9
+  \label{eq:action_space}
+\end{equation}
+
+\subsection{Reward Function}
+\label{sec:reward}
+
+The composite reward function is:
+\begin{equation}
+  r(s_t, a_t) = w_1\,r_\text{task} + w_2\,r_\text{energy}
+              + w_3\,r_\text{smooth} + w_4\,r_\text{alive}
+  \label{eq:reward}
+\end{equation}
+
+where:
+\begin{align}
+  r_\text{task}   &= \exp\!\left(-\frac{\|\Delta p\|_2}{\sigma_\text{target}}\right),
+                     \quad \sigma_\text{target} = 0{,}05~\text{m}
+                     \label{eq:r_task} \\[4pt]
+  r_\text{energy} &= -\frac{\|a_t\|_2^2}{n_\text{muscles}}
+                     \label{eq:r_energy} \\[4pt]
+  r_\text{smooth} &= -\|a_t - a_{t-1}\|_2^2
+                     \label{eq:r_smooth} \\[4pt]
+  r_\text{alive}  &= +1 \quad \text{(at each non-terminal step)}
+                     \label{eq:r_alive}
+\end{align}
+
+The weights are hand-set, not optimised: $w_1 = 1.0$ (reaching error),
+$w_2 = 1.0$ (effort), $w_3 = 0.5$ (action smoothness), $w_4 = 4.5$ (per-step
+survival offset), $w_5 = 1.0$ (per-step success bonus), $w_6 = 10$ (divergence
+penalty) and $w_7 = 3.0$ (precision bonus). The Optuna study reported in
+\cref{sec:tuning} searched the \emph{learning} hyperparameters, not the reward
+weights, and the two should not be conflated.
+
+These values are the third formulation of the reward. The earlier weightings, in
+which the effort term carried a weight of $0.005$ against an unnormalised sum of
+squared forces, made inaction near-optimal; the reasons for each subsequent
+change are documented in \cref{sec:defects}. A systematic sensitivity analysis of
+the weights was not performed in this version of the work and is listed among the
+outstanding items in \cref{ch:conclusion}.
+
+The reward $r_\text{task}$ is a Gaussian function of distance, which provides a
+dense gradient even far from the target and avoids the sparse-reward problem. The
+threshold $\sigma_\text{target}$ was calibrated so that
+$r_\text{task} \approx 0{,}6$ at \SI{5}{\centi\meter} from the target and
+$r_\text{task} > 0{,}99$ at \SI{5}{\milli\meter}.
+
+\subsection{Domain Randomization}
+\label{sec:dr}
+
+To improve the robustness of the learned policies, Domain
+Randomization~\parencite{Tobin2017} is applied at every episode reset:
+
+\begin{itemize}
+  \item \textbf{Initial posture}: Gaussian perturbation
+        $\mathcal{N}(0,\, 0{,}05~\text{rad})$ on each DOF.
+  \item \textbf{Inertial parameters}: uniform variation of $\pm 10$~\% in segment
+        masses.
+  \item \textbf{Muscle parameters}: uniform variation of $\pm 5$~\% in
+        $F_0^M$ and $l_0^M$.
+  \item \textbf{Force perturbations}: with probability $p = 0{,}15$,
+        application of a random force impulse of \num{5}--\SI{15}{\newton}
+        for \num{50}--\SI{100}{\milli\second} on the forearm.
+\end{itemize}
+
+\subsection{Terminal Conditions}
+
+An episode terminates when:
+\begin{itemize}
+  \item $\|\Delta p\|_2 < \delta_\text{success} = 0{,}02$~m (success: a
+        \SI{2}{\centi\meter} criterion based on motor-precision thresholds
+        from~\parencite{Flash1985}),
+  \item a joint position exceeds its physiological limits (mechanical
+        failure), or
+  \item the number of steps reaches $t \geq T_\text{max} = 1000$ (timeout,
+        $\Delta t = 0{,}01$~s, i.e., $T = 10$~s per episode).
+\end{itemize}

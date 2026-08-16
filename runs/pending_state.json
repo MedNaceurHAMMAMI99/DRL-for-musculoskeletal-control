@@ -1,0 +1,89 @@
+{
+  "done": [
+    "conventional",
+    "replication"
+  ],
+  "results": {
+    "conventional": {
+      "PD": {
+        "mean_final_error": 0.19845269578879232,
+        "mean_min_error": 0.17382822041012538,
+        "effort_ratio": 1.333956736812403,
+        "mean_energy": 102876.47919215243,
+        "reach_5cm": 0.12,
+        "reach_10cm": 0.28,
+        "pearson_r": 0.9154868498489188
+      },
+      "gains": {
+        "kp": 60.0,
+        "kd": 25.0
+      }
+    },
+    "replication": {
+      "seed1": {
+        "mean_final_error": 0.10189274036714675,
+        "mean_min_error": 0.07424440934379445,
+        "success_rate": 0.2,
+        "reach_5cm": 0.3,
+        "reach_10cm": 0.62,
+        "touch_2cm": 0.28,
+        "mean_energy": 313992.60460114555,
+        "blow_up_rate": 0.0,
+        "effort_ratio": 1.9115537204099942,
+        "pearson_r": 0.8230069675686843,
+        "cosine": 0.8395950801805818,
+        "cosine_null": 0.39114026591085965
+      },
+      "seed2": {
+        "mean_final_error": 0.09884888840436429,
+        "mean_min_error": 0.07284001461066193,
+        "success_rate": 0.0,
+        "reach_5cm": 0.36,
+        "reach_10cm": 0.64,
+        "touch_2cm": 0.22,
+        "mean_energy": 483372.7252130067,
+        "blow_up_rate": 0.0,
+        "effort_ratio": 2.1162168056204345,
+        "pearson_r": 0.7593336364465655,
+        "cosine": 0.7664004395008499,
+        "cosine_null": 0.3842598861119884
+      },
+      "seed3": {
+        "mean_final_error": 0.10695775732399415,
+        "mean_min_error": 0.07604737776682664,
+        "success_rate": 0.08,
+        "reach_5cm": 0.24,
+        "reach_10cm": 0.56,
+        "touch_2cm": 0.2,
+        "mean_energy": 273240.8257949918,
+        "blow_up_rate": 0.0,
+        "effort_ratio": 1.855849865727851,
+        "pearson_r": 0.8245317372166882,
+        "cosine": 0.8276113127432076,
+        "cosine_null": 0.34850918719042256
+      },
+      "seed4": {
+        "mean_final_error": 0.1022985745797796,
+        "mean_min_error": 0.06755994015803225,
+        "success_rate": 0.06,
+        "reach_5cm": 0.34,
+        "reach_10cm": 0.6,
+        "touch_2cm": 0.32,
+        "mean_energy": 287830.9021852567,
+        "blow_up_rate": 0.0,
+        "effort_ratio": 1.9743749078363442,
+        "pearson_r": 0.7668666401317824,
+        "cosine": 0.7615612614456482,
+        "cosine_null": 0.3634732281730652
+      }
+    },
+    "ablation": {
+      "A_entropy_only_seed0": {
+        "arm": "A_entropy_only",
+        "seed": 0,
+        "mean_final_error": 0.26787645157302614,
+        "mean_min_error": 0.15268832881326289
+      }
+    }
+  }
+}

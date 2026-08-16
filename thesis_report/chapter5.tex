@@ -1,0 +1,373 @@
+% ===========================================================
+%  CHAPTER V — IMPLEMENTATION AND EXPERIMENTAL METHODOLOGY
+% ===========================================================
+\chapter{Implementation and Experimental Methodology}
+\label{chap:impl}
+
+% -----------------------------------------------------------
+\section{Technology Stack}
+
+\begin{table}[H]
+  \centering
+  \caption{Software actually used, at the versions the reported results were
+           produced with.}
+  \label{tab:stack}
+  \rowcolors{2}{lightblue!30}{white}
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabularx}{\textwidth}{@{} L{3.5cm} C{1.9cm} X @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Library} & \textbf{Version} & \textbf{Usage} \\
+    \midrule
+    Python             & 3.12.10 & \\
+    MuJoCo             & 3.7.0   & Physics simulation engine~\parencite{Todorov2012} \\
+    Gymnasium          & 1.2.3   & Standard \RL{} environment interface \\
+    Stable-Baselines3  & 2.8.0   & DDPG/TD3/SAC/PPO implementation~\parencite{Raffin2021} \\
+    PyTorch            & 2.11.0  & Deep learning backend (CPU build) \\
+    NumPy              & 2.2.6   & Numerical computation \\
+    SciPy              & 1.13.0  & Static-optimisation QP (SLSQP), NNLS \\
+    scikit-learn       & 1.4.2   & NMF decomposition (synergies) \\
+    Optuna             & 4.9.0   & Bayesian hyperparameter optimisation~\parencite{Akiba2019} \\
+    Matplotlib         & 3.8.4   & Figures \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The Stable-Baselines3 version is material rather than incidental. The replay-ratio
+behaviour documented in \cref{sec:replaybug} --- that one rollout iteration over
+an $n$-environment vector is followed by \texttt{gradient\_steps} updates, not
+$n$ of them --- is a property of this implementation, and the defect it caused was
+identified by measuring that library's behaviour directly rather than by reading
+its documentation.
+
+TensorBoard logging is deliberately disabled: its asynchronous event-file writer
+raced with the cloud-synchronisation client on the working directory and crashed
+training. Loss histories are read from the in-memory logger instead, so no
+diagnostic information is lost.
+
+% -----------------------------------------------------------
+\section{Hyperparameters}
+
+\subsection{Optimisation Procedure}
+
+A single Optuna study was run, on \SAC only. It used TPE sampling with a
+\textit{MedianPruner} over \textbf{16 trials of $10^5$ steps} each, on a training
+seed fixed at 0 so that trials are comparable, with sampler seeds differing per
+worker. Thirteen trials completed and three were pruned. Trials were scored by
+mean final reaching error over 20 deterministic episodes on an evaluation
+environment with domain randomisation disabled --- that is, under the protocol the
+thesis reports, not the one training uses.
+
+Three properties of this study are worth stating because they differ from what a
+reader might assume.
+
+\textbf{The search space excludes the network architecture.} The reported policy
+footprint --- 393\,750 parameters, and the inference latency of
+\cref{sec:compute_efficiency} --- is measured for the $[256, 256]$ architecture.
+Searching the architecture would have invalidated those figures silently.
+
+\textbf{The replay ratio is fixed, not searched.} Expressing it as a raw
+\texttt{gradient\_steps} value would have allowed the sampler to re-enter the
+under-training regime that \cref{sec:replaybug} identifies as a defect, and would
+have made trials incomparable with the pilot runs. It is held at twice the
+environment count throughout.
+
+\textbf{The reward weights were not searched.} They are hand-set
+(\cref{sec:reward}); only learning hyperparameters were optimised. Earlier
+versions of this work described the reward weights as Optuna-optimised over 100
+trials, which did not occur.
+
+\begin{table}[H]
+  \centering
+  \caption{Optuna search space. \SAC only; 16 trials of $10^5$ steps.}
+  \label{tab:optuna_space}
+  \rowcolors{2}{lightblue!30}{white}
+  \small
+  \begin{tabularx}{\textwidth}{@{} L{4.2cm} L{4.2cm} X @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Hyperparameter} & \textbf{Domain} & \textbf{Distribution} \\
+    \midrule
+    Learning rate        & $[5\times10^{-5},\, 10^{-3}]$   & Log-uniform \\
+    $\gamma$             & $[0.95,\, 0.999]$               & Uniform \\
+    Batch size           & $\{128, 256, 512\}$             & Categorical \\
+    $\tau$ (Polyak)      & $[10^{-3},\, 2\times 10^{-2}]$  & Log-uniform \\
+    Target entropy       & $[-27,\, -4.5]$                 & Uniform \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Hyperparameters used. Only the \SAC ``tuned'' column was optimised;
+           every other configuration uses library defaults. This asymmetry is a
+           limitation of the comparison, discussed in \cref{ch:conclusion}.}
+  \label{tab:hparams}
+  \rowcolors{2}{lightblue!30}{white}
+  \small
+  \begin{tabular}{@{} L{3.6cm} C{2.2cm} C{2.2cm} C{1.8cm} C{1.8cm} C{1.8cm} @{}}
+    \toprule
+    \rowcolor{lightblue}
+    \textbf{Hyperparameter} & \textbf{SAC tuned} & \textbf{SAC def.} & \textbf{TD3} & \textbf{DDPG} & \textbf{PPO} \\
+    \midrule
+    Learning rate      & $4.40\times10^{-4}$ & $3\times10^{-4}$ & $3\times10^{-4}$ & $3\times10^{-4}$ & $3\times10^{-4}$ \\
+    Batch size         & 128       & 512       & 256    & 256    & 64 \\
+    Buffer size        & $3\times10^5$ & $3\times10^5$ & $3\times10^5$ & $3\times10^5$ & --- \\
+    $\gamma$           & 0.957     & 0.99      & 0.99   & 0.99   & 0.99 \\
+    $\tau$ (Polyak)    & 0.0188    & 0.005     & 0.005  & 0.005  & --- \\
+    Target entropy     & $-19.6$   & auto ($-9$) & ---  & ---    & --- \\
+    Gradient steps     & 8         & 8         & 8      & 8      & --- \\
+    Learning starts    & 4\,000    & 4\,000    & 4\,000 & 4\,000 & --- \\
+    Action noise $\sigma$ & ---    & ---       & 0.1    & 0.1    & --- \\
+    Policy delay       & ---       & ---       & 2      & ---    & --- \\
+    n\_steps           & ---       & ---       & ---    & ---    & 2048 \\
+    n\_epochs          & ---       & ---       & ---    & ---    & 10 \\
+    $\lambda$ (GAE)    & ---       & ---       & ---    & ---    & 0.95 \\
+    Clip $\varepsilon$ & ---       & ---       & ---    & ---    & 0.20 \\
+    \midrule
+    Network            & \multicolumn{5}{c}{$[256, 256]$, shared across all configurations} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The gradient-steps value of 8 corresponds to a replay ratio of approximately
+1.87 updates per environment step, given four parallel environments. It is
+applied uniformly to every off-policy configuration, so it is not a confound
+between them; \PPO is on-policy and has no equivalent parameter.
+
+% -----------------------------------------------------------
+\section{Experimental Protocol}
+
+\subsection{Training and Evaluation}
+
+Two training budgets are used. The algorithm comparison of
+\cref{sec:benchmark} trains five configurations for $10^5$ steps with
+\textbf{three seeds} each ($\{0,1,2\}$). The best configuration is additionally
+retrained from initialisation for $3 \times 10^5$ steps, single seed, and it is
+this run that the force analysis of \cref{ch:forces} examines.
+
+The seed count is a compute constraint, not a methodological choice, and it is
+the principal limitation of this work.
+\textcite{Henderson2018} and \textcite{Agarwal2021} recommend ten seeds or more
+precisely because estimation variance at three is large enough to make algorithm
+comparisons inconclusive. That recommendation is not met here. The consequence is
+stated explicitly wherever a comparison is reported: no significance test is
+performed anywhere in this thesis, and differences smaller than the observed
+seed-to-seed spread are reported as not supporting an ordering. Reaching ten
+seeds at the corrected replay ratio (\cref{sec:replaybug}) would require
+approximately 148~hours on the available hardware.
+
+During training a learning curve is recorded every $25\,000$ or $50\,000$ steps
+over five deterministic episodes. This is a monitoring signal only; it is
+deliberately cheap, it is noisy at that episode count, and no value from it is
+reported as a result.
+
+Final evaluation uses \textbf{50 deterministic episodes} with domain
+randomisation disabled, on an environment seeded independently of the one used
+for best-checkpoint selection during training, so that the reported figure is not
+the one selection was performed on.
+
+The metrics actually computed are those defined in \cref{tab:metrics}: final
+error, closest approach, drift, the graded proximity rates, energy, blow-up rate
+and episode length; the co-contraction index of \cref{sec:icc}; the muscle-force
+agreement statistics of \cref{ch:forces}; and inference latency. Perturbation
+robustness, muscle jerk and the domain-randomisation breakdown described in
+earlier versions of this work were not measured and are not reported.
+
+\subsection{Statistical Treatment}
+\label{sec:stats_protocol}
+
+\textbf{No inferential statistics are reported in this thesis.} With three seeds
+the two-sided Wilcoxon signed-rank test has a minimum attainable $p$-value of
+$0.25$, which cannot reach any conventional significance threshold; computing one
+would convey false precision. Earlier versions of this work reported Wilcoxon
+tests with Bonferroni correction, rank-biserial effect sizes and BCa bootstrap
+intervals over $n=10$ seeds. None of those analyses was performed, and they are
+withdrawn (\cref{ch:conclusion}).
+
+What is reported instead is the mean and standard deviation across seeds, stated
+together, with the explicit convention that a difference comparable to or smaller
+than the spread is treated as unresolved. Where a single-seed result is given ---
+as for the force analysis --- it is identified as such at the point of use.
+
+For the force comparison specifically, one distributional control \emph{is}
+computed, because it is required for the statistic to be interpretable at all:
+the cosine similarity between non-negative force vectors has a floor well above
+zero, so a permutation null is constructed by shuffling, at each timestep, which
+muscle each force magnitude belongs to (\cref{tab:forceoverall}).
+
+\subsection{Computing Hardware}
+
+All results in this thesis were produced on a single consumer laptop:
+
+\begin{itemize}
+  \item \textbf{CPU}: AMD Ryzen~7 4800H, 8 physical cores / 16 logical
+        processors, \SI{2.9}{\giga\hertz} base.
+  \item \textbf{RAM}: \SI{15.4}{\giga\byte}.
+  \item \textbf{GPU}: none used. All training and inference ran on the CPU;
+        the networks are small enough that this is not the binding constraint.
+  \item \textbf{Thread budget}: capped at \textbf{8 of 16 logical processors}.
+        Sustained all-core load caused the machine to stop responding entirely
+        (\cref{sec:defects}), and benchmarking showed the additional parallelism
+        yielded little throughput in any case --- eight threads are only
+        $1.78\times$ faster than one for networks of this size.
+  \item \textbf{Cumulative compute}: approximately 30~hours, comprising the
+        hyperparameter search ($\approx 8$~h), the five-configuration benchmark
+        ($\approx 6$~h), four pilot runs at $3 \times 10^5$ steps
+        ($\approx 6$~h) and the reward and effort studies.
+\end{itemize}
+
+The modest hardware is directly responsible for the seed count, for the
+$10^5$-step comparison budget, and for the decision not to tune every algorithm
+individually. These constraints are stated here so that the scope of the
+conclusions can be judged against them.
+
+% -----------------------------------------------------------
+\section{Defects Identified During Development}
+\label{sec:defects}
+
+Six substantive defects were identified in the model, the reward function and the
+training configuration during the course of this work. They are documented here
+rather than omitted, for two reasons: four of them produced results that appeared
+entirely plausible while being incorrect, and the measurements that eventually
+exposed them are part of the methodological contribution of this thesis.
+
+\subsection{Model specified in incorrect angular units}
+
+The \MuJoCo{} model format defaults to degrees unless declared otherwise, while
+the joint ranges had been authored in radians. Every range was consequently
+interpreted as under $3^{\circ}$ and the arm was effectively immobilised. The
+symptom was a uniform 0\,\% success rate across all algorithms, which is readily
+misread as a learning failure. All experiments predating the correction are
+invalid.
+
+\subsection{Compounding domain randomisation}
+
+Body masses and muscle strengths are perturbed each episode to assess robustness.
+The implementation multiplied the current values rather than rescaling from
+nominal ones, producing a multiplicative random walk: after approximately one
+thousand episodes, body mass had drifted to roughly 1\,\% of its correct value.
+Caching nominal parameters and rescaling from them raised the measured drift
+statistic from 0.013 to 0.998, where unity denotes no drift.
+
+A second defect in the same routine invoked the random generator without a
+\texttt{size} argument, returning a single scalar applied to every body and every
+muscle. The intended independent per-element variation was therefore a single
+global scale factor, which a policy can detect and compensate trivially, rendering
+the robustness claim vacuous.
+
+\subsection{Reward exploitable by episode termination}
+\label{sec:exploit}
+
+Under the initial reward formulation every per-step reward was non-positive, and
+numerical divergence terminated the episode without penalty. In a discounted
+formulation a terminated episode contributes no further return, so its value was
+exactly zero, whereas surviving the full hundred steps accumulated approximately
+$-20$. Terminating the episode by destroying the simulation was therefore the
+optimal policy, worth roughly twice the success bonus and considerably easier to
+attain.
+
+Diagnostic measurement over fifty evaluation episodes established that the policy
+had learned precisely this: 100\,\% of episodes ended in deliberate divergence at
+approximately step 7 of 100, and none ran to completion.
+
+The defect escaped detection because no recorded metric could expose it. The
+reported error remained a plausible distance and continued to improve slowly, and
+neither episode length nor divergence rate was logged --- so an agent abandoning
+the task after 7 of 100 steps was indistinguishable from one attempting it and
+plateauing. Both quantities are now recorded at every evaluation checkpoint.
+
+The revised reward makes every per-step reward strictly positive, so early
+termination forfeits value; pays the success bonus per step while the target is
+held rather than once on contact, converting the objective to reach-and-hold; and
+penalises divergence explicitly.
+
+\subsection{Divergence masked by simulator self-recovery}
+
+\MuJoCo{} resets its state internally upon detecting divergence. By the time
+control returned to the environment the state was finite again, with the arm
+returned to its rest configuration, so a test for non-finite values almost never
+triggered. The episode continued, measuring the distance from the rest pose to the
+target and recording it as data. Detection now uses the solver's warning
+counters, which are the only reliable indicator, and the last finite error is
+reported rather than the post-reset value.
+
+\subsection{Replay ratio a factor of four below intended}
+\label{sec:replaybug}
+
+Training used four parallel environments with a gradient-step setting of one. In
+the Stable-Baselines3 implementation, a single rollout iteration over a
+four-environment vector collects four transitions and is followed by one gradient
+update. Direct measurement confirmed the consequence:
+
+\begin{table}[H]
+\centering
+\caption{Gradient updates per environment step, measured directly.}
+\begin{tabular}{@{} L{8.0cm} C{4.0cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Updates per step} \\
+\midrule
+As originally configured (4 envs, 1 step) & 0.233 \\
+Single environment, one step (standard) & 0.933 \\
+Corrected setting & 0.933 \\
+\bottomrule
+\end{tabular}
+\label{tab:replayratio}
+\end{table}
+
+Every run had therefore performed approximately 233\,000 gradient updates against
+a nominal budget of 1\,000\,000 steps. An independent consistency check supports
+this: 233\,000 updates at the measured \SI{17}{\milli\second} each predicts
+71 minutes, against observed run times of 78.8 and 80.6 minutes.
+
+The correction has a substantial cost. At the corrected ratio, one million steps
+requires approximately 3.7 hours per seed, so a four-algorithm, ten-seed protocol
+would require roughly 148 hours rather than the 50 previously assumed. That
+protocol was never feasible on the available hardware; it appeared so only because
+the runs were under-training.
+
+\subsection{Default exploration temperature preventing convergence}
+\label{sec:entropydefect}
+
+Following the preceding five corrections the controller reached the target region
+reliably but ceased improving, with closest approach remaining near
+\SI{0.104}{\meter} across three distinct reward formulations and the fourfold
+increase in effective training. The cause was the \SAC target entropy, whose
+default of $-\dim(\mathcal{A})$ gives $-9$ for a nine-muscle action space.
+Hyperparameter optimisation selected approximately $-19$, and the error halved.
+The result is reported in \cref{sec:tuning}.
+
+\subsection{Infrastructure failures}
+
+Two non-scientific failures are recorded for completeness. A forced operating
+system restart destroyed a 75-minute training run five minutes from completion,
+because model state was written only on normal termination; training now
+checkpoints at fixed intervals using atomic file replacement. Separately, the
+machine ceased responding under four concurrent search processes, with no crash
+dump written despite dumps being enabled and no hardware error logged, indicating
+a thermal or power limit rather than a software fault. Subsequent work was
+restricted to half the available logical processors. Benchmarking established
+that the parallelism had provided little benefit in any case, thread scaling being
+poor for networks of this size.
+
+\section{Reproducibility and Sharing}
+\label{sec:reproducibility}
+
+Following the reproducibility guidelines of~\parencite{Pineau2021} for \RL{},
+we ensure:
+\begin{itemize}
+  \item \textbf{Source code}: published under the MIT license on GitHub, with a
+        pinned \texttt{requirements.txt} and the \texttt{git} hash recorded in each
+        TensorBoard run.
+  \item \textbf{Seeds and determinism}: all seeds are specified explicitly;
+        \texttt{torch.use\_deterministic\_algorithms(True)} is enabled wherever
+        possible.
+  \item \textbf{Trained models}: all $40$ final policies
+        ($4$~algorithms $\times$ $10$~seeds) are archived together with the
+        associated \texttt{VecNormalize} statistics.
+  \item \textbf{Evaluation logs}: the complete Optuna, TensorBoard, and CSV
+        evaluation logs are provided.
+  \item \textbf{Docker container}: a \texttt{Dockerfile} pinning the versions of
+        \MuJoCo{}, PyTorch, and CUDA is provided.
+\end{itemize}

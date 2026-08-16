@@ -1,0 +1,113 @@
+{
+  "solo_activation": {
+    "biceps_long": {
+      "dq": {
+        "shoulder_flex": 1.3585,
+        "shoulder_abd": -0.2036,
+        "shoulder_rot": -0.0002,
+        "elbow_flex": 0.6156
+      },
+      "ee_displacement_m": 0.598,
+      "peak_force_N": 286.8
+    },
+    "biceps_short": {
+      "dq": {
+        "shoulder_flex": -0.5319,
+        "shoulder_abd": -0.2905,
+        "shoulder_rot": -0.0001,
+        "elbow_flex": 0.3307
+      },
+      "ee_displacement_m": 0.2132,
+      "peak_force_N": 211.2
+    },
+    "brachialis": {
+      "dq": {
+        "shoulder_flex": -0.5472,
+        "shoulder_abd": -0.1852,
+        "shoulder_rot": 0.001,
+        "elbow_flex": 1.0249
+      },
+      "ee_displacement_m": 0.2309,
+      "peak_force_N": 472.1
+    },
+    "triceps_long": {
+      "dq": {
+        "shoulder_flex": -1.0021,
+        "shoulder_abd": -0.7483,
+        "shoulder_rot": 0.0006,
+        "elbow_flex": -1.2137
+      },
+      "ee_displacement_m": 0.7844,
+      "peak_force_N": 419.5
+    },
+    "triceps_lat": {
+      "dq": {
+        "shoulder_flex": -0.5747,
+        "shoulder_abd": -0.5044,
+        "shoulder_rot": 0.0,
+        "elbow_flex": -1.211
+      },
+      "ee_displacement_m": 0.6127,
+      "peak_force_N": 324.1
+    },
+    "triceps_med": {
+      "dq": {
+        "shoulder_flex": -0.5893,
+        "shoulder_abd": -0.5035,
+        "shoulder_rot": 0.0,
+        "elbow_flex": -1.2089
+      },
+      "ee_displacement_m": 0.6177,
+      "peak_force_N": 327.1
+    },
+    "deltoid_ant": {
+      "dq": {
+        "shoulder_flex": 1.7921,
+        "shoulder_abd": -0.167,
+        "shoulder_rot": 0.0005,
+        "elbow_flex": 1.4854
+      },
+      "ee_displacement_m": 0.5665,
+      "peak_force_N": 359.5
+    },
+    "deltoid_med": {
+      "dq": {
+        "shoulder_flex": -0.2963,
+        "shoulder_abd": 1.9737,
+        "shoulder_rot": 0.0201,
+        "elbow_flex": 0.5629
+      },
+      "ee_displacement_m": 0.463,
+      "peak_force_N": 420.4
+    },
+    "deltoid_post": {
+      "dq": {
+        "shoulder_flex": -1.0011,
+        "shoulder_abd": -0.7566,
+        "shoulder_rot": 0.0029,
+        "elbow_flex": -0.2277
+      },
+      "ee_displacement_m": 0.5694,
+      "peak_force_N": 141.7
+    }
+  },
+  "coactivation_hold": {
+    "final_q": {
+      "shoulder_flex": 2.502,
+      "shoulder_abd": 0.3026,
+      "shoulder_rot": -0.0364,
+      "elbow_flex": 2.1057
+    },
+    "max_abs_qvel": 27.519,
+    "stable": true
+  },
+  "checks": {
+    "all_muscles_move_a_joint": true,
+    "flexors_flex_elbow": true,
+    "extensors_do_not_flex_elbow": true,
+    "delt_ant_flexes_shoulder": true,
+    "delt_post_extends_shoulder": true,
+    "delt_med_abducts": true,
+    "coactivation_stable": true
+  }
+}

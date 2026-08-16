@@ -1,0 +1,27 @@
+{
+  "algo": "PPO",
+  "seed": 1,
+  "steps": 100000,
+  "wall_clock_s": 186.3719448000047,
+  "n_policy_params": 154131,
+  "eval_curve": [
+    {
+      "t": 50000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.5283501968283574,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.4750287852536653,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": null,
+  "best_err": 0.4750287852536653,
+  "best_step": 100000
+}
