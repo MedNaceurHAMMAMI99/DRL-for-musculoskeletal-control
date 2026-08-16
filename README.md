@@ -8,7 +8,7 @@ calculation of the force required in each individual muscle during a reaching
 movement?
 
 **Short answer: for *which* muscles and in what proportion, yes. For *how much*
-force, no. For speed, no.**
+force, yes — but only once the reward actually asks for it. For speed, no.**
 
 This repository contains the model, the training and analysis pipeline, every
 measured result, and a fully rewritten thesis report. It also documents six
@@ -27,7 +27,8 @@ All figures are means over **five independent training runs** unless stated.
 | Closest approach | **0.0729 ± 0.0032 m** |
 | Agreement with static optimisation (Pearson *r*) | **0.808 ± 0.044** |
 | Muscular effort vs the classical optimum | **1.91 ± 0.15 ×** |
-| …vs the *achievable* floor a conventional controller reaches (1.33) | **≈ 44 % above** |
+| …vs the *achievable* floor a conventional controller reaches (1.33) | ≈ 44 % above |
+| **…with the effort term weighted appropriately (w₂ = 20)** | **1.34 ×, i.e. at the floor** |
 | Blow-up rate | 0 % in all runs |
 
 The excess effort is anatomically localised: the three deltoids agree with the
@@ -124,9 +125,10 @@ Stated here because it matters more than the headline numbers.
   controller with full state access meets it only ~7 % of the time.
 - **The model is heavily reduced.** Nine muscles; the rotator cuff is absent,
   which required constraining shoulder rotation.
-- **The target-entropy attribution is a hypothesis, not a result.** Five
-  hyperparameters moved together in the search; the isolating ablation is
-  running.
+- **The target-entropy attribution was tested and refuted.** A two-sided
+  ablation shows it contributes nothing; the improvement comes from the learning
+  rate, target-network rate, discount and batch size, and this work does not
+  isolate which.
 
 ---
 

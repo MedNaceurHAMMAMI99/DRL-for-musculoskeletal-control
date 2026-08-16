@@ -1,0 +1,161 @@
+{
+  "conventional": {
+    "PD": {
+      "mean_final_error": 0.19845269578879232,
+      "mean_min_error": 0.17382822041012538,
+      "effort_ratio": 1.333956736812403,
+      "mean_energy": 102876.47919215243,
+      "reach_5cm": 0.12,
+      "reach_10cm": 0.28,
+      "pearson_r": 0.9154868498489188
+    },
+    "gains": {
+      "kp": 60.0,
+      "kd": 25.0
+    }
+  },
+  "replication": {
+    "seed1": {
+      "mean_final_error": 0.10189274036714675,
+      "mean_min_error": 0.07424440934379445,
+      "success_rate": 0.2,
+      "reach_5cm": 0.3,
+      "reach_10cm": 0.62,
+      "touch_2cm": 0.28,
+      "mean_energy": 313992.60460114555,
+      "blow_up_rate": 0.0,
+      "effort_ratio": 1.9115537204099942,
+      "pearson_r": 0.8230069675686843,
+      "cosine": 0.8395950801805818,
+      "cosine_null": 0.39114026591085965
+    },
+    "seed2": {
+      "mean_final_error": 0.09884888840436429,
+      "mean_min_error": 0.07284001461066193,
+      "success_rate": 0.0,
+      "reach_5cm": 0.36,
+      "reach_10cm": 0.64,
+      "touch_2cm": 0.22,
+      "mean_energy": 483372.7252130067,
+      "blow_up_rate": 0.0,
+      "effort_ratio": 2.1162168056204345,
+      "pearson_r": 0.7593336364465655,
+      "cosine": 0.7664004395008499,
+      "cosine_null": 0.3842598861119884
+    },
+    "seed3": {
+      "mean_final_error": 0.10695775732399415,
+      "mean_min_error": 0.07604737776682664,
+      "success_rate": 0.08,
+      "reach_5cm": 0.24,
+      "reach_10cm": 0.56,
+      "touch_2cm": 0.2,
+      "mean_energy": 273240.8257949918,
+      "blow_up_rate": 0.0,
+      "effort_ratio": 1.855849865727851,
+      "pearson_r": 0.8245317372166882,
+      "cosine": 0.8276113127432076,
+      "cosine_null": 0.34850918719042256
+    },
+    "seed4": {
+      "mean_final_error": 0.1022985745797796,
+      "mean_min_error": 0.06755994015803225,
+      "success_rate": 0.06,
+      "reach_5cm": 0.34,
+      "reach_10cm": 0.6,
+      "touch_2cm": 0.32,
+      "mean_energy": 287830.9021852567,
+      "blow_up_rate": 0.0,
+      "effort_ratio": 1.9743749078363442,
+      "pearson_r": 0.7668666401317824,
+      "cosine": 0.7615612614456482,
+      "cosine_null": 0.3634732281730652
+    }
+  },
+  "ablation": {
+    "A_entropy_only_seed0": {
+      "arm": "A_entropy_only",
+      "seed": 0,
+      "mean_final_error": 0.26787645157302614,
+      "mean_min_error": 0.15268832881326289
+    },
+    "A_entropy_only_seed1": {
+      "arm": "A_entropy_only",
+      "seed": 1,
+      "mean_final_error": 0.2782853999746813,
+      "mean_min_error": 0.13650433526502126
+    },
+    "A_entropy_only_seed2": {
+      "arm": "A_entropy_only",
+      "seed": 2,
+      "mean_final_error": 0.26031632251019765,
+      "mean_min_error": 0.14693449093749467
+    },
+    "B_entropy_reverted_seed0": {
+      "arm": "B_entropy_reverted",
+      "seed": 0,
+      "mean_final_error": 0.1351863262522122,
+      "mean_min_error": 0.09020757946185298
+    },
+    "B_entropy_reverted_seed1": {
+      "arm": "B_entropy_reverted",
+      "seed": 1,
+      "mean_final_error": 0.16021652878950612,
+      "mean_min_error": 0.09105855348316172
+    },
+    "B_entropy_reverted_seed2": {
+      "arm": "B_entropy_reverted",
+      "seed": 2,
+      "mean_final_error": 0.1702756398663584,
+      "mean_min_error": 0.08856117769813827
+    }
+  },
+  "effort_sweep": {
+    "w2_5": {
+      "w2": 5.0,
+      "steps": 300000,
+      "wall_min": 31.41379987333348,
+      "metrics": {
+        "success_rate": 0.12,
+        "mean_reward": 602.1343541765214,
+        "mean_final_error": 0.10188786252289805,
+        "mean_energy": 91809.52990384113,
+        "mean_inference_us": 386.94257989991456,
+        "n_episodes": 50.0,
+        "blow_up_rate": 0.0,
+        "mean_episode_len": 100.0,
+        "min_episode_len": 100.0,
+        "max_episode_steps": 100.0,
+        "reach_2cm": 0.14,
+        "reach_5cm": 0.42,
+        "reach_10cm": 0.64,
+        "touch_2cm": 0.26,
+        "touch_5cm": 0.52,
+        "mean_min_error": 0.0690175737460273
+      }
+    },
+    "w2_20": {
+      "w2": 20.0,
+      "steps": 300000,
+      "wall_min": 91.42976838999991,
+      "metrics": {
+        "success_rate": 0.04,
+        "mean_reward": 577.6492744112015,
+        "mean_final_error": 0.12493145775668502,
+        "mean_energy": 38855.19736966085,
+        "mean_inference_us": 387.41266001889016,
+        "n_episodes": 50.0,
+        "blow_up_rate": 0.0,
+        "mean_episode_len": 100.0,
+        "min_episode_len": 100.0,
+        "max_episode_steps": 100.0,
+        "reach_2cm": 0.04,
+        "reach_5cm": 0.26,
+        "reach_10cm": 0.5,
+        "touch_2cm": 0.2,
+        "touch_5cm": 0.52,
+        "mean_min_error": 0.07283741184574016
+      }
+    }
+  }
+}

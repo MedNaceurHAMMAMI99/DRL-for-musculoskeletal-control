@@ -1,0 +1,48 @@
+{
+  "w2_5": {
+    "w2": 5.0,
+    "steps": 300000,
+    "wall_min": 31.41379987333348,
+    "metrics": {
+      "success_rate": 0.12,
+      "mean_reward": 602.1343541765214,
+      "mean_final_error": 0.10188786252289805,
+      "mean_energy": 91809.52990384113,
+      "mean_inference_us": 386.94257989991456,
+      "n_episodes": 50.0,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0,
+      "min_episode_len": 100.0,
+      "max_episode_steps": 100.0,
+      "reach_2cm": 0.14,
+      "reach_5cm": 0.42,
+      "reach_10cm": 0.64,
+      "touch_2cm": 0.26,
+      "touch_5cm": 0.52,
+      "mean_min_error": 0.0690175737460273
+    }
+  },
+  "w2_20": {
+    "w2": 20.0,
+    "steps": 300000,
+    "wall_min": 91.42976838999991,
+    "metrics": {
+      "success_rate": 0.04,
+      "mean_reward": 577.6492744112015,
+      "mean_final_error": 0.12493145775668502,
+      "mean_energy": 38855.19736966085,
+      "mean_inference_us": 387.41266001889016,
+      "n_episodes": 50.0,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0,
+      "min_episode_len": 100.0,
+      "max_episode_steps": 100.0,
+      "reach_2cm": 0.04,
+      "reach_5cm": 0.26,
+      "reach_10cm": 0.5,
+      "touch_2cm": 0.2,
+      "touch_5cm": 0.52,
+      "mean_min_error": 0.07283741184574016
+    }
+  }
+}

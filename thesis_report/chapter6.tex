@@ -133,10 +133,86 @@ symptom, an inability to settle --- and not as an established result. The
 one-at-a-time ablation that would settle it is set out in \cref{sec:future}.
 
 The target entropy governs how much stochasticity \SAC deliberately retains in
-its policy. Exploration is valuable early in training, but must diminish for the
-end effector to settle precisely. The optimiser's consistent preference for a
-substantially lower value indicates that the default maintains more residual
-noise in the commanded activations than this task tolerates.
+its policy, and the mechanism by which a value too high would prevent an end
+effector from settling is straightforward. That reasoning motivated the
+hypothesis --- and \cref{sec:ablation} shows it to be wrong. The subsection
+below reports the ablation that refutes it.
+
+\subsection{Isolating the responsible hyperparameter}
+\label{sec:ablation}
+
+The preceding subsection advanced the target entropy as the leading candidate
+mechanism, while noting that five parameters moved together and that the
+attribution was therefore a hypothesis rather than a result. A two-sided
+one-at-a-time ablation was run to settle it, three seeds per arm at the same
+100\,000-step budget as the benchmark:
+
+\begin{description}[leftmargin=1.6em, itemsep=3pt]
+\item[Arm A] library defaults, with \emph{only} the target entropy set to the
+tuned value. If the target entropy is the mechanism, this should recover most of
+the improvement.
+\item[Arm B] the tuned configuration, with \emph{only} the target entropy
+reverted to its default. If the target entropy is the mechanism, this should
+lose most of the improvement.
+\end{description}
+
+\begin{table}[H]
+\centering
+\caption{Target-entropy ablation. Three seeds per arm; reference rows are the
+corresponding benchmark configurations.}
+\begin{tabular}{@{} L{7.2cm} C{3.2cm} C{2.6cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Final error (m)} & \textbf{Gap closed} \\
+\midrule
+All defaults \emph{(reference)} & $0.2613 \pm 0.0203$ & 0\,\% \\
+\textbf{A: defaults $+$ tuned entropy only} & $\mathbf{0.2688 \pm 0.0090}$ & $\mathbf{-8}$\,\% \\
+\textbf{B: tuned $-$ entropy reverted} & $\mathbf{0.1552 \pm 0.0181}$ & $\mathbf{+106}$\,\% \\
+All tuned \emph{(reference)} & $0.1610 \pm 0.0084$ & 100\,\% \\
+\bottomrule
+\end{tabular}
+\label{tab:ablation}
+\end{table}
+
+\subsection*{The hypothesis is refuted}
+
+The result is unambiguous and negative. Setting the target entropy to its tuned
+value while leaving every other parameter at its default recovers \emph{none} of
+the improvement --- arm~A is indistinguishable from the default configuration,
+and marginally worse. Conversely, reverting the target entropy to its default
+while retaining the other tuned parameters costs \emph{nothing} --- arm~B matches
+the fully tuned configuration within seed variation.
+
+\textbf{The target entropy is not the mechanism.} The improvement is produced
+entirely by the remaining parameters: the learning rate ($3\times10^{-4}
+\rightarrow 4.40\times10^{-4}$), the target-network update rate $\tau$
+($0.005 \rightarrow 0.0188$, a factor of 3.8), the discount factor
+($0.99 \rightarrow 0.957$) and the batch size ($512 \rightarrow 128$).
+
+This ablation does not identify which of those four is responsible; isolating
+further would require the same procedure applied to each in turn. On magnitude of
+change, $\tau$ is the natural next candidate, and its mechanism is plausible: a
+faster target-network update alters the stability of the value estimate, which is
+consistent with the oscillating evaluation curves that characterised every
+untuned run.
+
+\subsection*{Why this is reported at length}
+
+The refuted hypothesis was, until this measurement, one of the three stated
+contributions of this thesis. It was mechanistically plausible --- \SAC's entropy
+term does pay the policy to remain stochastic, the default does scale with action
+dimension, and residual stochasticity is exactly what prevents an end effector
+from settling. All five best search trials clustered near $-19$. The reasoning was
+sound and the conclusion was wrong.
+
+The clustering was the misleading evidence. A TPE sampler concentrates its
+proposals in regions that perform well, so parameters cluster in the best trials
+whether or not they are causally responsible. Reading causal importance from that
+clustering is a straightforward error, and it is one this work made until the
+ablation was run.
+
+The transferable point is not about entropy. It is that a hyperparameter search
+identifies a \emph{configuration}, never a \emph{cause}, and that the distinction
+requires a deliberate experiment to resolve.
 
 \subsection{Confirmation at full budget}
 \label{sec:confirmresult}

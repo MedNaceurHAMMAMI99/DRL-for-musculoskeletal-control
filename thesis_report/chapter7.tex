@@ -598,6 +598,113 @@ electromyographic recordings under a matched protocol --- which
 The policy-versus-classical column carries no such caveat: both sides are
 computed here, by the same procedure, on identical trajectories.
 
+\section{Closing the gap: the effort weight}
+\label{sec:effortsweep}
+
+\Cref{sec:whygap} argued that the load-sharing discrepancy is a property of the
+reward rather than of reinforcement learning, on the grounds that the reward's
+effort term --- although already the Crowninshield--Brand form --- is weighted so
+low it cannot influence the solution. Measured on the trained policy, the
+per-step contributions are
+
+\begin{center}
+\begin{tabular}{@{} L{7.0cm} R{3.0cm} @{}}
+\toprule
+effort term, $w_2 \cdot \overline{(f_i/F_{\max,i})^2}$ & $0.051$ \\
+error cost, $w_1 (\|e\|^2 + 0.5\|e\|)$ at \SI{0.11}{\meter} & $0.067$ \\
+precision bonus, $w_7 e^{-\|e\|/0.15}$ at \SI{0.11}{\meter} & $1.441$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+--- the effort term is roughly \textbf{28 times smaller} than the precision
+bonus. The prediction was that raising $w_2$ should reduce the discrepancy, at
+some cost in accuracy.
+
+The experiment was run at $w_2 \in \{5, 20\}$ against the reported $w_2 = 1$,
+holding every other weight and hyperparameter fixed, at the full 300\,000-step
+budget. Policies were evaluated under the standard protocol with the default
+weights, so the metrics remain comparable with every other result in this thesis;
+only the training objective differed.
+
+\begin{table}[H]
+\centering
+\caption{Effect of the effort weight. The conventional-controller row is the
+achievable floor established in \cref{sec:effortfloor}.}
+\begin{tabular}{@{} L{4.2cm} C{2.6cm} C{2.4cm} C{2.4cm} C{2.2cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Effort ratio} & \textbf{Pearson $r$} & \textbf{Final error} & \textbf{Energy} \\
+\midrule
+$w_2 = 1$ (as reported) & $1.91 \pm 0.15$ & $0.808$ & 0.1033 & 327\,048 \\
+$\mathbf{w_2 = 5}$ & $\mathbf{1.43}$ & $\mathbf{0.911}$ & $\mathbf{0.1019}$ & 91\,810 \\
+$w_2 = 20$ & $\mathbf{1.34}$ & $\mathbf{0.932}$ & 0.1249 & \textbf{38\,855} \\
+\midrule
+Conventional controller \emph{(floor)} & $1.33$ & $0.916$ & 0.199 & 102\,876 \\
+\bottomrule
+\end{tabular}
+\label{tab:effortsweep}
+\end{table}
+
+\subsection{The discrepancy is essentially eliminated}
+
+At $w_2 = 20$ the learned policy attains an effort ratio of \textbf{1.34} against
+the achievable floor of \textbf{1.33} demonstrated by a controller that solves
+minimum-effort load sharing explicitly at every timestep. Agreement with the
+classical solution rises to $r = 0.932$, exceeding the conventional controller's
+own $0.916$, and the per-muscle RMSE falls to 3.0\,\% of mean $F_{\max}$ from
+10.1\,\%.
+
+\textbf{The load-sharing discrepancy reported throughout this chapter is
+therefore a reward-weighting artefact, not a limitation of reinforcement
+learning.} When the objective is weighted such that effort can influence the
+solution, the learned controller recovers the classical load-sharing solution to
+within the precision that closed-loop control permits.
+
+\subsection{And at moderate weighting there is no trade-off at all}
+
+The result at $w_2 = 5$ was not anticipated. Both this chapter and
+\cref{sec:whygap} expected a Pareto trade-off --- less wasted effort bought with
+worse accuracy. Instead $w_2 = 5$ is \textbf{better on both axes} than the
+reported configuration: final error $0.1019$ against $0.1033$, closest approach
+$0.0690$ against $0.0729$, energy reduced by 72\,\%, effort ratio $1.91
+\rightarrow 1.43$, and agreement $0.808 \rightarrow 0.911$.
+
+The configuration this thesis reports as its principal result is therefore
+\emph{strictly dominated} by one differing only in a single reward weight.
+
+A plausible explanation is that co-contraction is not merely wasteful but
+actively harmful to precision. Antagonist pairs firing together make the endpoint
+position depend on the small difference between two large opposing forces, which
+is numerically ill-conditioned; suppressing that co-contraction improves
+controllability as well as economy. This is consistent with the elbow
+localisation of \cref{tab:permuscle} and with the excess path length observed in
+untuned policies, though it is an interpretation rather than a measured
+mechanism.
+
+A trade-off does appear at $w_2 = 20$: effort falls to the floor but final error
+degrades to $0.1249$. The knee therefore lies between the two, and was not
+searched.
+
+\subsection{Consequences for this thesis}
+
+Three, and they are substantial.
+
+\textbf{The headline answer changes.} The finding is no longer that \DRL{}
+reproduces coordination but not economy. It is that \DRL{} reproduces
+\emph{both}, provided the objective asks for both --- and that the version
+reported here did not ask.
+
+\textbf{The reported configuration is not the best one found.} $w_2 = 5$
+dominates it. The results of \cref{sec:replication} are retained as the
+five-seed characterisation of the configuration this work analysed in depth, and
+this section is reported alongside them rather than replacing them, because the
+$w_2$ variants were run at a single seed each and have not been replicated.
+
+\textbf{The remaining outstanding experiment is now well specified}: replicate
+$w_2 = 5$ across five seeds and repeat the force and synergy analyses on it. If
+it holds, the thesis's central claim becomes materially stronger --- a learned
+controller matching classical load sharing at equal or better task accuracy.
+
 \section{Answer to the research question}
 
 For coordination, \DRL reproduces the classical solution; for efficiency, it does

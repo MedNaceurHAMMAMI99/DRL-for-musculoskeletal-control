@@ -1,0 +1,71 @@
+{
+  "algo": "SAC",
+  "seed": 0,
+  "steps": 300000,
+  "wall_clock_s": 5903.274615899994,
+  "n_policy_params": 393750,
+  "eval_curve": [
+    {
+      "t": 50000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.31960562740364606,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 100000,
+      "success_rate": 0.2,
+      "mean_final_error": 0.10962817515491567,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 150000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.1474367555620494,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 200000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.16306711844602276,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    },
+    {
+      "t": 250000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.17600780594192145,
+      "blow_up_rate": 0.2,
+      "mean_episode_len": 81.2
+    },
+    {
+      "t": 300000,
+      "success_rate": 0.2,
+      "mean_final_error": 0.0560560968741298,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": 200004,
+  "hyperparams": {
+    "learning_rate": 0.00043997941251346594,
+    "gamma": 0.9568097976880915,
+    "batch_size": 128,
+    "tau": 0.018771833627238235,
+    "target_entropy": -19.64862576109677,
+    "gradient_steps": 8
+  },
+  "reward_weights": {
+    "w1": 1.0,
+    "w2": 5.0,
+    "w3": 0.5,
+    "w4": 4.5,
+    "w5": 1.0,
+    "w6": 10.0,
+    "w7": 3.0
+  },
+  "best_err": 0.0560560968741298,
+  "best_step": 300000
+}

@@ -1,0 +1,28 @@
+{
+  "algo": "SAC",
+  "seed": 0,
+  "steps": 100000,
+  "wall_clock_s": 1766.3679948999925,
+  "n_policy_params": 393750,
+  "eval_curve": [
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.2024038704501372,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "learning_rate": 0.00043997941251346594,
+    "gamma": 0.9568097976880915,
+    "batch_size": 128,
+    "tau": 0.018771833627238235,
+    "target_entropy": "auto",
+    "gradient_steps": 8
+  },
+  "reward_weights": null,
+  "best_err": 0.2024038704501372,
+  "best_step": 100000
+}

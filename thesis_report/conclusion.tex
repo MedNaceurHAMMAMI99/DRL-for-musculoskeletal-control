@@ -14,12 +14,20 @@ model of the human arm in \MuJoCo, training controllers to reach targets by
 commanding muscle activations directly, and comparing the resulting forces
 against those prescribed by static optimisation on the same movements.
 
-The answer is qualified. The learned controller reproduces the \emph{structure}
-of the classical solution --- a correlation of $0.81 \pm 0.04$ across all
-nine muscles, and a pattern cosine of $0.813 \pm 0.047$ against a shuffled null
-of $0.372$ --- while expending $1.91 \pm 0.15$ times the minimum effort required
-to generate the same joint torques, about 44\,\% above the floor a conventional
-controller attains. All figures are means over five independent training runs. It is therefore a
+The answer is affirmative, with a qualification about what had to be corrected
+to reach it. Under the reward this work reported, the learned controller
+reproduced the \emph{structure} of the classical solution --- correlation
+$0.81 \pm 0.04$ over five independent runs --- while expending $1.91 \pm 0.15$
+times the minimum effort, some 44\,\% above the floor a conventional controller
+attains.
+
+That discrepancy proved to be an artefact of the reward's weighting rather than a
+limitation of the method. The effort term, although already the classical
+criterion in form, carried roughly one twenty-eighth the weight of the precision
+bonus. Raising it (\cref{sec:effortsweep}) brings the effort ratio to $1.34$
+against an achievable floor of $1.33$, with agreement rising to $r = 0.932$ ---
+and at moderate weighting improves accuracy \emph{and} economy simultaneously,
+dominating the configuration reported as this thesis's principal result. It is therefore a
 usable fast approximation of which muscles act and in what proportion, at
 a fixed inference cost --- though not, as \cref{sec:latencycaveat}
 establishes, at lower latency than a competently implemented classical solver
@@ -45,7 +53,8 @@ still score well (\cref{sec:forcescope}). Assessing trajectory realism would
 require kinematic comparison against recorded human reaching, which this work
 does not perform.
 
-\textbf{A hyperparameter regime that prevents precision.} At \SAC's library
+\textbf{A hyperparameter regime that prevents precision --- and a refuted
+explanation for it.} At \SAC's library
 defaults the controller could not settle on a target, and the resulting error
 plateau persisted through three complete redesigns of the reward function and a
 fourfold correction to the effective training budget. Hyperparameter
@@ -54,24 +63,26 @@ the values than in the diagnostic difficulty: the failure presents as
 insufficient training or as poor reward shaping, and survives attempts to remedy
 both.
 
-The optimiser moved five parameters simultaneously, and the evidence does not
-isolate which of them is responsible. Target entropy is the most likely
-candidate --- it moved from the default $-\dim(\mathcal{A}) = -9$ to
-approximately $-19$, all five best trials cluster there, and its mechanism
-(residual stochasticity in the commanded activations preventing the end effector
-from settling) matches the observed symptom exactly. But the target-network
-update rate $\tau$ also rose by a factor of 3.8, the learning rate by 47\,\%, and
-both plausibly affect convergence. Clustering in a TPE search reflects the
-sampler's exploitation of a promising region and is not by itself evidence of
-causal importance.
+An earlier version of this thesis attributed the improvement to \SAC's target
+entropy, on the grounds that it moved furthest from its default, that all five
+best search trials clustered near the selected value, and that its mechanism ---
+residual stochasticity preventing the end effector from settling --- matched the
+symptom precisely.
 
-\textbf{This attribution is therefore stated as a hypothesis, not a result.}
-Establishing it requires a one-at-a-time ablation --- the default configuration
-with only the target entropy changed, and the tuned configuration with only the
-target entropy reverted --- which is listed in \cref{sec:future} and had not been
-completed at the time of writing. Until it is, the defensible claim is that the
-\emph{tuned regime} resolves the plateau, with target entropy the leading
-candidate mechanism.
+\textbf{A two-sided ablation refutes that attribution} (\cref{sec:ablation}).
+Setting the target entropy to its tuned value while leaving everything else at
+default recovers none of the improvement ($-8$\,\% of the gap); reverting it
+while retaining the other tuned parameters costs nothing ($+106$\,\%). The
+improvement is produced entirely by the learning rate, the target-network update
+rate, the discount factor and the batch size, and this work does not isolate
+which.
+
+The error is worth recording because the reasoning that produced it was sound.
+Clustering in the best trials of a TPE search is not evidence of causal
+importance: the sampler concentrates its proposals in regions that perform well,
+so parameters cluster whether or not they are responsible. \textbf{A
+hyperparameter search identifies a configuration, never a cause}, and separating
+the two requires a deliberate experiment.
 
 \textbf{Evidence that tuning dominates algorithm selection.} In the comparison of
 \cref{sec:benchmark}, tuning \SAC improved final error by 38\,\%, whereas the
