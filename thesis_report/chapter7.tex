@@ -339,27 +339,32 @@ run analysed in the preceding sections.}
 \toprule
 \textbf{Seed} & \textbf{Final error} & \textbf{Closest} & \textbf{Effort ratio} & \textbf{Pearson $r$} & \textbf{Success} \\
 \midrule
-0 & 0.1063 & 0.0740 & \textbf{1.71} & \textbf{0.865} & 0.04 \\
-1 & 0.1019 & 0.0742 & 1.91 & 0.823 & 0.20 \\
-2 & 0.0988 & 0.0728 & 2.12 & 0.759 & 0.00 \\
-3 & 0.1070 & 0.0760 & 1.86 & 0.825 & 0.08 \\
-4 & 0.1023 & 0.0676 & 1.97 & 0.767 & 0.06 \\
+0 & 0.1142 & 0.0766 & \textbf{1.71} & \textbf{0.865} & 0.04 \\
+1 & 0.1086 & 0.0785 & 1.91 & 0.823 & 0.20 \\
+2 & 0.1034 & 0.0757 & 2.12 & 0.759 & 0.00 \\
+3 & 0.1066 & 0.0672 & 1.86 & 0.825 & 0.08 \\
+4 & 0.1041 & 0.0691 & 1.97 & 0.767 & 0.06 \\
 \midrule
-\textbf{mean} & $0.1033$ & $0.0729$ & $1.914$ & $0.808$ & $0.076$ \\
-\textbf{std}  & $0.0034$ & $0.0032$ & $0.150$ & $0.044$ & $0.075$ \\
+\textbf{mean} & $0.1074$ & $0.0734$ & $1.914$ & $0.808$ & $0.076$ \\
+\textbf{std}  & $0.0043$ & $0.0050$ & $0.150$ & $0.044$ & $0.075$ \\
 \bottomrule
 \end{tabular}
 \label{tab:replication}
 \end{table}
 
+The accuracy columns are the corrected evaluation of \cref{sec:evaldefects},
+averaged over three target seeds. The effort ratio and correlation come from the
+load-sharing analysis, which draws its own episodes and was never affected by the
+duplicate-reset defect; those columns are unchanged.
+
 Three findings follow, and only the first was anticipated.
 
 \subsection{The accuracy result is a property of the method}
 
-Final error varies by 3.3\,\% across five independent runs
-($0.1033 \pm 0.0034$\,m) and closest approach by 4.4\,\%
-($0.0729 \pm 0.0032$\,m). Every run ends closer than \SI{0.11}{\meter} and
-reaches within \SI{0.076}{\meter} at some point; the blow-up rate is exactly zero
+Final error varies by 4.0\,\% across five independent runs
+($0.1074 \pm 0.0043$\,m) and closest approach by 6.8\,\%
+($0.0734 \pm 0.0050$\,m). Every run ends closer than \SI{0.115}{\meter} and
+reaches within \SI{0.079}{\meter} at some point; the blow-up rate is exactly zero
 in all five. The graded proximity measures are similarly stable: episodes ending
 within \SI{10}{\centi\meter} range from 0.56 to 0.64.
 
