@@ -67,10 +67,54 @@ TARGETS = [
 
 
 def cosine_between(H1: np.ndarray, H2: np.ndarray) -> float:
-    """Mean best-match cosine similarity between two synergy sets."""
+    """
+    Mean cosine similarity between two synergy sets under a ONE-TO-ONE
+    assignment.
+
+    WARNING ON STABILITY. This statistic is sensitive to the sample it is
+    computed on, far more so than the VAF. Measured on one policy, varying the
+    episode count gave 0.873 / 0.805 / 0.950 / 0.810 / 0.739 at 8 / 12 / 15 /
+    20 / 25 episodes -- a spread of 0.21, non-monotone, i.e. sampling noise
+    rather than convergence. VAF over the same range moved only 0.818-0.870.
+
+    The cause is NMF itself: the factorisation is not unique, and the recovered
+    basis depends on initialisation and on the particular sample, so comparing
+    two independently fitted bases inherits that instability.
+
+    Any figure from this function should therefore be reported as a mean over
+    several resampled subsets with its spread, never as a single value. See
+    `agreement_resampled` below.
+    """
+    from scipy.optimize import linear_sum_assignment
+
     a = H1 / (np.linalg.norm(H1, axis=1, keepdims=True) + 1e-12)
     b = H2 / (np.linalg.norm(H2, axis=1, keepdims=True) + 1e-12)
-    return float(np.mean(np.max(a @ b.T, axis=1)))
+    S = a @ b.T
+    r, c = linear_sum_assignment(-S)
+    return float(np.mean(S[r, c]))
+
+
+def agreement_resampled(act_traces, cls_traces, n_sub: int = 15,
+                        reps: int = 6, seed: int = 0):
+    """
+    Policy-vs-classical synergy agreement over `reps` random subsets of
+    `n_sub` episodes. Returns (mean, sd, values).
+
+    This is the reportable form of `cosine_between`, for the reason documented
+    there.
+    """
+    from analysis.synergies import _vaf
+    rng = np.random.default_rng(seed)
+    pool = len(act_traces)
+    out = []
+    for _ in range(reps):
+        idx = rng.choice(pool, min(n_sub, pool), replace=False)
+        A = np.clip(np.vstack([act_traces[i] for i in idx]), 0.0, None)
+        C = np.clip(np.vstack([cls_traces[i] for i in idx]), 0.0, None)
+        out.append(cosine_between(_vaf(A, config.N_SYNERGIES)[2],
+                                  _vaf(C, config.N_SYNERGIES)[2]))
+    v = np.asarray(out)
+    return float(v.mean()), float(v.std(ddof=1)), v.tolist()
 
 
 def collect(run_dir: str, algo: str, episodes: int):

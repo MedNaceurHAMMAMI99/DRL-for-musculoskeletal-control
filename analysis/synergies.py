@@ -57,12 +57,25 @@ def _vaf(X: np.ndarray, k: int, seed: int = 0):
 
 
 def _cosine_to_reference(H: np.ndarray) -> float:
-    """Mean best-match cosine similarity of extracted synergies to the reference."""
+    """
+    Mean cosine similarity of extracted synergies to the reference, under a
+    ONE-TO-ONE assignment.
+
+    A plain best-match (`max` over references for each extracted synergy) allows
+    several extracted synergies to claim the same reference while others go
+    unmatched, which inflates the score: measured on real data, only three of
+    four references were distinctly matched and the inflation was about 0.10.
+    The Hungarian assignment enforces a bijection, which is what a synergy
+    correspondence claim means.
+    """
+    from scipy.optimize import linear_sum_assignment
+
     ref = REFERENCE_SYNERGIES / (np.linalg.norm(REFERENCE_SYNERGIES, axis=1,
                                                  keepdims=True) + 1e-12)
     ext = H / (np.linalg.norm(H, axis=1, keepdims=True) + 1e-12)
     sims = ext @ ref.T                    # k_ext x k_ref
-    return float(np.mean(np.max(sims, axis=1)))
+    r, c = linear_sum_assignment(-sims)
+    return float(np.mean(sims[r, c]))
 
 
 def analyse_synergies(activation_traces, k: int = None, seed: int = 0) -> dict:

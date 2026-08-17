@@ -28,8 +28,9 @@ bonus. Raising it (\cref{sec:effortsweep}) improves load-sharing fidelity
 monotonically and across five seeds per setting: the effort ratio falls
 $1.914 \pm 0.150 \rightarrow 1.406 \pm 0.092 \rightarrow 1.304 \pm 0.025$ and
 agreement with the classical solution rises
-$0.808 \rightarrow 0.919 \rightarrow 0.943$, with no measurable cost in reaching
-accuracy and with closest approach in fact improving. Seed variance in the
+$0.808 \rightarrow 0.919 \rightarrow 0.943$, for a mild accuracy cost --- final
+error rises about 8\,\% across the range while closest approach is unchanged, so
+the loss is in holding position rather than in reaching it. Seed variance in the
 effort ratio collapses sixfold over the same range, confirming that the original
 objective was underdetermined in precisely this dimension. It is therefore a
 usable fast approximation of which muscles act and in what proportion, at
@@ -105,10 +106,13 @@ Falconer and Winter (\cref{sec:icc}), and the synergy decomposition
 (\cref{sec:synergies}) are methodologically unrelated, yet order the
 configurations consistently and localise the same residual defect to the same
 muscle group. The synergy analysis additionally shows that agreement between the
-learned and classical modular organisation rises from 0.647 to 0.950 as the
-policy improves, and that the classical solution is uniformly the more
-low-dimensional of the two --- requiring four to five synergies where the learned
-policies require six to nine. That the same hyperparameter change improved
+learned and classical modular organisation rises as the policy improves --- from
+$0.676 \pm 0.054$ to $0.851 \pm 0.129$ on resampling --- and that the classical
+solution is uniformly the more low-dimensional of the two, requiring four to five
+synergies where the learned policies require six to nine. This is the least
+well-determined of the three analyses: the synergy statistic's sampling spread is
+comparable to the effect it measures (\cref{sec:synergies}), and the ordering
+survives while the magnitude should not be pressed. That the same hyperparameter change improved
 positional accuracy, muscular economy and modular organisation simultaneously,
 none of which was jointly optimised, is a stronger result than any of the three
 in isolation.

@@ -563,13 +563,53 @@ policy and from static optimisation on the same trajectories.}
 Two observations follow, and a third must be treated with caution.
 
 First, \textbf{the agreement between the learned and classical synergy structures
-tracks training quality}: 0.647 for untuned \SAC, 0.900 once tuned, and 0.950 for
-the tuned policy trained three times longer. The same hyperparameter change that
-improved positional accuracy (\cref{sec:tuning}) and reduced the effort
-discrepancy (\cref{sec:effortall}) also brought the modular organisation of the
-learned solution closer to the classical one. Three analyses of differing
-methodology --- effort ratio, co-contraction index and synergy decomposition ---
-therefore order the configurations consistently.
+tracks training quality}, though with substantially more uncertainty than a
+single measurement suggests.
+
+The values in \cref{tab:synergies} are each computed from one sample of
+episodes, and that statistic proves unstable. Varying the episode count for a
+single fixed policy gave 0.873, 0.805, 0.950, 0.810 and 0.739 at 8, 12, 15, 20
+and 25 episodes --- a spread of 0.21, and non-monotone, so it is sampling noise
+rather than convergence. The VAF over the same range moved only 0.818--0.870, so
+the instability is in the \emph{basis matching}, not in the decomposition:
+non-negative matrix factorisation has no unique solution, and two independently
+fitted bases inherit that ambiguity.
+
+Re-estimated as a mean over six random 15-episode subsets:
+
+\begin{table}[H]
+\centering
+\caption{Policy-versus-classical synergy agreement, resampled. Single-sample
+values are those of \cref{tab:synergies}.}
+\begin{tabular}{@{} L{5.6cm} C{3.0cm} C{3.6cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Single sample} & \textbf{Resampled (mean $\pm$ sd)} \\
+\midrule
+\SAC default & 0.647 & $0.676 \pm 0.054$ \\
+\SAC tuned, 300k & 0.950 & $0.851 \pm 0.129$ \\
+\bottomrule
+\end{tabular}
+\label{tab:synergyresampled}
+\end{table}
+
+The ordering survives --- the gap of 0.175 exceeds the pooled spread --- so the
+qualitative claim stands: tuning brings the learned modular organisation closer
+to the classical one. But the reported 0.950 lies near the top of its own
+resampled range $[0.708, 0.979]$, and the honest figure is $0.851 \pm 0.129$.
+
+\textbf{This is the weakest of the three convergent analyses}, and it should be
+weighted accordingly. The effort ratio (five seeds, non-overlapping
+distributions) and the co-contraction index are far better determined than the
+synergy comparison, which rests on a statistic whose sampling spread is
+comparable to the effect it measures. The three analyses do order the
+configurations consistently, but only two of them do so with confidence.
+
+A second methodological point applies to every value in \cref{tab:synergies}. The
+similarity was originally computed as a best match for each extracted synergy,
+which permits several to claim the same reference while others go unmatched; on
+real data only three of four references were distinctly matched, inflating the
+score by roughly 0.10. All figures here use a one-to-one (Hungarian) assignment
+instead, which is what a correspondence between synergy sets means.
 
 Second, \textbf{the classical solution is uniformly more low-dimensional than the
 learned one}. Static optimisation requires four or five synergies to reach
