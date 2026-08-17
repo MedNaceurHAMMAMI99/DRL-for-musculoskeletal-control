@@ -20,36 +20,75 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from rl import algorithms as algo_registry
 
 
-def load_model(run_dir: str = None, algo: str = "SAC", domain_rand: bool = False):
-    """Load a trained model + normalisation stats from run_dir."""
+def load_model(run_dir: str = None, algo: str = "SAC", domain_rand: bool = False,
+               target_seed: int = 0, device: str = None):
+    """
+    Load a trained model + normalisation stats from run_dir.
+
+    `target_seed` seeds the EVALUATION ENVIRONMENT, and therefore the sequence of
+    reaching targets the policy is scored on. It must be set here rather than
+    passed to `reset()`: ArmReachEnv draws targets from `self.rng`, which is
+    seeded only in `__init__`, so `env.reset(seed=...)` has no effect on target
+    sampling (Gymnasium's `super().reset(seed=...)` seeds `self.np_random`, which
+    this environment does not use).
+
+    This matters more than it appears. Every configuration in this project was
+    evaluated at target_seed=0, which makes all BETWEEN-configuration comparisons
+    paired on an identical test set -- a genuine strength. But it also means the
+    absolute values describe one particular draw of targets, and measurement
+    shows that draw contributes 3-4x more variance than the training seed does.
+    Vary this to quantify that.
+
+    `device` defaults to config.DEVICE. Without it SB3 loads with device="auto",
+    which silently selects CUDA whenever it is available -- so a run intended for
+    the CPU would evaluate on the GPU.
+    """
     from rl.environment import ArmReachEnv
 
     run_dir = run_dir or config.RUNS_DIR
-    envs    = DummyVecEnv([lambda: ArmReachEnv(domain_rand=domain_rand, seed=0)])
+    envs    = DummyVecEnv([lambda: ArmReachEnv(domain_rand=domain_rand,
+                                               seed=target_seed)])
     envs    = VecNormalize.load(os.path.join(run_dir, "vecnormalize.pkl"), envs)
     envs.training    = False
     envs.norm_reward = False
     cls   = algo_registry.REGISTRY[algo.upper()]["cls"]
-    model = cls.load(os.path.join(run_dir, "model"), env=envs)
+    model = cls.load(os.path.join(run_dir, "model"), env=envs,
+                     device=device or config.DEVICE)
     return model, envs
 
 
-def evaluate(model, envs, n_episodes: int = None, seed: int = 0,
+def evaluate(model, envs, n_episodes: int = None, seed: int = None,
              log_activations: bool = False) -> dict:
     """
     Roll out the deterministic policy for n_episodes.
+
+    `seed` is accepted for backward compatibility and IGNORED: the target
+    sequence is fixed when the environment is constructed, so it must be set via
+    `load_model(target_seed=...)`. It is kept in the signature only so existing
+    call sites do not break, and a warning is issued if it is passed.
 
     Returns per-episode arrays plus aggregate means. If log_activations, also
     returns 'activations' — a list of (T, 9) arrays, one per episode.
     """
     n_episodes = n_episodes or config.EVAL_EPISODES
+    if seed is not None:
+        import warnings
+        warnings.warn("evaluate(seed=...) has no effect; the target sequence is "
+                      "fixed at environment construction. Use "
+                      "load_model(target_seed=...) instead.", RuntimeWarning,
+                      stacklevel=2)
     successes, rewards, errors, energies, times_us, lengths = [], [], [], [], [], []
     min_errors = []
     act_traces = []
     blew_ups   = []
 
+    # One reset before the loop, not one per iteration. DummyVecEnv auto-resets
+    # when an episode terminates, so resetting again at the top of each iteration
+    # consumed TWO targets per episode and scored on every other one -- which
+    # silently gave this function a different test set from force_comparison.py
+    # and run_conventional.py, and made those comparisons unpaired.
+    obs = envs.reset()
     for _ in range(n_episodes):
-        obs   = envs.reset()
         ep_r  = 0.0
         ep_e  = 0.0
         steps = 0

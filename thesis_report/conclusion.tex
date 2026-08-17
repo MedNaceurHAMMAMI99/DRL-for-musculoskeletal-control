@@ -167,6 +167,16 @@ been corrected downward. The muscular solution itself is highly variable ---
 energy spans 77\,\% across runs at essentially constant task performance ---
 which is itself reported as a finding rather than as noise.
 
+\textbf{Uncertainty was understated until a late audit.} Four defects in the
+evaluation path (\cref{sec:evaldefects}) meant every configuration was scored on
+one fixed draw of 50 targets, so every interval reported was training-seed spread
+alone. Measurement shows the target draw contributes comparable or greater
+variance (\cref{sec:variance}) --- for a single policy across five target seeds,
+roughly four times the training-seed spread. All figures have been re-measured
+across three target seeds and both components are now reported separately.
+Between-configuration comparisons are unaffected, being paired on identical
+targets; it is the absolute values whose intervals were too narrow.
+
 \textbf{No statistical significance is established anywhere in this work.} Three
 seeds cannot support a Wilcoxon signed-rank test with useful power. No $p$-value
 is reported, deliberately; where configurations differ by less than their spread,

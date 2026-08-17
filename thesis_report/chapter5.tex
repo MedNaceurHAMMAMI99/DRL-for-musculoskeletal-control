@@ -197,6 +197,102 @@ the cosine similarity between non-negative force vectors has a floor well above
 zero, so a permutation null is constructed by shuffling, at each timestep, which
 muscle each force magnitude belongs to (\cref{tab:forceoverall}).
 
+
+\subsection{Defects in the evaluation path, and what they changed}
+\label{sec:evaldefects}
+
+A late audit of the evaluation code found four defects. None produced an
+arithmetically wrong number, but two changed which episodes the reported figures
+describe, so every evaluation in this work was repeated with the corrected code.
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
+\item \textbf{The evaluation seed was dead code.} \texttt{evaluate(seed=\ldots)}
+never referenced its own argument, and \texttt{load\_model} fixed the environment
+seed at zero. Verified: two loads with different seed arguments return
+byte-identical results.
+
+\item \textbf{\texttt{reset(seed=\ldots)} does not reseed target sampling.}
+Targets are drawn from a generator seeded only in \texttt{\_\_init\_\_};
+Gymnasium's \texttt{super().reset(seed=\ldots)} seeds a different generator that
+this environment never uses. The target sequence can therefore only be changed at
+construction.
+
+\item \textbf{Two resets per episode.} The evaluation loop reset the vectorised
+environment at the top of each iteration, while \texttt{DummyVecEnv} also
+auto-resets on termination. Measured: the inner environment was reset twice per
+episode, so evaluation scored on every \emph{other} target --- a different test
+set from the one the force and conventional-controller analyses used, which made
+those comparisons unpaired.
+
+\item \textbf{A diverged episode could be scored a success.} On divergence the
+joint speed is forced to zero, which automatically satisfies the ``settled'' half
+of the success criterion. An episode blowing up within \SI{2}{\centi\meter} of
+the target would have been recorded as a success and paid the success bonus.
+Latent --- the divergence rate is zero throughout --- but a reward exploit of
+precisely the kind \cref{sec:exploit} documents.
+\end{enumerate}
+
+\subsection{Uncertainty was understated: two components, not one}
+\label{sec:variance}
+
+The first three defects share a consequence. Every configuration was evaluated on
+one fixed draw of 50 targets, so every $\pm$ previously reported was
+\textbf{training-seed spread on a single test set}. The contribution of the
+target draw itself was never measured.
+
+It is not negligible. Evaluating one policy across five target seeds gives a
+final error of $0.1130 \pm 0.0146$\,m, against $0.1033 \pm 0.0034$\,m across five
+\emph{training} seeds on a fixed test set --- roughly four times the spread. The
+graded rates move further still: \texttt{reach\_5cm} ranges from $0.16$ to $0.34$
+across target draws, and the value previously reported was the largest of the
+five.
+
+Every policy was therefore re-evaluated across three target seeds, and the two
+components are now reported separately.
+
+\begin{table}[H]
+\centering
+\caption{Variance decomposition after re-evaluation. $\sigma_{\text{train}}$ is
+the spread across training seeds with targets averaged out;
+$\sigma_{\text{target}}$ the spread across target draws with training seeds
+averaged out.}
+\small
+\begin{tabular}{@{} L{2.4cm} L{3.4cm} C{2.0cm} C{2.4cm} C{2.4cm} C{2.0cm} @{}}
+\toprule
+\textbf{Config.} & \textbf{Metric} & \textbf{mean} & $\boldsymbol{\sigma_{\text{train}}}$ & $\boldsymbol{\sigma_{\text{target}}}$ & \textbf{total} \\
+\midrule
+$w_2 = 1$  & final error & 0.1074 & 0.0043 & 0.0066 & 0.0079 \\
+           & closest     & 0.0734 & 0.0050 & 0.0031 & 0.0058 \\
+           & ends $<$5\,cm & 0.260 & 0.0374 & 0.0666 & 0.0764 \\
+\midrule
+$w_2 = 5$  & final error & 0.1114 & 0.0040 & 0.0035 & 0.0053 \\
+           & closest     & 0.0750 & 0.0037 & 0.0034 & 0.0050 \\
+\midrule
+$w_2 = 20$ & final error & 0.1161 & 0.0095 & 0.0053 & 0.0108 \\
+           & closest     & 0.0737 & 0.0073 & 0.0015 & 0.0074 \\
+           & ends $<$5\,cm & 0.192 & 0.0477 & 0.0174 & 0.0508 \\
+\bottomrule
+\end{tabular}
+\label{tab:variance}
+\end{table}
+
+For most quantities $\sigma_{\text{target}}$ is comparable to or larger than
+$\sigma_{\text{train}}$. \textbf{Which targets a policy is tested on matters at
+least as much as which seed it was trained from}, and reporting only the latter
+understated the uncertainty on every absolute figure in this work.
+
+\subsection*{What this does \emph{not} undermine}
+
+One consequence of the defect is favourable. Because the environment seed was
+fixed, every configuration was evaluated on \emph{identical} targets, so all
+between-configuration comparisons are paired. Paired comparison removes the
+target draw as a source of difference and is the more powerful design; it was
+arrived at by accident, but the comparative claims in this work --- the effort
+sweep, the ablations, the algorithm ranking --- rest on it and are unaffected.
+
+What needed correcting is the \emph{absolute} values and their stated
+uncertainty, not the comparisons between them.
+
 \subsection{Computing Hardware}
 
 All results in this thesis were produced on a single consumer laptop:

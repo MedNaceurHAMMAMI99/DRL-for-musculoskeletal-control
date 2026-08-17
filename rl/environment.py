@@ -296,7 +296,13 @@ class ArmReachEnv(gym.Env):
         reward  = self.w4 - (self.w1 * (err**2 + 0.5 * err)
                              + self.w2 * e_eff + self.w3 * d_act)
         reward += self.w7 * np.exp(-err / config.PRECISION_SCALE)
-        success = bool(err < 0.02 and v < 0.1)
+        # A diverged episode can never be a success. On divergence `v` is
+        # forced to 0.0 (there is no meaningful velocity to report), which would
+        # otherwise satisfy the "settled" half of the criterion automatically --
+        # so an episode that blew up within 2 cm of the target would be scored a
+        # success AND collect w5. Latent while blow_up_rate is 0, but it is a
+        # reward exploit of exactly the kind documented in the module docstring.
+        success = bool(err < 0.02 and v < 0.1 and not blew_up)
         if success:
             reward += self.w5          # per step held on target, not terminal
         if blew_up:

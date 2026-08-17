@@ -638,9 +638,9 @@ achievable floor established in \cref{sec:effortfloor}.}
 \toprule
 \textbf{Config.} & \textbf{$n$} & \textbf{Effort ratio} & \textbf{Pearson $r$} & \textbf{Final error} & \textbf{Closest} & \textbf{Energy} \\
 \midrule
-$w_2 = 1$  & 5 & $1.914 \pm 0.150$ & $0.808 \pm 0.044$ & $0.1033 \pm 0.0034$ & $0.0729$ & 327\,048 \\
-$w_2 = 5$  & 5 & $1.406 \pm 0.092$ & $0.919 \pm 0.016$ & $0.1023 \pm 0.0074$ & $0.0681$ & 104\,598 \\
-$\mathbf{w_2 = 20}$ & 5 & $\mathbf{1.304 \pm 0.025}$ & $\mathbf{0.943 \pm 0.008}$ & $0.1072 \pm 0.0148$ & $\mathbf{0.0672}$ & \textbf{37\,076} \\
+$w_2 = 1$  & 5 & $1.914 \pm 0.150$ & $0.808 \pm 0.044$ & $0.1074 \pm 0.0079$ & $0.0734$ & 327\,048 \\
+$w_2 = 5$  & 5 & $1.406 \pm 0.092$ & $0.919 \pm 0.016$ & $0.1114 \pm 0.0053$ & $0.0750$ & 104\,598 \\
+$\mathbf{w_2 = 20}$ & 5 & $\mathbf{1.304 \pm 0.025}$ & $\mathbf{0.943 \pm 0.008}$ & $0.1161 \pm 0.0108$ & $0.0737$ & \textbf{37\,076} \\
 \midrule
 Conventional & 1 & $1.263$ & $0.931$ & 0.165 & --- & 102\,876 \\
 \bottomrule
@@ -674,12 +674,20 @@ The distributions are cleanly separated: every $w_2 = 20$ seed (1.278--1.340)
 lies below every $w_2 = 5$ seed (1.336--1.557), which in turn lies below every
 $w_2 = 1$ seed (1.710--2.116).
 
-\textbf{There is no measurable accuracy cost.} Final error is
-$0.1033 \pm 0.0034$, $0.1023 \pm 0.0074$ and $0.1072 \pm 0.0148$ --- mutually
-overlapping, with no ordering supported. Closest approach in fact \emph{improves}
-monotonically, $0.0729 \rightarrow 0.0681 \rightarrow 0.0672$. The expectation
-stated in \cref{sec:whygap}, that reduced effort would be bought with worse
-accuracy, is not borne out over the range tested.
+\textbf{There is a mild accuracy cost.} Under the corrected evaluation
+(\cref{sec:evaldefects}) final error rises monotonically with the effort weight:
+$0.1074 \pm 0.0079$, $0.1114 \pm 0.0053$, $0.1161 \pm 0.0108$. The end-to-end
+degradation from $w_2 = 1$ to $w_2 = 20$ is about 8\,\%, and the fraction of
+episodes ending within \SI{5}{\centi\meter} falls from $0.26$ to $0.19$. Closest
+approach is unaffected ($0.0734$, $0.0750$, $0.0737$), so the loss is in holding
+position rather than in reaching it.
+
+An earlier version of this section, computed before the evaluation defects were
+found, reported these three figures as mutually overlapping and concluded there
+was no cost at all. On the corrected test set the trend is monotone and the
+expectation stated in \cref{sec:whygap} --- that reduced effort would be bought
+with some accuracy --- is borne out, though the price is modest: a 32\,\%
+reduction in wasted effort for an 8\,\% increase in final error.
 
 \textbf{Seed variance collapses as the effort weight rises.} The standard
 deviation of the effort ratio falls $0.150 \rightarrow 0.092 \rightarrow 0.025$,

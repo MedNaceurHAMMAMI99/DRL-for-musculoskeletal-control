@@ -513,10 +513,10 @@ had a corrected $\gamma$.}
 \toprule
 \textbf{Algorithm} & \textbf{Before ($\gamma = 0.99$)} & \textbf{After ($\gamma = 0.957$)} & \textbf{Change} \\
 \midrule
-\SAC  & $0.2613 \pm 0.0203$ & $\mathbf{0.1636 \pm 0.0066}$ & $-37$\,\% \\
-\DDPG & $0.4161 \pm 0.0189$ & $\mathbf{0.2279 \pm 0.0074}$ & $\mathbf{-45}$\,\% \\
-\TDIII & $0.2786 \pm 0.0110$ & $0.2397 \pm 0.0272$ & $-14$\,\% \\
-\PPO  & $0.4231 \pm 0.0351$ & $0.4644 \pm 0.0480$ & $+10$\,\% \\
+\SAC  & $0.2613 \pm 0.0203$ & $\mathbf{0.1909 \pm 0.0341}$ & $-27$\,\% \\
+\DDPG & $0.4161 \pm 0.0189$ & $\mathbf{0.2510 \pm 0.0383}$ & $\mathbf{-40}$\,\% \\
+\TDIII & $0.2786 \pm 0.0110$ & $0.2579 \pm 0.0348$ & $-7$\,\% \\
+\PPO  & $0.4231 \pm 0.0351$ & $0.4661 \pm 0.0401$ & $+10$\,\% \\
 \bottomrule
 \end{tabular}
 \label{tab:fairbench}
@@ -524,16 +524,21 @@ had a corrected $\gamma$.}
 
 \subsection{The original ordering was an artefact}
 
-\DDPG{} improves by 45\,\% and overtakes \TDIII. The ranking changes from
-$\SAC < \TDIII < \DDPG < \PPO$ to $\SAC < \DDPG < \TDIII < \PPO$.
+\DDPG{} improves by 40\,\% and overtakes \TDIII. The ranking changes from
+$\SAC < \TDIII < \DDPG < \PPO$ to $\SAC < \DDPG < \TDIII < \PPO$. (The
+``after'' column reports the corrected evaluation of \cref{sec:evaldefects},
+with uncertainty covering both training and target draws; the ``before'' column
+is reproduced as originally published, on a single test set, and its intervals
+are correspondingly too narrow.)
 
 \Cref{sec:benchmark} reported \DDPG{} as clearly the weakest off-policy method
 and attributed this to its lack of twin critics --- a textbook explanation, and
 in this instance a wrong one. \DDPG{} was not failing for want of twin critics;
 it was failing because its discount factor was mismatched to the task, and it
 suffered more from that than the others did. Once corrected it is
-indistinguishable from \TDIII{} ($0.2279 \pm 0.0074$ against
-$0.2397 \pm 0.0272$, overlapping), and no ordering between them is supported.
+indistinguishable from \TDIII{} ($0.2510 \pm 0.0383$ against
+$0.2579 \pm 0.0348$, heavily overlapping), and no ordering between them is
+supported.
 
 \textbf{This vindicates the concern that motivated the re-run.} A comparison in
 which one entrant is correctly configured and the rest are not does not measure
@@ -561,10 +566,10 @@ The claim of \cref{sec:benchmark} was that tuning dominates algorithm selection.
 It can now be stated more precisely, and more strongly.
 
 With every algorithm correctly configured, the interval between the best and the
-second-best off-policy method is $0.1636$ to $0.2279$, a gap of
-\SI{0.064}{\meter}. The improvement obtained in \DDPG{} by correcting $\gamma$
-alone was \SI{0.188}{\meter} --- roughly \textbf{three times the gap between
-algorithms}.
+second-best off-policy method is $0.1909$ to $0.2510$, a gap of
+\SI{0.060}{\meter}. The improvement obtained in \DDPG{} by correcting $\gamma$
+alone was \SI{0.165}{\meter} --- still roughly \textbf{three times the gap
+between algorithms}.
 
 \begin{quote}
 On this task, choosing the discount factor correctly mattered about three times
