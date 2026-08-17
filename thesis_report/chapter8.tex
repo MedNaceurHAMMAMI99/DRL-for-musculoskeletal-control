@@ -158,10 +158,14 @@ reaching with a restrained rotational degree of freedom.
 The magnitude of the effort discrepancy is a property of the reward employed. Its
 effort term is a normalised sum of squared forces weighted for numerical balance
 against the distance term, which is neither the classical criterion nor scaled to
-match it. A different formulation would yield a different figure, which is
-precisely the experiment proposed in \cref{sec:whygap}.
+match it. That this is the operative cause is not merely argued but tested:
+\cref{sec:effortsweep} reports the sweep, and raising the weight moves the effort
+ratio from $1.914$ to $1.304$ against an achievable floor of $1.263$.
 
-Finally, the statistical basis is limited throughout. The principal result rests
-on a single training seed, the algorithm comparison on three, and no significance
-test is reported anywhere in this work. These constraints are set out in full in
-\cref{ch:conclusion}.
+Finally, the statistical basis is limited throughout. The principal configuration
+is replicated across five seeds and the algorithm comparison across three; no
+significance test is reported anywhere in this work, because three seeds cannot
+support one with useful power. \Cref{sec:accidental} gives the sharpest available
+measure of the resulting uncertainty: an identical configuration, trained and
+evaluated twice by this project, differed by \SI{0.036}{\meter}. These
+constraints are set out in full in \cref{ch:conclusion}.

@@ -10,15 +10,18 @@ The overall architecture is organized into four functional layers
 (Figure~\ref{fig:arch}):
 \begin{enumerate}
   \item \textbf{Physical layer}: multibody dynamics handled by \MuJoCo{}.
-  \item \textbf{Muscle layer}: complete Hill model with Newton--Raphson
-        integration (5--40 iterations per muscle per timestep ---
-        see Section~\ref{sec:compute_bottleneck} for the computational cost
-        and why this layer is the bottleneck targeted for RL replacement).
+  \item \textbf{Muscle layer}: Hill-type model with Newton--Raphson
+        fibre--tendon integration (5--40 iterations per muscle per timestep;
+        \cref{sec:compute_bottleneck} reports its cost).
   \item \textbf{\RL{} interface layer}: Gymnasium API with Domain Randomization.
   \item \textbf{Agent layer}: \DRL{} algorithm or reference controller. After
         training, the agent produces muscle activations via a single forward
-        pass through the policy network, \emph{bypassing} the Newton--Raphson
-        loop entirely at deployment time.
+        pass through the policy network, at a cost that is fixed and independent
+        of biomechanical state. Earlier drafts described this layer as
+        \emph{bypassing} the solver and framed the muscle layer as ``the
+        bottleneck targeted for RL replacement''; \cref{sec:latencycaveat} shows
+        that framing does not survive a like-for-like measurement, and it has
+        been dropped.
 \end{enumerate}
 
 \begin{figure}[H]
@@ -34,7 +37,7 @@ The overall architecture is organized into four functional layers
     \node[box] (rl)   at (0,6.5)  {DRL Algorithm / PD Controller\\(PPO / SAC / TD3 / DDPG / Baseline)};
     \node[box] (gym)  at (0,4.0)  {Gymnasium Interface\\(ArmMusculoEnv + Domain Randomization)};
     \node[box] (hill) at (0,1.5)  {Hill Model\\(9 muscles -- Newton--Raphson)};
-    \node[box] (muj)  at (0,-1.0) {\MuJoCo{}\\(multibody dynamics, 6 DOF)};
+    \node[box] (muj)  at (0,-1.0) {\MuJoCo{}\\(multibody dynamics, 4 DOF)};
     \draw[arrow] (rl.south) -- node[lab, right]{action $a_t \in [0,1]^9$} (gym.north);
     \draw[arrow] (gym.south) -- node[lab, right]{excitation $u$} (hill.north);
     \draw[arrow] (hill.south) -- node[lab, right]{muscle force $F^\text{muscle}$} (muj.north);
@@ -55,11 +58,28 @@ The overall architecture is organized into four functional layers
 \subsection{Anatomical Description}
 
 The model represents a simplified upper limb composed of three rigid
-segments: upper arm (humerus), forearm (radius--ulna), and hand. The modeled joints
-are the shoulder (3~DOF: flexion/extension, abduction/adduction, internal/external
-rotation), elbow (1~DOF: flexion/extension), and wrist (2~DOF:
-flexion/extension, pronation/supination). The model therefore includes a total of
-\textbf{6~DOF}.
+segments: upper arm (humerus, \SI{1.98}{\kilo\gram}), forearm (radius--ulna,
+\SI{1.18}{\kilo\gram}), and hand (\SI{0.45}{\kilo\gram}), for a moving mass of
+\SI{3.61}{\kilo\gram}. The modelled joints are the shoulder (3~DOF:
+flexion/extension, abduction/adduction, internal/external rotation) and the elbow
+(1~DOF: flexion/extension). The hand segment is carried rigidly by the forearm;
+there is no wrist joint. The model therefore has \textbf{4~DOF}, actuated by nine
+muscles, which is the nine-into-four redundancy the thesis is about.
+
+\begin{quote}
+\small
+An earlier version of this section described a six-degree-of-freedom model with a
+two-\hspace{0pt}DOF wrist. No wrist joint was ever implemented. Queried directly,
+the compiled model reports \texttt{nq}~$=$~\texttt{nv}~$=4$ and \texttt{nu}~$=9$,
+with four named joints (\texttt{shoulder\_flex}, \texttt{shoulder\_abd},
+\texttt{shoulder\_rot}, \texttt{elbow\_flex}). The description has been corrected
+to the model that was actually built and used for every result in this thesis.
+\end{quote}
+
+One of those four is further constrained. \Cref{sec:rotation} reports that
+no muscle in the nine-muscle set can generate internal/external rotation of the
+humerus --- the rotator cuff is absent --- so that axis is held near neutral. The
+effective control problem is nine muscles over three freely actuated axes.
 
 The inertial parameters are taken from the anthropometric database
 of~\parencite{Winter2009}, for a reference subject of \SI{75}{\kilo\gram} and
@@ -71,26 +91,33 @@ of~\parencite{Winter2009}, for a reference subject of \SI{75}{\kilo\gram} and
            Source: \parencite{Winter2009}.}
   \label{tab:segments}
   \rowcolors{2}{lightblue!30}{white}
-  \begin{tabular}{@{} L{4.2cm} C{2cm} C{2.3cm} C{2.3cm} C{2.5cm} @{}}
+  \begin{tabular}{@{} L{4.2cm} C{2.4cm} C{3.0cm} C{3.0cm} @{}}
     \toprule
     \rowcolor{lightblue}
-    \textbf{Segment} & \textbf{Mass (kg)} & \textbf{Length (m)} &
-    \textbf{$I_{cg}$ (kg$\cdot$m$^2$)} & \textbf{DOF} \\
+    \textbf{Segment} & \textbf{Mass (kg)} &
+    \textbf{$I_{xx}$ (kg$\cdot$m$^2$)} & \textbf{DOF} \\
     \midrule
-    Upper arm (humerus)       & 2{,}05 & 0{,}286 & 0{,}015 & 3 (shoulder)  \\
-    Forearm (radius--ulna)    & 1{,}39 & 0{,}269 & 0{,}009 & 1 (elbow)     \\
-    Hand                      & 0{,}60 & 0{,}186 & 0{,}001 & 2 (wrist)     \\
+    Upper arm (humerus)       & 1.98 & 0.0215 & 3 (shoulder)  \\
+    Forearm (radius--ulna)    & 1.18 & 0.0098 & 1 (elbow)     \\
+    Hand                      & 0.45 & 0.0003 & 0 (rigid)     \\
     \midrule
-    \textbf{Total}            & \textbf{4{,}04} & \textbf{0{,}741} & --- & \textbf{6} \\
+    \textbf{Total}            & \textbf{3.61} & --- & \textbf{4} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Physiological joint limits are imposed in the MJCF model:
-elbow flexion $[0^\circ, 145^\circ]$, shoulder flexion $[-60^\circ, 180^\circ]$,
-shoulder abduction $[-45^\circ, 90^\circ]$, internal/external rotation
-$[-90^\circ, 90^\circ]$, wrist flexion/extension $[-70^\circ, 70^\circ]$, and
-pronation/supination $[-80^\circ, 80^\circ]$.
+Every value in \cref{tab:segments} is read back from the compiled model rather
+than transcribed from the design intent. An earlier version of this table
+reported $2.05/1.39/0.60$\,kg for a total of $4.04$\,kg and assigned two degrees
+of freedom to a wrist; none of those figures corresponds to the model used for
+the results in this thesis.
+
+Joint limits as compiled, in degrees:
+elbow flexion $[0.0, 154.7]$, shoulder flexion $[-28.6, 143.2]$,
+shoulder abduction $[-28.6, 143.2]$, and internal/external rotation
+$[-2.9, 2.9]$. The last of these is the constraint discussed above and in
+\cref{sec:rotation}: a $\pm 0.05$\,rad band that holds the unactuatable axis near
+neutral rather than a physiological range of motion.
 
 \subsection{Muscle Topology}
 
@@ -100,36 +127,50 @@ from~\parencite{Holzbaur2005} and~\parencite{Zajac1989}.
 
 \begin{table}[H]
   \centering
-  \caption{Hill-model parameters for the nine muscles.
-           $F_0^M$: maximum isometric force; $l_0^M$: optimal fiber length;
-           $l_T^\text{slack}$: tendon zero-load length;
-           $\alpha_0$: pennation angle at $l_0^M$.
-           Sources: \parencite{Holzbaur2005}; \parencite{Zajac1989}.}
+  \caption{The nine muscles as compiled. $F_0^M$ is the peak isometric force
+           (\MuJoCo{} \texttt{gainprm[2]}); the operating range is the actuator
+           \texttt{lengthrange}. Force scales follow~\parencite{Holzbaur2005}.}
   \label{tab:muscles}
   \rowcolors{2}{lightblue!30}{white}
-  \begin{tabular}{@{} L{5cm} C{1.6cm} C{1.6cm} C{1.8cm} C{1.4cm} C{1.4cm}@{}}
+  \begin{tabular}{@{} L{2.6cm} L{4.4cm} C{1.8cm} C{2.6cm} C{2.4cm}@{}}
     \toprule
     \rowcolor{lightblue}
-    \textbf{Muscle} & $F_0^M$\,(N) & $l_0^M$\,(m) & $l_T^\text{slack}$\,(m) &
-    $\alpha_0$\,($^\circ$) & \textbf{Role} \\
+    \textbf{Actuator} & \textbf{Muscle} & $F_0^M$\,(N) &
+    \textbf{Range (m)} & \textbf{Role} \\
     \midrule
-    Biceps Brachii (long head)    & 624  & 0{,}116 & 0{,}272 & 0  & Elbow flex. \\
-    Biceps Brachii (short head)   & 435  & 0{,}133 & 0{,}192 & 0  & Elbow flex. \\
-    Triceps Brachii (long head)   & 798  & 0{,}134 & 0{,}143 & 12 & Elbow ext.  \\
-    Triceps Brachii (medial head) & 624  & 0{,}127 & 0{,}098 & 10 & Elbow ext.  \\
-    Brachialis                    & 987  & 0{,}086 & 0{,}060 & 0  & Elbow flex. \\
-    Brachioradialis               & 261  & 0{,}173 & 0{,}133 & 0  & Elbow flex. \\
-    Anterior Deltoid              & 1142 & 0{,}098 & 0{,}038 & 22 & Shoulder flex. \\
-    Posterior Deltoid             & 1142 & 0{,}137 & 0{,}038 & 18 & Shoulder ext.  \\
-    Pectoralis Major              & 1270 & 0{,}144 & 0{,}030 & 17 & Shoulder add. \\
+    \texttt{biceps\_long}  & Biceps brachii, long head   & 624  & 0.183--0.509 & Elbow flex. \\
+    \texttt{biceps\_short} & Biceps brachii, short head  & 435  & 0.135--0.312 & Elbow flex. \\
+    \texttt{brachialis}    & Brachialis                  & 987  & 0.109--0.260 & Elbow flex. \\
+    \texttt{triceps\_long} & Triceps brachii, long head  & 798  & 0.202--0.509 & Elbow ext.  \\
+    \texttt{triceps\_lat}  & Triceps brachii, lateral    & 624  & 0.165--0.339 & Elbow ext.  \\
+    \texttt{triceps\_med}  & Triceps brachii, medial     & 624  & 0.137--0.277 & Elbow ext.  \\
+    \texttt{deltoid\_ant}  & Deltoid, anterior           & 1142 & 0.031--0.299 & Shoulder flex. \\
+    \texttt{deltoid\_med}  & Deltoid, medial             & 1142 & 0.030--0.281 & Shoulder abd.  \\
+    \texttt{deltoid\_post} & Deltoid, posterior          & 259  & 0.056--0.305 & Shoulder ext.  \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The agonist/antagonist pairs used to compute the co-contraction index
-(CCI, Section~\ref{sec:icc}) are: Biceps (B.B. long head + Brachialis)
-vs.\ Triceps (T.B. long head + T.B. medial head) for elbow flexion, and Anterior
-Deltoid vs.\ Posterior Deltoid for shoulder flexion.
+\Cref{tab:muscles} also replaces an incorrect one. The earlier version listed a
+\emph{brachioradialis} and a \emph{pectoralis major}, neither of which is present
+in the model, and omitted the lateral head of triceps and the medial deltoid,
+both of which are. The muscle set used for every result in this thesis is the one
+above, and it is the set named in \texttt{config.MUSCLE\_NAMES}.
+
+\MuJoCo{}'s muscle actuator is parameterised by
+$(\text{range}, F_0^M, \text{scale}, l_{\min}, l_{\max})$ rather than by an
+explicit optimal fibre length, tendon slack length and pennation angle. Those
+quantities enter through the independent Newton--Raphson fibre--tendon solver
+documented in Appendix~\ref{app:newton}, which is validated against \MuJoCo{}'s
+internal model in \cref{sec:solvervalidation}; they are not free parameters of
+\cref{tab:muscles}.
+
+The agonist and antagonist groups used for the co-contraction index
+(CCI, \cref{sec:icc}) are the three elbow flexors
+(\texttt{biceps\_long}, \texttt{biceps\_short}, \texttt{brachialis}) against the
+three elbow extensors (\texttt{triceps\_long}, \texttt{triceps\_lat},
+\texttt{triceps\_med}), matching \texttt{config.CCI\_AGONIST\_IDX} and
+\texttt{config.CCI\_ANTAGONIST\_IDX}. No deltoid pair enters the index.
 
 \begin{remarque}[Explicit anatomical simplifications]
 The model deliberately omits: (i)~the intrinsic muscles of the hand, which are

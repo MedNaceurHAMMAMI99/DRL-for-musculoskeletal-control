@@ -4,9 +4,6 @@
 \chapter{General Introduction}
 \label{chap:intro}
 
-\epigraph{\itshape ``The question is not how to control the arm, but how the nervous
-system solves this redundant, nonlinear, and high-dimensional problem in real time.''}{--- Emanuel Todorov}
-
 % -----------------------------------------------------------
 \section{Context and Motivation}
 
@@ -45,12 +42,16 @@ situated.
 \label{sec:epidemio}
 
 Beyond its fundamental scientific interest, the societal stake is considerable.
-According to the World Health Organization~(WHO), stroke is the world's second leading
-cause of death and the leading cause of acquired disability in adults~\parencite{WHO2023, Feigin2022}.
-In Tunisia, the annual incidence is estimated at about $110$~cases per $100\,000$
-inhabitants~\parencite{Mrabet2015}, corresponding to more than $12\,000$~new cases
-each year, with an aging population suggesting a substantial increase in the coming
-decades.
+Stroke is the world's second leading cause of death and a leading cause of
+acquired disability in adults~\parencite{Feigin2022}.
+
+An earlier version of this section also reported a national incidence figure for
+Tunisia. That figure was attributed to a source whose identifier resolves to an
+unrelated article, and no substitute could be verified; both the statistic and
+its citation have therefore been withdrawn rather than re-attributed. The
+argument does not depend on it --- the global burden reported
+by~\textcite{Feigin2022} is sufficient motivation, and it is independently
+verifiable.
 
 Among stroke survivors, more than $60$~\% still present residual upper-limb motor
 impairment six months after the event~\parencite{Kwakkel2003}. Intensive,
@@ -67,14 +68,22 @@ therefore represents a major scientific and humanitarian opportunity.
 The central problem addressed in this thesis can be formulated as follows:
 
 \begin{quote}
-\itshape How can one design a realistic musculoskeletal simulation environment that
-integrates a complete Hill-type muscle model (including pennation dynamics, serial and
-parallel elasticity, and numerical integration of fiber--tendon equilibrium), and to
-what extent can a trained \DRL{} policy \emph{replace} the iterative
-Newton--Raphson solver at inference time --- trading a large but one-off training
-cost against virtually zero per-step computation --- while preserving biomechanical
-accuracy and enabling real-time rehabilitation control?
+\itshape For a reaching movement of a nine-muscle upper limb, does a controller
+trained by deep reinforcement learning distribute force across the individual
+muscles in the same way as classical static optimisation --- recruiting the same
+muscles in the same proportions, and at the same total cost --- and under what
+conditions on the training objective does that agreement hold?
 \end{quote}
+
+This formulation replaces the one carried by earlier drafts, which asked whether
+a trained policy could \emph{replace the iterative Newton--Raphson solver at
+inference time, trading a one-off training cost against virtually zero per-step
+computation}. That question presupposed its own answer, and the presupposition
+did not survive measurement: \cref{sec:latencycaveat} finds that a competently
+implemented classical load-sharing solver runs in \SI{23.9}{\micro\second}
+against the network's \SI{288.8}{\micro\second}, so the network is roughly twelve
+times \emph{slower}, not faster. The speed argument is withdrawn in full, and the
+problem statement is rewritten around the question the evidence actually answers.
 
 This problem can be broken down into five research questions:
 \begin{enumerate}[label=\textbf{Q\arabic*.}, leftmargin=2.2em]
@@ -84,17 +93,23 @@ This problem can be broken down into five research questions:
         strategies while preserving learning efficiency?
   \item Which \DRL{} algorithms provide the best compromise between convergence,
         robustness, and energy efficiency on muscular state and action spaces?
-  \item Do the trained agents exhibit behaviors observed in humans
-        (co-contraction, \textit{jerk} minimization, energy efficiency,
-        triphasic profiles, muscle synergies)?
+  \item Do the trained agents exhibit behaviours reported in humans
+        (co-contraction, energy economy, muscle synergies)?
   \item Does Domain Randomization improve the robustness of musculoskeletal policies,
         and to what extent does it make transfer to real patients with varying
         anatomical parameters conceivable?
-  \item[\textbf{Q6.}] Can a trained RL policy replace the Newton--Raphson solver for
-        real-time muscle force estimation --- producing sufficiently accurate control
-        signals without any iterative computation per step --- and what is the
-        resulting computational gain for embedded rehabilitation hardware?
+  \item[\textbf{Q6.}] How does the inference cost of a trained policy compare with
+        that of the classical calculation it would displace, measured
+        like-for-like on the same problem?
 \end{enumerate}
+
+Two of these were narrowed after measurement. \textbf{Q4} originally also promised
+an analysis of \textit{jerk} minimisation and of triphasic activation profiles;
+neither analysis was performed, and the claim has been removed rather than left
+outstanding. \textbf{Q6} originally asked what \emph{computational gain} a policy
+delivers, which assumed there was one; it is restated here as a neutral
+comparison, and \cref{sec:latencycaveat} reports that the comparison favours the
+classical solver.
 
 % -----------------------------------------------------------
 \section{Objectives}
@@ -102,19 +117,25 @@ This problem can be broken down into five research questions:
 This thesis pursues the following objectives:
 
 \begin{enumerate}
-  \item Implement an articulated multibody dynamic model (6~DOF) of an upper limb in
-        \MuJoCo{}~\parencite{Todorov2012}, integrating a complete
-        Hill model~\parencite{Hill1938}: CE, SEE, PEE, pennation-angle dynamics,
-        and numerical integration of fiber--tendon equilibrium.
+  \item Implement an articulated multibody dynamic model of an upper limb in
+        \MuJoCo{}~\parencite{Todorov2012} --- four actuated degrees of freedom
+        driven by nine muscles --- specifying a Hill-type
+        model~\parencite{Hill1938} with CE, SEE, PEE, pennation-angle dynamics
+        and numerical integration of fibre--tendon equilibrium.
   \item Validate the physical model by comparing passive mechanical properties and
         FL/FV curves with data from the literature~\parencite{Holzbaur2005, Winter2009, Gordon1966}.
   \item Develop a modular Gymnasium environment with Domain Randomization and
         reproducible perturbations.
   \item Define reference controllers (random policy, impedance PD controller) in
         order to establish a meaningful evaluation baseline.
-  \item Compare four \DRL{} algorithms (PPO, SAC, TD3, DDPG) through a rigorous
-        experimental procedure: $10$~seeds, $2{\times}10^6$~steps, hyperparameters
-        optimized with Optuna~\parencite{Akiba2019}, and appropriate statistical tests.
+  \item Compare four \DRL{} algorithms (PPO, SAC, TD3, DDPG) under a common
+        protocol, with hyperparameters searched using
+        Optuna~\parencite{Akiba2019}. The protocol originally specified
+        $10$~seeds at $2{\times}10^6$~steps; \cref{sec:compute} explains why the
+        available compute did not permit it, and the comparison as executed uses
+        three seeds at $10^5$~steps, with the principal configuration replicated
+        across five seeds at $3{\times}10^5$. No significance testing is claimed
+        at those sample sizes.
   \item Analyze and quantify emerging motor strategies: co-contraction
         (CCI~\parencite{Falconer1985}), metabolic cost~\parencite{Bhargava2004},
         robustness to perturbations, temporal activation profiles, and muscle
@@ -136,13 +157,24 @@ This thesis pursues the following objectives:
 Compared with similar studies, this thesis makes the following contributions:
 
 \begin{enumerate}[label=\textbf{C\arabic*.}, leftmargin=2.2em]
-  \item \textbf{A complete Hill model in \MuJoCo{}}: explicit integration of the
-        SEE and PEE equations, as well as pennation-angle dynamics, with numerical
-        solution of fiber--tendon equilibrium using the Newton--Raphson method. We
-        mathematically justify each component and provide reference code
-        (Appendix~\ref{app:newton}), whereas most similar studies rely on
-        \MuJoCo{}'s internal simplified muscle model without mathematical
-        justification or validation protocol.
+  \item \textbf{A fully specified Hill-type model in \MuJoCo{}}: explicit
+        treatment of the SEE and PEE equations and of pennation-angle dynamics,
+        with numerical solution of fibre--tendon equilibrium by the
+        Newton--Raphson method, each component justified mathematically and
+        provided as reference code (Appendix~\ref{app:newton}), where comparable
+        studies commonly adopt \MuJoCo{}'s internal simplified muscle model
+        without a stated validation protocol.
+
+        One qualification belongs with this claim rather than in a later
+        limitations section. Probing every muscle at zero activation across
+        sampled trajectories returns a passive force of exactly zero in all
+        states: no muscle in this model exceeds $0.67$ of its declared length
+        range, and the parallel element only engages near the top of that range.
+        The specification is complete; the \emph{exercised} model is the
+        contractile and series-elastic elements, with the force--length curve
+        used on its ascending limb and plateau only. ``Complete Hill model''
+        would therefore overstate what is active, and the weaker wording is used
+        throughout.
   \item \textbf{A quantitative validation protocol}: comparison of FL and FV
         curves and passive joint torques against reference anthropometric
         data~\parencite{Holzbaur2005, Gordon1966}, with NRMSE reporting.
@@ -153,24 +185,42 @@ Compared with similar studies, this thesis makes the following contributions:
         by muscle. This is the contribution around which the present work is
         organised, and it addresses the research question directly rather than
         through task performance.
-  \item \textbf{Identification of an exploration default that prevents
-        precision} (\cref{sec:entropydefect}). The \SAC{} target entropy of
-        $-\dim(\mathcal{A})$ is shown to impose an error plateau that survives
-        three complete reward redesigns and a fourfold correction to the training
-        budget, and to be remediable by a single hyperparameter change.
-  \item \textbf{Evidence that tuning dominates algorithm selection}
-        (\cref{sec:benchmark}): a five-configuration comparison over three seeds
-        in which the effect of tuning is approximately six times the difference
-        between algorithms at default settings.
+  \item \textbf{Identification of the discount factor as the decisive
+        hyperparameter for this task} (\cref{sec:ablation2}). A one-at-a-time
+        ablation over five searched parameters, three seeds each, finds that
+        $\gamma$ alone recovers the entire default-to-tuned improvement
+        ($+106$\,\%) while the other four recover nothing. The mechanism is
+        checkable and quantitative: $\gamma$ sets an effective horizon of about
+        $1/(1-\gamma)$ steps, and the selected value matches the duration of the
+        reach itself where the library default exceeds it fourfold.
+
+        This contribution replaces one claimed by earlier drafts --- that the
+        \SAC{} target entropy of $-\dim(\mathcal{A})$ imposed the error plateau.
+        That hypothesis was mechanistically plausible and supported by the
+        clustering of the best search trials, and it was wrong: the same ablation
+        shows the target entropy recovers $-8$\,\% of the gap, i.e.\ nothing
+        (\cref{sec:ablation}). It is reported in full in this thesis as a
+        negative result rather than removed.
+  \item \textbf{Evidence that configuration dominates algorithm selection}
+        (\cref{sec:fairbench}): with every algorithm given a correctly matched
+        discount factor, the interval between the best and second-best off-policy
+        method is \SI{0.060}{\meter}, while correcting $\gamma$ alone within a
+        single algorithm is worth \SI{0.165}{\meter} --- roughly three times the
+        gap between algorithms.
   \item \textbf{A documented account of six substantive defects}
         (\cref{sec:defects}), four of which produced plausible-looking but
         incorrect results, together with the measurements that exposed each.
-  \item \textbf{A direct computational comparison between the physics-based
-        solver and RL inference}: we measure the per-step wall-clock time of the
-        Newton--Raphson equilibrium solver (9~muscles $\times$ 5--40~iterations each)
-        versus a single forward pass through the \SAC{} policy network, establishing
-        for the first time a quantitative basis for the claim that RL can replace
-        iterative biomechanical computation for real-time rehabilitation control.
+  \item \textbf{A like-for-like inference-cost comparison, and the retraction it
+        forced} (\cref{sec:latencycaveat}). An initial measurement gave the policy
+        a $7.3\times$ advantage over a Newton--Raphson solve. Re-examined, that
+        comparison timed the wrong computation --- the muscle-model solve inside
+        forward simulation rather than the load-sharing problem the thesis
+        actually poses --- and both sides were unoptimised. Measured
+        like-for-like on the load-sharing problem, the classical route takes
+        \SI{23.9}{\micro\second} against the network's \SI{288.8}{\micro\second}.
+        The speed advantage is withdrawn; what survives is the weaker property
+        that the network's cost is fixed and branch-free where the solver's
+        depends on convergence.
 \end{enumerate}
 
 % -----------------------------------------------------------

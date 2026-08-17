@@ -140,6 +140,7 @@ between them; \PPO is on-policy and has no equivalent parameter.
 \section{Experimental Protocol}
 
 \subsection{Training and Evaluation}
+\label{sec:compute}
 
 Two training budgets are used. The algorithm comparison of
 \cref{sec:benchmark} trains five configurations for $10^5$ steps with
@@ -158,8 +159,8 @@ seed-to-seed spread are reported as not supporting an ordering. Reaching ten
 seeds at the corrected replay ratio (\cref{sec:replaybug}) would require
 approximately 148~hours on the available hardware.
 
-During training a learning curve is recorded every $25\,000$ or $50\,000$ steps
-over five deterministic episodes. This is a monitoring signal only; it is
+During training a learning curve is recorded every $100\,000$ steps
+(	exttt{config.EVAL\_FREQ}) over five deterministic episodes. This is a monitoring signal only; it is
 deliberately cheap, it is noisy at that episode count, and no value from it is
 reported as a result.
 
