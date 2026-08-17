@@ -549,7 +549,7 @@ policy and from static optimisation on the same trajectories.}
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
 \textbf{Configuration} & VAF@4 & $k_{90}$ & VAF@4 & $k_{90}$ & \textbf{cos(pol,\,cls)} \\
 \midrule
-\SAC tuned, 300k & 0.852 & 6 & 0.895 & 5 & \textbf{0.950} \\
+\SAC tuned, 300k & 0.850 & 6 & 0.896 & 5 & \textbf{0.950} \\
 \SAC tuned, 100k & 0.845 & 6 & 0.859 & 5 & 0.900 \\
 \SAC default     & 0.848 & 6 & 0.908 & 4 & 0.647 \\
 \DDPG            & 0.791 & 9 & 0.865 & 5 & 0.745 \\
@@ -715,9 +715,16 @@ cleaner than either single-seed measurement suggested.
 \textbf{Load-sharing fidelity improves monotonically with the effort weight.}
 The effort ratio falls $1.914 \rightarrow 1.406 \rightarrow 1.304$ and agreement
 with the classical solution rises $0.808 \rightarrow 0.919 \rightarrow 0.943$.
-The distributions are cleanly separated: every $w_2 = 20$ seed (1.278--1.340)
-lies below every $w_2 = 5$ seed (1.336--1.557), which in turn lies below every
-$w_2 = 1$ seed (1.710--2.116).
+
+The separation is complete at one step and not at the other, and the distinction
+matters. Every $w_2 = 5$ seed (1.336--1.557) lies below every $w_2 = 1$ seed
+(1.714--2.116), so that improvement is unambiguous. Between $w_2 = 20$
+(1.278--1.345) and $w_2 = 5$ (1.336--1.557) the ranges \emph{overlap}: the worst
+$w_2 = 20$ seed at $1.345$ sits above the best $w_2 = 5$ seed at $1.336$. The
+means still differ in the expected direction ($1.304$ against $1.406$) and four
+of the five $w_2 = 20$ seeds lie below the entire $w_2 = 5$ range, but at $n = 5$
+a single overlapping pair is enough that the step from 5 to 20 should be read as
+a probable further improvement rather than a demonstrated one.
 
 \textbf{There is a mild accuracy cost.} Under the corrected evaluation
 (\cref{sec:evaldefects}) final error rises monotonically with the effort weight:
@@ -777,7 +784,7 @@ A thirty-point search was run. It does.
 \toprule
 & \textbf{Gains} & \textbf{Final error} & \textbf{Effort ratio} \\
 \midrule
-Coarse grid (12 points) & $k_p=60$, $k_d=25$ & \SI{0.199}{\meter} & $1.330$ \\
+Coarse grid (12 points) & $k_p=60$, $k_d=25$ & \SI{0.199}{\meter} & $1.334$ \\
 \textbf{Fine grid (30 points)} & $k_p=20$, $k_d=6$ & \textbf{\SI{0.165}{\meter}} & $\mathbf{1.263}$ \\
 \bottomrule
 \end{tabular}
@@ -788,7 +795,7 @@ The coarse search had bottomed out against its own lower boundary: the better
 gains are gentler than any it examined, in both stiffness and damping. Properly
 tuned, the conventional controller is both more accurate
 (\SI{0.165}{} against \SI{0.199}{\meter}) and more economical
-($1.263$ against $1.330$) than previously reported.
+($1.263$ against $1.334$) than previously reported.
 
 \subsection{The honest comparison}
 

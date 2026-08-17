@@ -584,6 +584,52 @@ the practical implication is that effort spent selecting an algorithm is poorly
 allocated against effort spent matching the discount factor to the task
 timescale.
 
+\subsection{An accidental replication, and what it costs the reader}
+\label{sec:accidental}
+
+One reconciliation is owed, because two tables in this thesis report the same
+configuration and do not agree.
+
+The \SAC{} entry of \cref{tab:fairbench} --- library defaults with
+$\gamma = 0.957$ --- is \emph{the same configuration} as the
+``$+$ tuned discount factor only'' row of \cref{tab:ablation2}: identical
+algorithm, budget, hyperparameters and seeds. They were trained as two separate
+sets of runs, for two different purposes, and were never cross-checked against
+one another until this audit.
+
+\begin{table}[H]
+\centering
+\caption{The same configuration, trained and evaluated twice.}
+\begin{tabular}{@{} L{5.4cm} C{3.4cm} C{3.6cm} @{}}
+\toprule
+& \textbf{Final error (m)} & \textbf{Evaluation} \\
+\midrule
+\Cref{tab:ablation2}, $\gamma$ only & $0.1553 \pm 0.0061$ & one target draw \\
+\Cref{tab:fairbench}, \SAC{} after  & $0.1909 \pm 0.0341$ & three target draws \\
+\bottomrule
+\end{tabular}
+\label{tab:accidental}
+\end{table}
+
+Two causes contribute and cannot be separated with the runs available. The
+ablation table was evaluated on the single fixed target draw used throughout
+\cref{ch:results}; the fair-benchmark table was re-evaluated across three draws
+under the corrected protocol of \cref{sec:evaldefects}, which both shifts the
+mean and widens the interval. And the two sets are independent trainings, so
+run-to-run variation contributes as well.
+
+\textbf{The honest reading is that an identical configuration, measured twice by
+this project, differed by \SI{0.036}{\meter}} --- larger than the
+\SI{0.007}{\meter} that separates \DDPG{} from \TDIII{} in
+\cref{tab:fairbench}, and comparable to differences elsewhere in this chapter
+that are discussed as though they were meaningful. It is the sharpest available
+estimate of this project's own measurement floor, and it argues for reading every
+interval in \cref{tab:fairbench} as a lower bound on the true uncertainty.
+
+Within each table the comparison remains valid, because all rows of a given table
+were produced under one protocol. Across tables they should not be compared, and
+this thesis does not do so.
+
 \subsection{What this does not fix}
 
 The comparison remains three seeds, at a 100\,000-step early-training snapshot,

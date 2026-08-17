@@ -493,12 +493,40 @@ Conventional & $1.263$ & $0.931$ & $0.165$ & 102\,876 \\
 \end{tabular}
 \end{center}
 
-The prediction held, in every particular.
+The prediction held in the means. The per-seed ranges tell a more careful story,
+and it is worth getting right.
 
-\textbf{Fidelity improves monotonically}, and the distributions are cleanly
-separated --- every $w_2 = 20$ seed (1.278--1.340) lies below every $w_2 = 5$ seed
-(1.336--1.557), which lies below every $w_2 = 1$ seed (1.710--2.116). Per-muscle
-RMSE falls from 10.1\,\% to about 3\,\% of mean $F_{\max}$.
+\begin{center}
+\begin{tabular}{@{} L{2.2cm} L{7.2cm} C{3.0cm} @{}}
+\toprule
+& \textbf{the five seeds} & \textbf{range} \\
+\midrule
+$w_2 = 1$  & 1.714, 1.856, 1.912, 1.974, 2.116 & 1.714--2.116 \\
+$w_2 = 5$  & \textbf{1.336}, 1.351, 1.355, 1.429, 1.557 & 1.336--1.557 \\
+$w_2 = 20$ & 1.278, 1.292, 1.293, 1.318, \textbf{1.345} & 1.278--\textbf{1.345} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{trap}
+An earlier version of this document said the three distributions were
+\emph{cleanly separated}. Checked against the per-seed numbers, that is true of
+one step and false of the other.
+
+$w_2 = 1 \rightarrow 5$ \textbf{is} clean: every seed of one lies below every seed
+of the other, $1.557 < 1.714$.
+
+$w_2 = 5 \rightarrow 20$ \textbf{is not}: the worst $w_2 = 20$ seed at
+$\mathbf{1.345}$ sits just above the best $w_2 = 5$ seed at $\mathbf{1.336}$. The
+ranges overlap by 0.009.
+
+The means still move the right way, and four of the five $w_2 = 20$ seeds do
+clear the entire $w_2 = 5$ range --- but one overlapping pair at $n = 5$ makes
+that second step a \emph{probable} further improvement, not a demonstrated one.
+The upper bound had also been mis-transcribed as 1.340.
+\end{trap}
+
+Per-muscle RMSE falls from 10.1\,\% to about 3\,\% of mean $F_{\max}$.
 
 \textbf{The accuracy cost is real but modest}: 8\,\% worse final error for a
 32\,\% reduction in wasted effort. Closest approach is unchanged
