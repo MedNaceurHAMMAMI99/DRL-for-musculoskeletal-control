@@ -635,10 +635,19 @@ metric reported in this work.
 
 That column is not interpreted further. The reference loadings used are a
 documented qualitative approximation of those reported
-by~\textcite{dAvella2003}, constructed over this model's nine-muscle ordering
-rather than digitised from the original figures. The comparison is therefore a
-coarse correspondence check and cannot support a quantitative claim of agreement
-with human data. Establishing that would require the published loadings, a
+by~\textcite{dAvella2006} for fast human upper-limb reaching, constructed over
+this model's nine-muscle ordering rather than digitised from the original
+figures. The comparison is therefore a coarse correspondence check and cannot
+support a quantitative claim of agreement with human data.
+
+An earlier version of this section attributed those loadings
+to~\textcite{dAvella2003} instead. That citation was wrong twice over: it is a
+different study, and it reports synergies extracted from the \emph{frog}
+hindlimb, not from human reaching. The implementation
+(\texttt{analysis/synergies.py}) has always named the 2006 source correctly; the
+error was in the write-up alone. It is recorded here because a reference set
+attributed to the wrong species would have invalidated the only comparison in
+this thesis that mentions human data. Establishing that would require the published loadings, a
 principled correspondence between the two muscle sets, and ideally
 electromyographic recordings under a matched protocol --- which
 \cref{ch:conclusion} lists among the outstanding work.

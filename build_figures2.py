@@ -51,8 +51,12 @@ SWEEP = {
     "eff_sd":  [0.150, 0.092, 0.025],
     "r":       [0.808, 0.919, 0.943],
     "r_sd":    [0.044, 0.016, 0.008],
-    "err":     [0.1033, 0.1023, 0.1072],
-    "err_sd":  [0.0034, 0.0074, 0.0148],
+    # Final error is deliberately NOT kept here. This dict once carried
+    # [0.1033, 0.1023, 0.1072], the pre-correction accuracy figures from the
+    # single fixed target draw; the corrected five-seed values are
+    # 0.1074 / 0.1114 / 0.1161 (tab:effortsweep, from runs/reevaluation.json).
+    # The stale numbers were never plotted, but leaving them here invited a
+    # future figure to contradict the table. Read accuracy from the source.
 }
 CONVENTIONAL_FLOOR = 1.263     # fine 30-point gain search (coarse grid gave 1.33)
 

@@ -15,7 +15,7 @@ consequence wherever one exists.
 \texttt{FRAME\_SKIP} & 10 & Physics steps per decision. Physics runs at \SI{500}{\hertz}, the policy at \SI{50}{\hertz}. \textbf{If too small:} a 2-second episode becomes 1000 decisions, so the budget buys few \emph{attempts} and the policy regresses to the workspace centre --- measured, settle spread was 39\,\% of target spread. \textbf{Nearly free:} physics is \SI{6.8}{\micro\second}/step against \SI{14}{\milli\second}/gradient update. \\
 \texttt{MAX\_EPISODE\_STEPS} & 100 & Derived: $2.0 / (0.002 \times 10)$. Not set independently. \\
 \texttt{EVAL\_EPISODES} & 50 & Episodes per reported evaluation. \textbf{Too few and} target-sampling noise dominates --- at 50 the success rate still swings 0--20\,\% across draws. \\
-\texttt{EVAL\_FREQ} & 25--50k & Learning-curve spacing. Monitoring only; five episodes per point is far too noisy to report. \\
+\texttt{EVAL\_FREQ} & 100k & Learning-curve spacing (\texttt{config.py}, used directly by \texttt{train.py}). Monitoring only, at five episodes per point --- far too noisy to report, and at this spacing a 100k-step run yields a single curve point. \\
 \bottomrule
 \end{longtable}
 
