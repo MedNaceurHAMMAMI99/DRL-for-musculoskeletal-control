@@ -1,0 +1,24 @@
+{
+  "algo": "DDPG",
+  "seed": 2,
+  "steps": 100000,
+  "wall_clock_s": 1541.9528963000048,
+  "n_policy_params": 312852,
+  "eval_curve": [
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.29250607966347775,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "gamma": 0.9568097976880915,
+    "gradient_steps": 8
+  },
+  "reward_weights": null,
+  "best_err": 0.29250607966347775,
+  "best_step": 100000
+}

@@ -463,12 +463,12 @@ identical protocol and evaluation environment.}
 \toprule
 \textbf{Metric} & \textbf{Conventional} & \textbf{Learned (\SAC)} \\
 \midrule
-Final error (m) & 0.199 & \textbf{0.106} \\
+Final error (m) & 0.165 & \textbf{0.106} \\
 Closest approach (m) & 0.174 & \textbf{0.074} \\
 Ends within \SI{5}{\centi\meter} & 0.12 & \textbf{0.31} \\
 Ends within \SI{10}{\centi\meter} & 0.28 & \textbf{0.60} \\
 Energy & \textbf{102\,876} & 327\,048 \\
-\textbf{Effort ratio} & \textbf{1.33} & 1.91 \\
+\textbf{Effort ratio} & \textbf{1.263} & 1.91 \\
 Pearson $r$ vs static optimisation & \textbf{0.916} & 0.808 \\
 \bottomrule
 \end{tabular}
@@ -486,7 +486,8 @@ should replace conventional control on this task.
 
 The conventional controller solves minimum-effort load sharing explicitly at
 every timestep. One would therefore expect its effort ratio to be $1.00$ by
-construction. It is \textbf{1.33}.
+construction. It is \textbf{1.263} (\cref{sec:finegains}; an initial coarse
+gain search gave $1.33$, and the finer search reported there lowered it).
 
 The gap is not an error. It is the cost of closed-loop control: activation
 dynamics mean the commanded activation is not the realised one, the policy acts
@@ -496,13 +497,15 @@ of $1.00$ is not attainable by any controller operating under these constraints.
 
 This changes the interpretation of the central result. Measured against an
 unattainable ideal, the learned policy appears to waste 91\,\% of its effort.
-Measured against \textbf{1.33}, the achievable floor demonstrated by a controller
-that optimises effort explicitly, it uses about \textbf{44\,\% more effort than
-necessary}. The second figure is the meaningful one, and it is the one this
+Measured against \textbf{1.263}, the achievable floor demonstrated by a properly
+tuned controller that optimises effort explicitly, it uses about \textbf{51\,\%
+more effort than necessary}. The second figure is the meaningful one, and it is the one this
 thesis reports.
 
-The qualification remains that 1.33 is itself one measurement from one controller
-at one pair of gains, and a better conventional controller might lower it.
+That figure is itself one controller at one gain pair. A first, coarse search
+gave $1.33$; a finer one lowered it to $1.263$ (\cref{sec:finegains}). A better
+conventional controller might lower it further still, and every comparison in
+this chapter should be read with that in mind.
 
 \section{Muscle synergies}
 \label{sec:synergies}
@@ -639,7 +642,7 @@ $w_2 = 1$  & 5 & $1.914 \pm 0.150$ & $0.808 \pm 0.044$ & $0.1033 \pm 0.0034$ & $
 $w_2 = 5$  & 5 & $1.406 \pm 0.092$ & $0.919 \pm 0.016$ & $0.1023 \pm 0.0074$ & $0.0681$ & 104\,598 \\
 $\mathbf{w_2 = 20}$ & 5 & $\mathbf{1.304 \pm 0.025}$ & $\mathbf{0.943 \pm 0.008}$ & $0.1072 \pm 0.0148$ & $\mathbf{0.0672}$ & \textbf{37\,076} \\
 \midrule
-Conventional & 1 & $1.33$ & $0.916$ & 0.199 & --- & 102\,876 \\
+Conventional & 1 & $1.263$ & $0.931$ & 0.165 & --- & 102\,876 \\
 \bottomrule
 \end{tabular}
 \label{tab:effortsweep}
@@ -648,7 +651,7 @@ Conventional & 1 & $1.33$ & $0.916$ & 0.199 & --- & 102\,876 \\
 \subsection{The discrepancy is essentially eliminated}
 
 Over five seeds the learned policy at $w_2 = 20$ attains an effort ratio of
-$1.304 \pm 0.025$, comparable to the $1.33$ measured for a controller that
+$1.304 \pm 0.025$, against the $1.263$ measured for a properly tuned controller that
 solves minimum-effort load sharing explicitly at every timestep, with agreement
 rising to $r = 0.943 \pm 0.008$ and the per-muscle RMSE falling to about 3\,\% of
 mean $F_{\max}$ from 10.1\,\%.
@@ -695,7 +698,7 @@ rather than by the random seed.
 \includegraphics[width=\textwidth]{figures/fig6_effort_sweep.png}
 \caption{Effect of the effort weight, five seeds per setting. Left: muscular
 effort relative to the classical minimum. The dashed line is the conventional
-controller's $1.33$; the dotted line is the idealised optimum of $1.00$, which
+controller's $1.263$; the dotted line is the idealised optimum of $1.00$, which
 \cref{sec:effortfloor} shows is not attainable in closed loop. Right: agreement
 with the classical load-sharing solution. Both improve monotonically, and the
 error bars shrink --- the load-sharing outcome becomes progressively determined
@@ -703,27 +706,72 @@ by the objective rather than by the random seed.}
 \label{fig:effortsweep2}
 \end{figure}
 
-\subsection{A comparison that must be stated carefully}
+\subsection{The conventional reference, measured properly}
+\label{sec:finegains}
 
-At $w_2 = 20$ the learned policy attains an effort ratio of
-$1.304 \pm 0.025$, which is \emph{below} the $1.33$ measured for a conventional
-controller that solves minimum-effort load sharing explicitly at every timestep
-(\cref{sec:effortfloor}), and its agreement with the classical solution
-($0.943$) exceeds the conventional controller's ($0.916$).
+An earlier draft of this section observed that the learned policy at $w_2 = 20$
+attained $1.304 \pm 0.025$, below the $1.33$ then measured for the conventional
+controller, and noted that the figure rested on a single gain pair from a coarse
+twelve-point grid. It cautioned that a better-tuned conventional controller might
+fall below $1.30$, in which case the ordering would reverse.
 
-Taken at face value this says a learned policy distributes force more
-economically than a controller which optimises that very quantity in closed form.
-That is possible in principle --- the conventional controller optimises
-instantaneously and greedily, whereas a learned policy can trade effort across
-time, and \cref{sec:effortfloor} established that instantaneous optimisation does
-not achieve $1.00$ in closed loop either.
+A thirty-point search was run. It does.
 
-\textbf{But the comparison rests on a weak reference and should not be pressed.}
-The $1.33$ figure comes from a single controller at a single pair of gains
-selected from a coarse twelve-point grid. A finer search was begun and not
-completed. A better-tuned conventional controller may well fall below $1.30$, in
-which case the ordering reverses. The defensible claim is that the two are
-\emph{comparable}, not that the learned policy wins.
+\begin{table}[H]
+\centering
+\caption{Conventional controller before and after a finer gain search.}
+\begin{tabular}{@{} L{5.0cm} C{3.0cm} C{3.0cm} C{2.4cm} @{}}
+\toprule
+& \textbf{Gains} & \textbf{Final error} & \textbf{Effort ratio} \\
+\midrule
+Coarse grid (12 points) & $k_p=60$, $k_d=25$ & \SI{0.199}{\meter} & $1.330$ \\
+\textbf{Fine grid (30 points)} & $k_p=20$, $k_d=6$ & \textbf{\SI{0.165}{\meter}} & $\mathbf{1.263}$ \\
+\bottomrule
+\end{tabular}
+\label{tab:finegains}
+\end{table}
+
+The coarse search had bottomed out against its own lower boundary: the better
+gains are gentler than any it examined, in both stiffness and damping. Properly
+tuned, the conventional controller is both more accurate
+(\SI{0.165}{} against \SI{0.199}{\meter}) and more economical
+($1.263$ against $1.330$) than previously reported.
+
+\subsection{The honest comparison}
+
+With both sides measured properly:
+
+\begin{table}[H]
+\centering
+\caption{Learned policy against a properly tuned conventional controller.}
+\begin{tabular}{@{} L{5.6cm} C{3.4cm} C{3.4cm} @{}}
+\toprule
+& \textbf{Learned ($w_2 = 20$)} & \textbf{Conventional} \\
+\midrule
+Final error & $\mathbf{0.1072 \pm 0.0148}$ & \SI{0.165}{\meter} \\
+Effort ratio & $1.304 \pm 0.025$ & $\mathbf{1.263}$ \\
+Agreement with classical ($r$) & $\mathbf{0.943 \pm 0.008}$ & $0.931$ \\
+\bottomrule
+\end{tabular}
+\label{tab:honest}
+\end{table}
+
+\textbf{Neither method dominates, and the earlier reading is withdrawn.} The
+learned policy reaches roughly 35\,\% more accurately. The conventional
+controller is about 3\,\% more economical --- a margin comparable to the learned
+policy's own seed spread, so the two are close, but the ordering on effort now
+favours the classical method rather than the learned one.
+
+The claim that a learned policy distributes force more economically than a
+controller optimising that quantity in closed form is therefore \textbf{not
+supported}, and the paragraph advancing it has been removed. What survives is
+narrower and sturdier: at an appropriate effort weight, a learned policy achieves
+load-sharing fidelity \emph{comparable} to a properly tuned conventional
+controller, while reaching substantially more accurately.
+
+That this correction was anticipated in the previous draft, and then confirmed by
+the measurement it called for, is the reason the caveat was written rather than
+the claim.
 
 \subsection{Two corrections to earlier drafts of this section}
 
@@ -789,7 +837,7 @@ solution --- $r = 0.81 \pm 0.04$, pattern cosine $0.813$ against a null of
 $0.372$, over five independent training runs --- at a fixed, branch-free
 inference cost and a \SI{1.5}{\mega\byte} memory footprint, but converges on a
 solution expending $1.91 \pm 0.15$ times the minimum required effort, about
-44\,\% above the achievable floor of $1.33$ (\cref{sec:effortfloor}), with the
+51\,\% above the achievable floor of $1.263$ (\cref{sec:finegains}), with the
 excess concentrated in elbow antagonist co-contraction.
 Across all configurations tested the discrepancy is present, ranging from $1.21$
 to $2.30\times$.
@@ -814,7 +862,7 @@ match it. The policy optimised the objective it was given.
 
 This yields a directly testable prediction: a reward whose effort term is
 precisely the criterion of \cref{eq:statopt2} should reduce the $1.91\times$
-discrepancy toward the $1.33$ floor. This is the most informative single experiment remaining, it
+discrepancy toward the $1.263$ floor. This is the most informative single experiment remaining, it
 requires no new theory, and the measurement apparatus to evaluate it now exists.
 
 \section{Limitations}

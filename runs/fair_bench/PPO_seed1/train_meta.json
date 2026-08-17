@@ -1,0 +1,23 @@
+{
+  "algo": "PPO",
+  "seed": 1,
+  "steps": 100000,
+  "wall_clock_s": 287.98233900000923,
+  "n_policy_params": 154131,
+  "eval_curve": [
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.6585798693380187,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "gamma": 0.9568097976880915
+  },
+  "reward_weights": null,
+  "best_err": 0.6585798693380187,
+  "best_step": 100000
+}

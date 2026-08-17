@@ -54,7 +54,7 @@ SWEEP = {
     "err":     [0.1033, 0.1023, 0.1072],
     "err_sd":  [0.0034, 0.0074, 0.0148],
 }
-CONVENTIONAL_FLOOR = 1.33      # single controller, coarse grid
+CONVENTIONAL_FLOOR = 1.263     # fine 30-point gain search (coarse grid gave 1.33)
 
 ABLATION = {                    # fraction of the default->tuned gap recovered
     "labels": ["discount\nfactor $\\gamma$", "learning\nrate",

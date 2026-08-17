@@ -108,14 +108,16 @@ distribute force across it, so trajectory realism is not assessed. The policy re
 coordination pattern of the classical solution ($r = 0.81 \pm 0.04$ over five
 independent training runs; pattern cosine $0.813$ against a shuffled null of
 $0.372$) but expends $1.91 \pm 0.15$ times the minimum effort needed to generate
-those torques --- about 44\,\% above the $1.33$ a conventional controller
-attains on the same task. That discrepancy proved to be an artefact of the
+those torques --- about 51\,\% above the $1.263$ a properly tuned conventional
+controller attains on the same task. That discrepancy proved to be an artefact of the
 reward's weighting: the effort term carried roughly one twenty-eighth the weight
 of the precision bonus. Raising it improves load-sharing fidelity monotonically
 across five seeds per setting --- effort ratio $1.914 \rightarrow 1.406
 \rightarrow 1.304$, agreement $r = 0.808 \rightarrow 0.919 \rightarrow 0.943$ ---
-at no measurable cost in reaching accuracy, and comparable to the $1.33$ attained
-by a conventional controller solving the same problem explicitly. The excess is anatomically localised: the
+at no measurable cost in reaching accuracy, and approaching the $1.263$ attained
+by a properly tuned conventional controller solving the same problem explicitly.
+Neither method dominates: the learned policy reaches some 35\,\% more accurately,
+the conventional controller is about 3\,\% more economical. The excess is anatomically localised: the
 three deltoids agree to within $2.5$--$10$\,\% normalised RMSE, whereas the
 lateral and medial heads of triceps are driven at three to four and a half
 times the prescribed force, indicating sustained co-contraction against the

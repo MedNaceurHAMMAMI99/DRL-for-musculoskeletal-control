@@ -439,7 +439,10 @@ unattributable between the two.
 \begin{table}[H]
 \centering
 \caption{Algorithm comparison: five configurations, three seeds each,
-100\,000 steps. Mean $\pm$ standard deviation across seeds.}
+100\,000 steps. Mean $\pm$ standard deviation across seeds. \textbf{The ordering
+in this table is superseded by \cref{tab:fairbench}}: every non-\SAC{} entry ran
+with an uncorrected discount factor, which \cref{sec:ablation2} later identified
+as decisive.}
 \small
 \begin{tabular}{@{} L{2.7cm} C{2.6cm} C{2.6cm} C{1.7cm} C{1.9cm} C{1.5cm} @{}}
 \toprule
@@ -487,7 +490,101 @@ sixteen-trial search, so any comparison involving the tuned configuration
 conflates algorithm with tuning effort by construction. Success rate is 0\,\% for
 every configuration at this budget and is omitted for that reason.
 
-\subsection{Interpretation of the PPO result}
+
+\section{The comparison repeated fairly}
+\label{sec:fairbench}
+
+The benchmark of \cref{sec:benchmark} is compromised by a result obtained after
+it was run. It compared one configuration with $\gamma = 0.957$ against four with
+$\gamma = 0.99$, and \cref{sec:ablation2} subsequently established that $\gamma$
+is the single decisive parameter for this task. Every non-\SAC{} entry in that
+table was therefore handicapped by the one setting now known to matter, and no
+ordering among them can be trusted.
+
+All four algorithms were accordingly retrained with $\gamma = 0.957$ and library
+defaults otherwise, three seeds each, at the same 100\,000-step budget.
+
+\begin{table}[H]
+\centering
+\caption{Algorithm comparison before and after correcting the discount factor.
+Three seeds per entry; ``before'' is \cref{tab:benchmark}, in which only \SAC{}
+had a corrected $\gamma$.}
+\begin{tabular}{@{} L{2.8cm} C{3.0cm} C{3.6cm} C{2.6cm} @{}}
+\toprule
+\textbf{Algorithm} & \textbf{Before ($\gamma = 0.99$)} & \textbf{After ($\gamma = 0.957$)} & \textbf{Change} \\
+\midrule
+\SAC  & $0.2613 \pm 0.0203$ & $\mathbf{0.1636 \pm 0.0066}$ & $-37$\,\% \\
+\DDPG & $0.4161 \pm 0.0189$ & $\mathbf{0.2279 \pm 0.0074}$ & $\mathbf{-45}$\,\% \\
+\TDIII & $0.2786 \pm 0.0110$ & $0.2397 \pm 0.0272$ & $-14$\,\% \\
+\PPO  & $0.4231 \pm 0.0351$ & $0.4644 \pm 0.0480$ & $+10$\,\% \\
+\bottomrule
+\end{tabular}
+\label{tab:fairbench}
+\end{table}
+
+\subsection{The original ordering was an artefact}
+
+\DDPG{} improves by 45\,\% and overtakes \TDIII. The ranking changes from
+$\SAC < \TDIII < \DDPG < \PPO$ to $\SAC < \DDPG < \TDIII < \PPO$.
+
+\Cref{sec:benchmark} reported \DDPG{} as clearly the weakest off-policy method
+and attributed this to its lack of twin critics --- a textbook explanation, and
+in this instance a wrong one. \DDPG{} was not failing for want of twin critics;
+it was failing because its discount factor was mismatched to the task, and it
+suffered more from that than the others did. Once corrected it is
+indistinguishable from \TDIII{} ($0.2279 \pm 0.0074$ against
+$0.2397 \pm 0.0272$, overlapping), and no ordering between them is supported.
+
+\textbf{This vindicates the concern that motivated the re-run.} A comparison in
+which one entrant is correctly configured and the rest are not does not measure
+algorithms; it measures configuration. The earlier table did precisely that, and
+the theoretical account offered for its ordering was constructed after the fact
+around a result that has not survived.
+
+\subsection{\PPO{} is the exception, and instructively so}
+
+\PPO{} is the only method made \emph{worse} by the correction, by 10\,\%. This is
+consistent with its structure rather than anomalous: \PPO{} estimates advantages
+through generalised advantage estimation, in which $\gamma$ and $\lambda$ jointly
+set the bias--variance trade-off. Lowering $\gamma$ alone, while leaving
+$\lambda = 0.95$ untouched, shortens the effective horizon on one side of that
+pairing only. The correct adjustment for \PPO{} would involve both, and was not
+attempted.
+
+\PPO{} therefore remains the weakest entry here, but for a reason that is again
+about configuration rather than about the algorithm, and its position should be
+read with that caveat.
+
+\subsection{The discount factor outweighed the choice of algorithm}
+
+The claim of \cref{sec:benchmark} was that tuning dominates algorithm selection.
+It can now be stated more precisely, and more strongly.
+
+With every algorithm correctly configured, the interval between the best and the
+second-best off-policy method is $0.1636$ to $0.2279$, a gap of
+\SI{0.064}{\meter}. The improvement obtained in \DDPG{} by correcting $\gamma$
+alone was \SI{0.188}{\meter} --- roughly \textbf{three times the gap between
+algorithms}.
+
+\begin{quote}
+On this task, choosing the discount factor correctly mattered about three times
+more than choosing between \SAC, \TDIII{} and \DDPG.
+\end{quote}
+
+\SAC{} remains the strongest, and by a margin larger than the seed spread. But
+the practical implication is that effort spent selecting an algorithm is poorly
+allocated against effort spent matching the discount factor to the task
+timescale.
+
+\subsection{What this does not fix}
+
+The comparison remains three seeds, at a 100\,000-step early-training snapshot,
+with no significance testing. Only $\gamma$ was corrected; the remaining
+hyperparameters are at library defaults for all four, so this is a fair
+comparison rather than a tuned one. A properly tuned comparison would require a
+separate search per algorithm, which was not affordable here.
+
+\subsection{Interpretation of the original PPO result}
 
 \PPO's position requires care. As an on-policy method, at 100\,000 steps with
 2048-step rollouts across four environments it performs approximately twelve
