@@ -689,6 +689,20 @@ dimension of interest. Weighting that dimension pins the solution down. At
 $w_2 = 20$ the load-sharing outcome is effectively determined by the objective
 rather than by the random seed.
 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig6_effort_sweep.png}
+\caption{Effect of the effort weight, five seeds per setting. Left: muscular
+effort relative to the classical minimum. The dashed line is the conventional
+controller's $1.33$; the dotted line is the idealised optimum of $1.00$, which
+\cref{sec:effortfloor} shows is not attainable in closed loop. Right: agreement
+with the classical load-sharing solution. Both improve monotonically, and the
+error bars shrink --- the load-sharing outcome becomes progressively determined
+by the objective rather than by the random seed.}
+\label{fig:effortsweep2}
+\end{figure}
+
 \subsection{A comparison that must be stated carefully}
 
 At $w_2 = 20$ the learned policy attains an effort ratio of

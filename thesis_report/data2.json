@@ -1,0 +1,56 @@
+{
+  "sweep": {
+    "w2": [
+      1,
+      5,
+      20
+    ],
+    "effort": [
+      1.914,
+      1.406,
+      1.304
+    ],
+    "eff_sd": [
+      0.15,
+      0.092,
+      0.025
+    ],
+    "r": [
+      0.808,
+      0.919,
+      0.943
+    ],
+    "r_sd": [
+      0.044,
+      0.016,
+      0.008
+    ],
+    "err": [
+      0.1033,
+      0.1023,
+      0.1072
+    ],
+    "err_sd": [
+      0.0034,
+      0.0074,
+      0.0148
+    ]
+  },
+  "ablation": {
+    "labels": [
+      "discount\nfactor $\\gamma$",
+      "learning\nrate",
+      "batch\nsize",
+      "target\nnetwork $\\tau$",
+      "target\nentropy"
+    ],
+    "gap": [
+      106,
+      -3,
+      -5,
+      -5,
+      -8
+    ]
+  },
+  "conventional_floor": 1.33
+}

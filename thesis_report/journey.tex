@@ -219,18 +219,48 @@ stopped improving. The closest it ever got stayed near \SI{0.10}{\meter} through
 \emph{three complete redesigns of the scoring system} and the fourfold training
 correction.
 
-The cause was a setting called \textbf{target entropy}, which controls how much
-deliberate randomness the learner keeps in its actions. Randomness helps early ---
-it is how the agent discovers what works. It must fade for the hand to hold
-still. The software's default sets it in proportion to the number of muscles,
-and for nine muscles that default keeps roughly twice as much randomness as this
-task tolerates.
+Finding the cause took two attempts, and the first was wrong.
 
-\textbf{The hand was being deliberately jiggled and could not settle.}
+\textbf{The wrong answer.} A hyperparameter search had changed five settings at
+once, and one of them --- how much deliberate randomness the learner keeps in its
+actions --- moved furthest from its default and had a mechanism that fitted the
+symptom perfectly. All five of the best trials agreed on roughly the same value.
+It was written up as the explanation.
 
-\lesson{A default value is a guess made by someone who had not seen your problem.
-This one produced a failure that looked like insufficient training --- and
-survived every attempt to fix it as though it were.}
+\textbf{Then it was tested properly.} Each of the five settings was changed
+\emph{on its own}, three times each, to see which one actually mattered.
+
+\begin{center}
+\begin{tabular}{@{} L{6.0cm} C{3.6cm} @{}}
+\toprule
+\textbf{Setting changed alone} & \textbf{Improvement recovered} \\
+\midrule
+randomness (``target entropy'') & $-8$\,\% \\
+learning rate & $-3$\,\% \\
+how fast the value estimate updates & $-5$\,\% \\
+batch size & $-5$\,\% \\
+\textbf{discount factor} & $\mathbf{+106}$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Four settings did nothing. One did everything --- and it was not the one that had
+been written up.
+
+\textbf{Why the discount factor.} It controls how far ahead the learner looks.
+The default made it plan over 100 steps: the whole two-second attempt. But the
+hand actually arrives at the target by step~25. So the learner was being asked to
+judge each action by what happened over the following two seconds, when only the
+first half-second was relevant. That is a noisy thing to estimate, and a learner
+working from noisy judgements cannot fine-tune. Shortening the horizon to match
+the movement fixed it.
+
+\lesson{Two lessons, and the second is the harder one. First: a setting left at
+its default is a guess by someone who never saw your problem --- here it was
+four times too long. Second: a hyperparameter search tells you \emph{which
+combination} works, never \emph{which part} of it was responsible. The
+explanation that felt obvious was wrong, and only changing one thing at a time
+revealed it.}
 
 % ============================================================
 \section{Step 2: what happened when it finally worked}
@@ -421,15 +451,58 @@ really are many different ways to make the same movement, and the learner lands
 on a different one each time.
 
 % ============================================================
+\section{Step 6: can the waste be removed?}
+
+The finding above --- right muscles, too much force --- raised an obvious
+question. The scoring system had a term meant to discourage wasted effort. Was it
+simply set too weakly?
+
+It was. Measured on a trained controller, that term contributed about
+\emph{one twenty-eighth} of what the accuracy terms contributed. It existed, but
+it was far too quiet to influence anything.
+
+So the experiment was to turn it up, at two settings, five runs each.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{} C{3.2cm} C{3.4cm} C{3.4cm} C{3.0cm} @{}}
+\toprule
+\textbf{Effort weight} & \textbf{Wasted effort} & \textbf{Agreement with maths} & \textbf{Accuracy} \\
+\midrule
+1 (original) & $1.91\times$ & 0.81 & 0.1033 \\
+5 & $1.41\times$ & 0.92 & 0.1023 \\
+\textbf{20} & $\mathbf{1.30\times}$ & \textbf{0.94} & 0.1072 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The waste fell steadily, agreement with the classical answer rose steadily, and
+\textbf{accuracy did not suffer} --- the three accuracy figures are within each
+other's margin of error, and the closest the hand ever got actually improved.
+
+For scale: a conventional engineered controller, solving the effort problem
+explicitly at every instant, scores $1.33$ on the same measure. The learned
+controller at the highest setting reaches $1.30$. They are, to the precision
+available here, equivalent.
+
+There was also a quieter result that mattered more than it looks. At the original
+setting, five identical runs produced muscle patterns differing by 77\,\% in
+total energy while reaching equally well. At the highest setting, that spread
+almost vanished. The scoring system had never really specified how to share the
+force, so each run had invented its own answer; saying what we wanted made them
+agree.
+
 \section{What the answer actually is}
 
 \textbf{For \emph{which} muscles to use and in what proportion: yes.} The learned
 controller recovers the structure of the classical solution without ever being
 shown it.
 
-\textbf{For \emph{how much} force: not yet.} It uses about 1.9 times the minimum-effort ideal --- and, more meaningfully,
-about 44\,\% more than a conventional controller actually achieves on the same
-task --- concentrated in one pair of opposing elbow muscles.
+\textbf{For \emph{how much} force: yes, once we asked for it.} Under the original
+scoring the controller used about 1.9 times the necessary effort, concentrated in
+one pair of opposing elbow muscles. Turning up the term that discourages waste
+brought that to $1.30\times$ --- level with a conventional engineered controller
+--- without costing accuracy.
 
 \textbf{For speed: no.} The classical method, properly implemented, is faster.
 

@@ -254,6 +254,17 @@ the four are marginally worse than doing nothing at all.
 Five parameters have now been tested individually. Four have no effect. One
 explains everything.
 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig7_ablation.png}
+\caption{One-at-a-time ablation, three seeds per bar. Each configuration is
+library defaults with a single parameter set to its tuned value. Only the
+discount factor recovers the default-to-tuned improvement; the other four
+recover nothing, and three are marginally worse than changing nothing at all.}
+\label{fig:ablation}
+\end{figure}
+
 \subsection*{Why the discount factor, and why $0.957$}
 
 The mechanism is specific and checkable. The discount factor sets the effective
@@ -289,6 +300,17 @@ evaluation curves that characterised every untuned run in this project
 (\cref{sec:replayresult}), and a policy trained against an unreliable critic
 cannot refine its endpoint precisely. Shortening the horizon to the duration of
 the reach itself makes credit assignment local and the value estimate tractable.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig8_horizon.png}
+\caption{Why the discount factor is decisive. It sets an effective planning
+horizon of roughly $1/(1-\gamma)$ steps. The library default spans the entire
+two-second episode, while the reach itself completes in about a quarter of that;
+the selected value matches the timescale of the behaviour being learned.}
+\label{fig:horizon}
+\end{figure}
 
 \subsection*{What this replaces, and why it is a better result}
 
