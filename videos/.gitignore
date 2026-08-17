@@ -1,0 +1,5 @@
+# manim intermediates: partial movie files and section caches, regenerated
+# on every render and worth nothing in history
+media/
+render_log.txt
+_smoke.py
