@@ -19,12 +19,15 @@ believable results while being wrong.
 
 ## Headline results
 
-All figures are means over **five independent training runs** unless stated.
+All figures are means over **five training seeds × three target seeds** unless
+stated. Intervals combine both components: an audit found that the target draw
+contributes as much variance as the training seed, and earlier versions of this
+work reported only the latter (see `thesis_report/` §5.4).
 
 | Result | Value |
 |---|---|
-| Reaching error (hand to target, end of 2 s reach) | **0.1033 ± 0.0034 m** |
-| Closest approach | **0.0729 ± 0.0032 m** |
+| Reaching error (hand to target, end of 2 s reach) | **0.1074 ± 0.0079 m** |
+| Closest approach | **0.0734 ± 0.0058 m** |
 | Agreement with static optimisation (Pearson *r*) | **0.808 ± 0.044** |
 | Muscular effort vs the classical optimum | **1.91 ± 0.15 ×** |
 | …vs the *achievable* floor a conventional controller reaches (1.33) | ≈ 44 % above |
@@ -125,10 +128,13 @@ Stated here because it matters more than the headline numbers.
   controller with full state access meets it only ~7 % of the time.
 - **The model is heavily reduced.** Nine muscles; the rotator cuff is absent,
   which required constraining shoulder rotation.
-- **The target-entropy attribution was tested and refuted.** A two-sided
-  ablation shows it contributes nothing; the improvement comes from the learning
-  rate, target-network rate, discount and batch size, and this work does not
-  isolate which.
+- **The cause of the precision plateau is the discount factor.** One-at-a-time
+  ablation over all five tuned hyperparameters: γ recovers 106 % of the
+  default-to-tuned interval, the other four recover nothing. An earlier
+  attribution to the exploration temperature was tested and refuted.
+- **The parallel elastic element never engages** — passive force is exactly zero
+  in every sampled state, so the "complete Hill model" describes the model file
+  rather than what is active in simulation.
 
 ---
 

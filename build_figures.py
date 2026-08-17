@@ -81,8 +81,8 @@ def fig_progression():
     """Every metric that mattered, across the four pilots that produced them."""
     runs = ["Pilot 4\n(reward v3)", "Pilot 5\n(reward v4)",
             "Pilot 6\n(replay fix)", "Final\n(entropy tuned)"]
-    final = [0.2424, 0.2540, 0.2040, 0.1063]
-    minerr = [0.1781, 0.1344, 0.1316, 0.0740]
+    final = [0.2424, 0.2540, 0.2040, 0.1074]   # last value re-measured, corrected eval
+    minerr = [0.1781, 0.1344, 0.1316, 0.0734]   # re-measured
     data["progression"] = {"runs": runs, "final_error": final,
                            "min_error": minerr}
 

@@ -114,8 +114,9 @@ reward's weighting: the effort term carried roughly one twenty-eighth the weight
 of the precision bonus. Raising it improves load-sharing fidelity monotonically
 across five seeds per setting --- effort ratio $1.914 \rightarrow 1.406
 \rightarrow 1.304$, agreement $r = 0.808 \rightarrow 0.919 \rightarrow 0.943$ ---
-at no measurable cost in reaching accuracy, and approaching the $1.263$ attained
-by a properly tuned conventional controller solving the same problem explicitly.
+for a mild accuracy cost (final error rising about 8\,\% across the range), and
+approaching the $1.263$ attained by a properly tuned conventional controller
+solving the same problem explicitly.
 Neither method dominates: the learned policy reaches some 35\,\% more accurately,
 the conventional controller is about 3\,\% more economical. The excess is anatomically localised: the
 three deltoids agree to within $2.5$--$10$\,\% normalised RMSE, whereas the

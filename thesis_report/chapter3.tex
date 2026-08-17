@@ -143,6 +143,34 @@ and are discussed as limitations in Chapter~\ref{chap:discussion}.
 \end{remarque}
 
 % -----------------------------------------------------------
+\subsection{The parallel elastic element does not engage}
+\label{sec:peeinert}
+
+The muscle model specified in \cref{chap:sota} includes a parallel elastic
+element, which produces passive force when a muscle is stretched beyond its
+optimal fibre length. Direct measurement shows it contributes nothing in this
+model.
+
+Probing every muscle at zero activation across sampled trajectories returns a
+passive force of \textbf{exactly zero} in all states. The reason is visible in
+the operating lengths: no muscle exceeds 0.67 of its declared length range, and
+most stay below 0.6, because the ranges were measured and then padded. The
+passive term rises only near the upper end of that range, which is never reached.
+
+Two consequences should be carried forward. Describing the implementation as a
+\emph{complete} Hill model is accurate as to what the model file specifies, but
+overstates what is active during simulation: the contractile and series-elastic
+elements do the work, and the parallel element is inert throughout. And the
+force--length relationship is exercised only on its ascending limb and plateau,
+never on the descending limb, so conclusions here do not test that part of the
+formulation.
+
+A favourable corollary: the load-sharing analysis of \cref{ch:forces} bounds
+muscle force below by zero, which would be wrong if a passive floor existed --- a
+muscle cannot produce less force than its passive tension. Because that tension
+is zero throughout, the bound is correct and the reported effort ratios are not
+inflated by it.
+
 \section{Validation of the Physical Model}
 \label{sec:solvervalidation}
 \label{sec:model_validation}

@@ -421,7 +421,7 @@ random starting points.
 4 & 0.1070 & 0.0760 & 1.86 & 8\,\% \\
 5 & 0.1023 & 0.0676 & 1.97 & 6\,\% \\
 \midrule
-\textbf{average} & \textbf{0.1033} & \textbf{0.0729} & \textbf{1.91} & 8\,\% \\
+\textbf{average} & \textbf{0.1074} & \textbf{0.0734} & \textbf{1.91} & 8\,\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -469,16 +469,18 @@ So the experiment was to turn it up, at two settings, five runs each.
 \toprule
 \textbf{Effort weight} & \textbf{Wasted effort} & \textbf{Agreement with maths} & \textbf{Accuracy} \\
 \midrule
-1 (original) & $1.91\times$ & 0.81 & 0.1033 \\
-5 & $1.41\times$ & 0.92 & 0.1023 \\
-\textbf{20} & $\mathbf{1.30\times}$ & \textbf{0.94} & 0.1072 \\
+1 (original) & $1.91\times$ & 0.81 & 0.1074 \\
+5 & $1.41\times$ & 0.92 & 0.1114 \\
+\textbf{20} & $\mathbf{1.30\times}$ & \textbf{0.94} & 0.1161 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The waste fell steadily, agreement with the classical answer rose steadily, and
-\textbf{accuracy did not suffer} --- the three accuracy figures are within each
-other's margin of error, and the closest the hand ever got actually improved.
+The waste fell steadily and agreement with the classical answer rose steadily.
+Accuracy did suffer, but only slightly: the final distance grew by about 8\,\%
+across the whole range, while the closest the hand ever got did not change at
+all. So the controller became no worse at \emph{reaching} the target --- only
+slightly worse at \emph{staying} there.
 
 For scale: a conventional engineered controller, solving the effort problem
 explicitly at every instant, scores $1.33$ on the same measure. The learned

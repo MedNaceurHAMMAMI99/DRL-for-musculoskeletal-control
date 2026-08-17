@@ -662,7 +662,7 @@ learning.} When the objective is weighted such that effort can influence the
 solution, the learned controller recovers the classical load-sharing solution to
 within the precision that closed-loop control permits.
 
-\subsection{Load-sharing fidelity improves monotonically, at no accuracy cost}
+\subsection{Load-sharing fidelity improves monotonically, at a mild accuracy cost}
 
 Both variants have now been replicated across five seeds, and the picture is
 cleaner than either single-seed measurement suggested.
@@ -822,9 +822,12 @@ reproduces coordination but not economy. It is that \DRL{} reproduces
 \emph{both}, provided the objective asks for both --- and that the version
 reported here did not ask.
 
-\textbf{The reported configuration is not the best one found.} At $w_2 = 5$ the
-load-sharing fidelity is markedly better for no measurable accuracy cost, over
-four seeds. The results of \cref{sec:replication} are retained as the five-seed
+\textbf{The reported configuration is not the only defensible one.} At
+$w_2 = 5$ the load-sharing fidelity is markedly better --- effort $1.406$ against
+$1.914$, agreement $0.919$ against $0.808$ --- for a final-error cost of about
+4\,\% ($0.1114$ against $0.1074$). Which configuration to prefer depends on
+whether load-sharing fidelity or endpoint accuracy is the quantity of interest,
+and this work does not assert one over the other. The results of \cref{sec:replication} are retained as the five-seed
 characterisation of the configuration analysed in depth throughout this chapter,
 and this section is reported alongside them rather than replacing them. The
 $w_2 = 20$ row remains single-seed and its replication was still running at the
