@@ -854,9 +854,10 @@ localisation of \cref{tab:permuscle} and with the excess path length observed in
 untuned policies, though it is an interpretation rather than a measured
 mechanism.
 
-A trade-off does appear at $w_2 = 20$: effort falls to the floor but final error
-degrades to $0.1249$. The knee therefore lies between the two, and was not
-searched.
+A trade-off does appear across the range: effort falls to within 3\,\% of the
+achievable floor while final error rises from $0.1074$ to
+$0.1161$\,m. Where the best compromise lies between $w_2 = 5$ and
+$w_2 = 20$ was not searched.
 
 \subsection{Consequences for this thesis}
 
@@ -874,41 +875,50 @@ $1.914$, agreement $0.919$ against $0.808$ --- for a final-error cost of about
 whether load-sharing fidelity or endpoint accuracy is the quantity of interest,
 and this work does not assert one over the other. The results of \cref{sec:replication} are retained as the five-seed
 characterisation of the configuration analysed in depth throughout this chapter,
-and this section is reported alongside them rather than replacing them. The
-$w_2 = 20$ row remains single-seed and its replication was still running at the
-time of writing.
+and this section is reported alongside them rather than replacing them. All three
+settings are now characterised across five seeds each.
 
-\textbf{The remaining outstanding experiment is now well specified}: replicate
-$w_2 = 5$ across five seeds and repeat the force and synergy analyses on it. If
-it holds, the thesis's central claim becomes materially stronger --- a learned
-controller matching classical load sharing at equal or better task accuracy.
+\textbf{What remains outstanding is narrower than it was.} Two items. The synergy
+decomposition of \cref{sec:synergies} was performed on the $w_2 = 1$ policies
+only and has not been repeated on the higher-weight variants, so whether the
+improved load-sharing fidelity is accompanied by a more classical modular
+organisation is untested. And the accuracy--economy knee between $w_2 = 5$ and
+$w_2 = 20$ was not searched, so the configuration reported here is defensible but
+not demonstrably optimal.
 
 \section{Answer to the research question}
 
-For coordination, \DRL reproduces the classical solution; for efficiency, it does
-not.
+The answer has two parts, and they were established in that order.
 
-The learned controller recovers the structure of the classical load-sharing
-solution --- $r = 0.81 \pm 0.04$, pattern cosine $0.813$ against a null of
-$0.372$, over five independent training runs --- at a fixed, branch-free
-inference cost and a \SI{1.5}{\mega\byte} memory footprint, but converges on a
-solution expending $1.91 \pm 0.15$ times the minimum required effort, about
-51\,\% above the achievable floor of $1.263$ (\cref{sec:finegains}), with the
-excess concentrated in elbow antagonist co-contraction.
-Across all configurations tested the discrepancy is present, ranging from $1.21$
-to $2.30\times$.
+\textbf{Coordination is reproduced under any weighting tested.} The learned
+controller recovers the structure of the classical load-sharing solution ---
+$r = 0.81 \pm 0.04$, pattern cosine $0.813$ against a null of $0.372$, over five
+independent training runs --- at a fixed, branch-free inference cost and a
+\SI{1.5}{\mega\byte} memory footprint.
 
-\DRL is therefore a viable fast approximation of \emph{which} muscles act and in
-\emph{what proportion}, but not a substitute for static optimisation where the
-magnitude of individual muscle forces is the quantity of interest --- as it is in
-prosthesis control, surgical planning and injury-risk estimation.
+\textbf{Magnitude is reproduced only when the objective asks for it.} Under the
+reward this work first reported, the controller expends $1.91 \pm 0.15$ times the
+minimum required effort --- about 51\,\% above the achievable floor of $1.263$
+(\cref{sec:finegains}) --- with the excess concentrated in elbow antagonist
+co-contraction, and the discrepancy present in every configuration tested,
+ranging from $1.21$ to $2.30\times$. \Cref{sec:effortsweep} establishes that this
+is a property of the reward weighting rather than of reinforcement learning: at
+$w_2 = 20$ the effort ratio falls to $1.304 \pm 0.025$ against that floor of
+$1.263$, and agreement with the classical solution rises to
+$r = 0.943 \pm 0.008$.
 
-No configuration is simultaneously best on both axes. Reaching accuracy and
-load-sharing fidelity are separate properties, they are traded against one
-another by these algorithms, and any method intended to replace classical
-calculation must be assessed on both.
+\DRL is therefore a viable approximation of both \emph{which} muscles act and
+\emph{how hard} --- but only where the effort criterion is supplied explicitly in
+the objective, which is the classical criterion itself. The method does not
+remove that modelling assumption; it relocates it from a solver into a reward
+function.
 
-\section{Explanation and proposed test}
+The accuracy cost of doing so is modest but real, and no configuration tested is
+simultaneously best on both axes. Reaching accuracy and load-sharing fidelity
+remain separate properties traded against one another, and any method intended to
+replace classical calculation must be assessed on both.
+
+\section{Explanation, and the test that confirmed it}
 \label{sec:whygap}
 
 The reward function did not specify minimum effort. Its effort term is a
@@ -916,16 +926,24 @@ normalised sum of squared forces with a weight selected for numerical balance
 against the distance term, which is neither the classical criterion nor scaled to
 match it. The policy optimised the objective it was given.
 
-This yields a directly testable prediction: a reward whose effort term is
-precisely the criterion of \cref{eq:statopt2} should reduce the $1.91\times$
-discrepancy toward the $1.263$ floor. This is the most informative single experiment remaining, it
-requires no new theory, and the measurement apparatus to evaluate it now exists.
+This yielded a directly testable prediction, recorded before the experiment was
+run: a reward whose effort term is weighted such that it can influence the
+solution should reduce the $1.91\times$ discrepancy toward the $1.263$ floor, at
+some cost in accuracy.
+
+\Cref{sec:effortsweep} reports that experiment. The prediction held in both
+halves --- the effort ratio fell monotonically to $1.304 \pm 0.025$ and final
+error rose about 8\,\% --- which is the strongest form the argument of this
+section could take, since the explanation was committed to in advance of the
+measurement that could have refuted it.
 
 \section{Limitations}
 
-The headline analysis rests on one policy, one training seed and twenty episodes
-(2000 timesteps); replication across seeds is required before the specific values
-are relied upon.
+The per-muscle breakdown of \cref{tab:permuscle} is computed from one policy and
+twenty episodes (2000 timesteps), so the muscle-by-muscle figures are
+illustrative of where the discrepancy sits rather than precise. The aggregate
+quantities that carry the chapter's argument --- effort ratio, correlation and
+pattern cosine --- are five-seed means throughout (\cref{sec:replication}).
 
 $F_{\max}$ in the constraint of \cref{eq:statopt2} is peak isometric force; the
 force--length and force--velocity modulation of \emph{available} force is not
