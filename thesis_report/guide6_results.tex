@@ -1,0 +1,822 @@
+\chapter{The Results, and Why They Came Out That Way}
+\label{ch:results}
+
+This chapter takes each result in turn and answers three questions about it:
+\textbf{what} was measured, \textbf{why} it turned out that way, and \textbf{how
+much confidence} it deserves. Where a result replaced an earlier one, the earlier
+one is shown too --- the direction in which a number moves when it is checked is
+itself information.
+
+\section{How performance is measured, and why not by success rate}
+
+\begin{center}
+\begin{tabular}{@{} L{4.0cm} L{10.0cm} @{}}
+\toprule
+\textbf{Metric} & \textbf{Definition and what it tells you} \\
+\midrule
+Final error & Hand-to-target distance at the last step. \textbf{The headline number:} it measures reaching \emph{and} holding. \\
+Closest approach & Smallest distance at any instant. Separates ``can it get there'' from ``can it stay''. \\
+Ends within 5 / 10\,cm & Graded proximity. Stable where a strict threshold is not. \\
+Drift & Closest approach minus final error --- how much is given back after arriving. \\
+Path length & Distance travelled per \SI{0.80}{\meter} of required travel. Exposes sweeping and overshoot. \\
+Energy & Summed squared activation. Distinguishes a passive policy from a straining one. \\
+Success rate & Within \SI{2}{\centi\meter} \emph{and} settled. \textbf{Reported, never headlined.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{why}
+\textbf{Why success rate is not the headline.} Across five runs of one identical
+configuration it read 0\,\%, 4\,\%, 6\,\%, 8\,\% and 20\,\%. A measure that
+varies twentyfold under identical settings is reporting sampling noise, not
+performance.
+
+The reason is structural: 4\,\% of fifty episodes is \emph{two episodes}. Any
+binary threshold near the edge of a system's capability behaves this way. Final
+error averages over all fifty and is stable to 4\,\% across the same five runs.
+This is why the graded proximity measures exist --- they retain the
+interpretability of a threshold without its brittleness.
+\end{why}
+
+\section{The self-destruction exploit}
+\label{sec:defect3}
+
+\textbf{What was measured.} Fifty evaluation episodes of a policy that appeared,
+from its reward curve, to be learning.\ \textbf{Result: 100\,\% ended in a
+deliberate numerical blow-up at step 7 of 100.} Not one episode ran to completion.
+
+\begin{why}
+\textbf{Why it happened.} Every per-step reward term was zero or negative, and a
+blow-up terminated the episode with no penalty attached. In this framework a
+terminated episode accrues nothing further --- its remaining value is exactly
+zero --- while surviving all 100 steps accumulated about $-20$.
+
+\textbf{Quitting was worth 20 more than participating.} The agent found the
+cheapest way to quit: drive the muscles into a configuration the integrator
+cannot handle.
+
+The algorithm was not broken. It maximised the objective it was given, precisely.
+The objective was wrong.
+\end{why}
+
+\textbf{The fix, and why it is the shape it is.} A survival term $w_4 = 4.5$ paid
+\emph{every step}, chosen so the per-step reward is strictly positive at any
+reachable error (costs are bounded by $2.7 + 1.0 + 0.5 = 4.2$), plus an explicit
+blow-up penalty $w_6 = 10$. Living now strictly beats quitting from every state
+--- not on average, but pointwise, which is the property that makes the fix
+robust rather than lucky.
+
+\textbf{Confidence: certain.} The failure was directly observed on 50 of 50
+episodes and the blow-up rate is exactly zero across all five replication seeds
+afterwards.
+
+\section{The discount factor is the whole story}
+\label{sec:gammaresult}
+
+This is the most important result in the project, and it was arrived at by
+first being wrong.
+
+\subsection{The wrong answer, held for weeks}
+\label{sec:entropyrefuted}
+
+A sixteen-trial Bayesian search over five hyperparameters produced a
+configuration that cut final error from \SI{0.261}{} to \SI{0.161}{\meter}. All
+five best trials selected a target entropy near $-19.6$ against the library
+default of $-9$.
+
+\begin{why}
+\textbf{Why that looked conclusive.} The mechanism fit the symptom exactly. SAC
+pays its policy to stay random; residual randomness is precisely what stops an
+end effector settling; the default scales with the \emph{number of muscles}
+rather than with anything about the task; and every good trial independently
+agreed on roughly half the default randomness.
+
+Four independent lines of evidence, all pointing one way. It was written up as a
+contribution of the thesis.
+\end{why}
+
+\begin{trap}
+\textbf{It was wrong.} A two-sided one-at-a-time ablation, three seeds per arm:
+
+\begin{center}
+\begin{tabular}{@{} L{7.6cm} C{3.2cm} C{2.4cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Final error (m)} & \textbf{Gap closed} \\
+\midrule
+All defaults \emph{(reference)} & $0.2613 \pm 0.0203$ & 0\,\% \\
+Defaults $+$ tuned entropy only & $0.2688 \pm 0.0090$ & $-8$\,\% \\
+Tuned $-$ entropy reverted & $0.1552 \pm 0.0181$ & $+106$\,\% \\
+All tuned \emph{(reference)} & $0.1610 \pm 0.0084$ & 100\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Adding the tuned entropy to defaults recovers \emph{nothing}. Removing it from
+the tuned configuration costs \emph{nothing}. Both directions agree, so this is
+not a marginal call.
+
+\textbf{Why the evidence misled.} A TPE sampler concentrates its proposals where
+performance is good. Parameters therefore cluster in the best trials whether or
+not they are causally responsible. Reading causation from that clustering is a
+plain error --- and it is the error this project made.
+
+\textbf{A hyperparameter search identifies a configuration, never a cause.} Only
+a deliberate ablation separates the two.
+\end{trap}
+
+\subsection{The right answer}
+
+The same procedure applied to all five parameters:
+
+\begin{center}
+\begin{tabular}{@{} L{6.8cm} C{3.4cm} C{2.4cm} @{}}
+\toprule
+\textbf{Defaults, plus one tuned parameter} & \textbf{Final error (m)} & \textbf{Gap closed} \\
+\midrule
+(nothing changed) & $0.2613 \pm 0.0203$ & 0\,\% \\
+target entropy only & $0.2688 \pm 0.0090$ & $-8$\,\% \\
+learning rate only & $0.2642 \pm 0.0026$ & $-3$\,\% \\
+$\tau$ only & $0.2660 \pm 0.0117$ & $-5$\,\% \\
+batch size only & $0.2658 \pm 0.0096$ & $-5$\,\% \\
+\textbf{discount factor only} & $\mathbf{0.1553 \pm 0.0061}$ & $\mathbf{+106}$\,\% \\
+\midrule
+All tuned \emph{(reference)} & $0.1610 \pm 0.0084$ & 100\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Five parameters tested individually. Four do nothing. One explains
+everything.}
+
+\begin{plain}
+The discount factor decides how far into the future the agent bothers to look ---
+about $1/(1-\gamma)$ steps ahead.
+
+\begin{center}
+\begin{tabular}{@{} L{5.4cm} C{2.4cm} C{5.0cm} @{}}
+\toprule
+& $\gamma$ & \textbf{effective horizon} \\
+\midrule
+Library default & $0.99$ & 100 steps --- the whole episode \\
+Selected by the search & $0.957$ & 23 steps $=$ \SI{0.46}{\second} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Now compare that with what the arm actually does. Measured from the trajectory,
+the hand arrives at the target by \textbf{step 25} --- \SI{0.50}{\second}.
+
+The tuned value matches the duration of the movement almost exactly. The default
+was four times too long.
+\end{plain}
+
+\begin{why}
+\textbf{Why a too-long horizon hurts, mechanically.} At $\gamma = 0.99$ the value
+of an early step includes seventy-odd later steps of holding reward. That is a
+high-variance quantity to estimate. A critic fed high-variance targets produces
+unreliable estimates; an actor trained against an unreliable critic cannot refine
+its endpoint. The visible symptom is an evaluation curve that oscillates and
+never sharpens --- exactly what every untuned run in this project showed.
+
+Shortening the horizon to the length of the reach makes credit assignment local
+and the value estimate tractable.
+
+\textbf{The transferable statement,} which is the part worth carrying to another
+project: \emph{match the discount factor to the timescale of the behaviour, not
+to a library default. Where the default horizon greatly exceeds the task
+duration, the resulting variance presents as an inability to refine --- a symptom
+easily and wrongly blamed on insufficient training, on reward shaping, or on
+exploration.} This project spent considerable effort on all three before testing
+$\gamma$.
+\end{why}
+
+\textbf{Confidence: high.} Single parameter changed, three seeds, full effect
+recovered in both directions, four alternatives excluded by the identical
+procedure, and a mechanism that predicts the observed timescale quantitatively.
+
+\section{What the tuned policy actually does}
+
+\begin{center}
+\begin{tabular}{@{} L{5.6cm} C{3.0cm} C{3.0cm} @{}}
+\toprule
+\textbf{Metric (300k steps, 50 episodes)} & \textbf{Default} & \textbf{Tuned} \\
+\midrule
+Final error (m) & 0.204 & \textbf{0.106} \\
+Closest approach (m) & 0.132 & \textbf{0.074} \\
+Drift (m) & 0.072 & \textbf{0.035} \\
+Ends within \SI{10}{\centi\meter} & 18\,\% & \textbf{58\,\%} \\
+Energy & 774\,667 & \textbf{276\,804} \\
+Path length per \SI{0.80}{\meter} reach & \SI{3.55}{\meter} & \textbf{\SI{1.64}{\meter}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{plain}
+Read the path-length row. To cover \SI{0.80}{\meter} of required travel, the
+untuned policy moved its hand \SI{3.55}{\meter} --- it swept around, overshot,
+and came back. The tuned policy moved \SI{1.64}{\meter}, with net displacement
+$0.99\times$ the distance required.
+
+It stopped wandering and started going there.
+\end{plain}
+
+Intra-episode, averaged over thirty episodes: the hand starts \SI{0.795}{\meter}
+away, is at \SI{0.198}{} by step 10, \SI{0.119}{} by step 25, and then holds ---
+\SI{0.110}{}, \SI{0.112}{}, \SI{0.113}{\meter} at steps 50, 75, 99. \textbf{That
+flat tail is the whole point:} converged and stationary, not still drifting.
+
+\section{Comparing the four algorithms, and getting it wrong first}
+\label{sec:fairness}
+
+\textbf{What was measured first.} Five configurations, three seeds, 100k steps.
+Ordering: SAC $<$ TD3 $<$ DDPG $<$ PPO. DDPG was reported as clearly the weakest
+off-policy method, explained by its lack of twin critics --- the textbook account.
+
+\begin{trap}
+\textbf{That comparison was invalid, and by its own later findings.} SAC ran with
+$\gamma = 0.957$; the other three ran at the library default $0.99$. Once
+$\gamma$ was shown to be the decisive parameter, the benchmark stood revealed as
+\emph{one correctly configured entrant against three handicapped ones}.
+
+Retrained with $\gamma = 0.957$ for all four:
+
+\begin{center}
+\begin{tabular}{@{} L{2.8cm} C{3.0cm} C{3.4cm} C{2.4cm} @{}}
+\toprule
+& \textbf{Before ($\gamma{=}0.99$)} & \textbf{After ($\gamma{=}0.957$)} & \textbf{Change} \\
+\midrule
+SAC  & $0.2613 \pm 0.0203$ & $\mathbf{0.1909 \pm 0.0341}$ & $-27$\,\% \\
+DDPG & $0.4161 \pm 0.0189$ & $\mathbf{0.2510 \pm 0.0383}$ & $\mathbf{-40}$\,\% \\
+TD3  & $0.2786 \pm 0.0110$ & $0.2579 \pm 0.0348$ & $-7$\,\% \\
+PPO  & $0.4231 \pm 0.0351$ & $0.4661 \pm 0.0401$ & $+10$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+DDPG improves 40\,\% and overtakes TD3. The ranking changes. \textbf{The
+twin-critic explanation was constructed after the fact around a result that has
+not survived} --- DDPG was not failing for want of twin critics; it was failing
+because its horizon was wrong, and it suffered more from that than the others.
+Corrected, it is indistinguishable from TD3 and no ordering between them is
+supported.
+\end{trap}
+
+\begin{why}
+\textbf{Why PPO got worse}, uniquely. PPO estimates advantages through
+generalised advantage estimation, where $\gamma$ and $\lambda$ \emph{jointly} set
+the bias--variance trade-off. Lowering $\gamma$ while leaving $\lambda = 0.95$
+shortens the horizon on one side of a pair only. The correct adjustment for PPO
+touches both, and was not attempted --- so PPO's last place is again about
+configuration, not about the algorithm.
+
+This is what makes fair comparison of RL algorithms genuinely hard: there is no
+single setting that can be held equal across all four, because the parameters do
+not mean the same thing in each.
+\end{why}
+
+\textbf{The conclusion that survives.} The gap between the best and second-best
+off-policy method is \SI{0.060}{\meter}. The improvement obtained in DDPG by
+correcting $\gamma$ alone was \SI{0.165}{\meter} --- roughly \textbf{three times
+the gap between algorithms}.
+
+\begin{center}
+\begin{tabular}{@{}p{3pt}@{\hspace{10pt}}p{0.93\linewidth}@{}}
+\cellcolor{navy} & On this task, choosing the discount factor correctly mattered
+about three times more than choosing between SAC, TD3 and DDPG.
+\end{tabular}
+\end{center}
+
+\textbf{Confidence: moderate.} Three seeds, no significance testing (three seeds
+cannot support a signed-rank test with useful power, so none is claimed), a
+100k-step early-training snapshot, and only $\gamma$ corrected --- a \emph{fair}
+comparison, not a \emph{tuned} one. A tuned comparison needs a separate search
+per algorithm, which the compute budget did not allow.
+
+\section{The central result: do the muscle forces agree?}
+
+This is the thesis question. Everything above concerns whether the arm reaches;
+this concerns whether it reaches \emph{the same way}.
+
+\subsection{How the comparison is made fair}
+
+At every timestep of a rollout, take the joint torque $\tau$ the policy actually
+produced, hand it to static optimisation, and ask what forces \emph{it} would
+have chosen for that same torque.
+
+\begin{why}
+\textbf{Why $\tau$ is taken from the policy rather than computed independently.}
+Two reasons, and both are about eliminating excuses.
+
+It is \emph{exact} --- \texttt{qfrc\_actuator} is the generalised force the
+muscles genuinely produced, so no numerical differentiation enters. And it is
+\emph{guaranteed feasible} --- the policy's own force vector satisfies the
+constraint by construction, so static optimisation can never fail for want of a
+solution.
+
+Both methods are then posed an identical problem on an identical trajectory. Any
+difference is purely a difference of load-sharing strategy, which is exactly what
+the thesis asks about.
+
+\textbf{The cost of this choice, stated plainly:} the classical method never
+chooses a trajectory of its own. So this validates load sharing \emph{along a
+given path}, not the path. A controller could move in a way no human would and
+still share load classically. Trajectory realism is not assessed anywhere in this
+work.
+\end{why}
+
+\textbf{The identity was verified, not assumed.} Over 2000 timesteps, the mean
+residual $\|R^\top f - \tau\|$ is \SI{1.46e-15}{\newton\meter} for the policy's
+forces and \SI{1.68e-15}{} for the classical solution, with 0 optimisation
+failures. Both at machine precision. A sign error or a moment-arm extraction
+error would have invalidated the whole chapter, and would have shown up here.
+
+\subsection{Result one: the pattern agrees}
+
+\begin{center}
+\begin{tabular}{@{} L{8.2cm} R{4.0cm} @{}}
+\toprule
+Pearson correlation, all muscles & $\mathbf{0.81 \pm 0.04}$ \\
+Pattern cosine similarity & $0.813 \pm 0.047$ \\
+\quad null baseline & $0.372 \pm 0.017$ \\
+\quad \textbf{excess over null} & $\mathbf{+0.441}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{trap}
+\textbf{The cosine number cannot be quoted on its own, and this nearly went
+wrong.} Muscle forces are non-negative by construction, so two \emph{completely
+unrelated} force vectors already agree strongly --- all their components point
+into the same corner of the space.
+
+The correct null: at each timestep, permute which muscle each of the policy's own
+force magnitudes belongs to. This destroys the correspondence while preserving
+that instant's magnitude distribution exactly.
+
+That null averages \textbf{0.373}. So of an apparent 0.813, roughly the first
+0.37 is a floor imposed by arithmetic, not evidence of anything.
+
+\textbf{A second-order error inside the first.} The null was initially computed on
+\emph{time-averaged} force vectors and gave 0.767 --- which would have made the
+result look like nothing at all. That was also wrong: averaging over time removes
+the very variation the statistic is meant to test. Computed per timestep, as it
+must be, it is 0.373.
+
+And because the null's 95th percentile for \emph{individual} timesteps is 0.867,
+no single timestep's cosine means anything. Only the aggregate does.
+
+\textbf{The Pearson correlation is mean-centred, carries no such floor, and is
+the figure to quote when one number is required.}
+\end{trap}
+
+\subsection{Result two: the economy does not agree}
+
+Producing identical joint torques, the learned controller expends
+$\mathbf{1.91 \pm 0.15}$ times the effort of the minimum-effort solution.
+
+\textbf{Where the excess sits} --- it is not spread evenly:
+
+\begin{center}
+\begin{tabular}{@{} L{3.6cm} R{2.2cm} R{2.4cm} R{1.6cm} R{1.8cm} @{}}
+\toprule
+\textbf{Muscle} & \textbf{Policy (N)} & \textbf{Classical (N)} & \textbf{$r$} & \textbf{NRMSE} \\
+\midrule
+deltoid anterior  &  63.7 &  59.2 & 0.959 &  2.5\,\% \\
+deltoid medial    & 145.3 & 112.3 & 0.954 &  6.1\,\% \\
+deltoid posterior &  35.5 &  38.7 & 0.859 & 10.0\,\% \\
+triceps long      & 180.4 & 134.0 & 0.910 & 11.2\,\% \\
+biceps long       &  52.1 &  41.6 & 0.893 &  7.5\,\% \\
+brachialis        & 113.9 &  87.6 & 0.871 &  8.6\,\% \\
+biceps short      &  90.7 &  45.7 & 0.764 & 18.1\,\% \\
+\textbf{triceps lateral} &  79.1 &  25.8 & \textbf{0.416} & 16.5\,\% \\
+\textbf{triceps medial}  &  64.3 &  14.2 & \textbf{0.416} & 15.3\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{plain}
+The three shoulder muscles agree closely --- one to within 2.5\,\%. The problem is
+in two elbow extensors, where the policy uses three to four and a half times what
+is prescribed.
+
+Those muscles \emph{straighten} the elbow while the biceps group \emph{bends} it.
+Driving both at once produces largely cancelling torques. The elbow ends up at
+roughly the right angle, but both groups have spent large forces to achieve what
+one alone would have done.
+
+This is \textbf{co-contraction}. Humans do it deliberately when a joint needs to
+be stiff --- carrying a full cup, or steadying a hand. Doing it throughout an
+unloaded reach is simply waste, and it is not what the minimum-effort criterion
+selects.
+\end{plain}
+
+\textbf{Independently corroborated.} The Falconer--Winter co-contraction index
+over the elbow flexor/extensor groups reads 0.564 --- elevated, and the only
+behavioural metric that did \emph{not} improve under tuning (0.501 before). Two
+methodologically unrelated analyses, one a comparison against classical
+optimisation and one a standard EMG-derived index, localise the same defect to
+the same muscle group. That agreement is stronger evidence than either alone.
+
+\subsection{Result three: the task is solved consistently, the muscle solution is not}
+
+Five identical runs differing only in random seed:
+
+\begin{center}
+\begin{tabular}{@{} C{1.6cm} C{2.2cm} C{2.2cm} C{2.0cm} C{1.8cm} C{1.8cm} @{}}
+\toprule
+\textbf{Seed} & \textbf{Final error} & \textbf{Closest} & \textbf{Effort ratio} & \textbf{$r$} & \textbf{Success} \\
+\midrule
+0 & 0.1142 & 0.0766 & 1.71 & 0.865 & 0.04 \\
+1 & 0.1086 & 0.0785 & 1.91 & 0.823 & 0.20 \\
+2 & 0.1034 & 0.0757 & 2.12 & 0.759 & 0.00 \\
+3 & 0.1066 & 0.0672 & 1.86 & 0.825 & 0.08 \\
+4 & 0.1041 & 0.0691 & 1.97 & 0.767 & 0.06 \\
+\midrule
+\textbf{mean} & $0.1074$ & $0.0734$ & $1.914$ & $0.808$ & $0.076$ \\
+\textbf{std}  & $0.0043$ & $0.0050$ & $0.150$ & $0.044$ & $0.075$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two facts sit side by side in that table and their combination is the most
+informative result in the thesis. \textbf{Final error varies by 4\,\% across the
+five runs. Muscular energy varies by 77\,\%} (273{,}241 to 483{,}373).
+
+\begin{plain}
+Five controllers, trained identically apart from a random seed, all arrive at
+essentially the same place --- using materially different sets of muscle forces.
+
+That is the redundancy problem of Chapter~1 appearing directly in the results.
+Nine muscles, four joints; many force distributions give the same movement; and
+nothing in the reward chose among them. The learner settled somewhere different
+each time.
+
+It also tells you where the fix is. Huge variance in the muscular solution
+alongside near-constancy in the task outcome is the signature of \textbf{an
+objective that is undetermined in exactly the dimension you care about.}
+\end{plain}
+
+\begin{trap}
+\textbf{The originally reported run was the best of the five.} Seed 0 --- the run
+every earlier section analysed --- gave the \emph{lowest} effort ratio (1.71 vs a
+mean of 1.914) and the \emph{highest} correlation (0.865 vs 0.808). On both
+metrics carrying the argument, the single run first reported was the most
+favourable of five.
+
+Not a large effect, but a systematic one, and exactly the error that reporting a
+single run invites. Without replication this thesis would have reported both an
+agreement and an efficiency better than the method delivers.
+\end{trap}
+
+\section{Closing the gap: the effort weight}
+\label{sec:sweepresult}
+
+\textbf{The prediction, made before the experiment.} If the effort term is 28
+times smaller than the precision bonus, it cannot be influencing the solution ---
+so raising $w_2$ should reduce the discrepancy, at some cost in accuracy.
+
+Run at $w_2 \in \{1, 5, 20\}$, everything else fixed, five seeds each, full
+300k-step budget, and evaluated under the \emph{default} weights so the numbers
+stay comparable with every other result:
+
+\begin{center}
+\begin{tabular}{@{} L{2.4cm} C{2.6cm} C{2.4cm} C{2.6cm} C{2.0cm} @{}}
+\toprule
+\textbf{Config.} & \textbf{Effort ratio} & \textbf{Pearson $r$} & \textbf{Final error} & \textbf{Energy} \\
+\midrule
+$w_2 = 1$  & $1.914 \pm 0.150$ & $0.808 \pm 0.044$ & $0.1074 \pm 0.0079$ & 327\,048 \\
+$w_2 = 5$  & $1.406 \pm 0.092$ & $0.919 \pm 0.016$ & $0.1114 \pm 0.0053$ & 104\,598 \\
+$\mathbf{w_2 = 20}$ & $\mathbf{1.304 \pm 0.025}$ & $\mathbf{0.943 \pm 0.008}$ & $0.1161 \pm 0.0108$ & \textbf{37\,076} \\
+\midrule
+Conventional & $1.263$ & $0.931$ & $0.165$ & 102\,876 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The prediction held, in every particular.
+
+\textbf{Fidelity improves monotonically}, and the distributions are cleanly
+separated --- every $w_2 = 20$ seed (1.278--1.340) lies below every $w_2 = 5$ seed
+(1.336--1.557), which lies below every $w_2 = 1$ seed (1.710--2.116). Per-muscle
+RMSE falls from 10.1\,\% to about 3\,\% of mean $F_{\max}$.
+
+\textbf{The accuracy cost is real but modest}: 8\,\% worse final error for a
+32\,\% reduction in wasted effort. Closest approach is unchanged
+(0.0734, 0.0750, 0.0737), so what is lost is \emph{holding}, not \emph{reaching}.
+
+\begin{why}
+\textbf{The most informative row is the standard deviation.} It collapses:
+$0.150 \rightarrow 0.092 \rightarrow 0.025$ on effort, and
+$0.044 \rightarrow 0.016 \rightarrow 0.008$ on correlation.
+
+That confirms the interpretation offered above. At $w_2 = 1$ the muscular
+solution varied 77\,\% across seeds while task performance stayed constant,
+because the objective did not constrain it. Weighting that dimension \emph{pins
+the solution down}: at $w_2 = 20$ the load-sharing outcome is determined by the
+objective rather than by the random seed.
+
+This is a stronger form of evidence than the mean improvement alone. It shows the
+mechanism, not just the effect.
+\end{why}
+
+\begin{center}
+\begin{tabular}{@{}p{3pt}@{\hspace{10pt}}p{0.93\linewidth}@{}}
+\cellcolor{navy} & \textbf{The headline answer changes.} It is not that DRL
+reproduces coordination but not economy. It is that DRL reproduces
+\textbf{both} --- provided the objective asks for both. The version originally
+reported did not ask.
+\end{tabular}
+\end{center}
+
+\subsection{Two predictions, one right and one wrong}
+
+Both are recorded because the direction of the error is instructive.
+
+\textbf{Right:} the prediction that raising $w_2$ would trade accuracy for
+fidelity, made in advance, borne out in both directions.
+
+\textbf{Wrong:} this author predicted that $w_2 = 20$ would \emph{regress} on
+replication, reasoning that single-seed results in this project had twice proved
+optimistic. It did the opposite --- seed 0's 1.34 was the \emph{worst} of the
+five and the mean is 1.304. Selection bias explains a favourable first
+measurement; it does not license assuming that every first measurement is
+favourable.
+
+\section{Against a conventional controller --- and a withdrawn claim}
+
+Static optimisation is an \emph{idealised} reference: solved instant by instant,
+with no actuator lag and no tracking. Comparing against it says how far the
+policy is from a mathematical optimum, not how far it is from what conventional
+control actually achieves --- and the thesis question is the latter.
+
+A Cartesian impedance controller was therefore built:
+$f_{\text{des}} = K_p(x^\star - x) - K_d\dot{x}$, mapped to joint torques by the
+Jacobian transpose, with gravity and Coriolis terms compensated, and distributed
+onto muscles by minimum-effort load sharing over the achievable force range. Both
+gains were grid-searched, because a tuned policy against an untuned controller is
+not a test.
+
+\begin{trap}
+\textbf{Two defects would have made it a strawman.} Both are on the
+\emph{classical} side, and both were found and fixed before publishing anything.
+
+\textbf{No gravity compensation.} Without the bias term the arm droops until
+position error alone generates enough torque, leaving a large steady-state
+offset. Measured, it reached only \SI{0.46}{\meter} --- \emph{worse than a random
+policy}. Any textbook impedance controller includes this term.
+
+\textbf{It assumed force is proportional to activation.} It is not: force is
+$g(l,v)\,a + b(l,v)$, state-dependent. Converting a desired force to an
+activation requires inverting the muscle model at the current length and velocity.
+Probing at $a = 0$ and $a = 1$ recovers that affine relation exactly.
+
+Reporting the comparison without these fixes would have overstated the case for
+learning. This is the single easiest way to fake a machine-learning result, and
+it is usually done by accident.
+\end{trap}
+
+\subsection{Why the conventional controller is not 1.00}
+
+It solves minimum-effort load sharing explicitly at every timestep, so its effort
+ratio ``should'' be exactly 1.00. It is \textbf{1.263}.
+
+\begin{why}
+The gap is not an error --- it is the price of closed-loop control. Activation
+dynamics mean the commanded activation is not the realised one; the controller
+acts at \SI{50}{\hertz} rather than continuously; and it tracks a moving state
+rather than solving a static instant.
+
+\textbf{The idealised 1.00 is not attainable by any controller operating under
+these constraints}, and this reframes the central number. Measured against 1.00,
+the learned policy appears to waste 91\,\% of its effort. Measured against 1.263 ---
+the achievable floor, demonstrated by a controller that optimises effort
+explicitly --- it uses about \textbf{51\,\% more than necessary}. The second figure
+is the meaningful one.
+\end{why}
+
+\subsection{A claim made, then withdrawn}
+
+\begin{trap}
+An earlier draft observed that the learned policy at $w_2 = 20$ reached
+$1.304 \pm 0.025$, \emph{below} the 1.33 then measured for the conventional
+controller --- and cautioned that the 1.33 rested on a single gain pair from a
+coarse twelve-point grid, so a better-tuned controller might overturn it.
+
+A thirty-point search was run. It did. The coarse search had bottomed out against
+its own lower boundary; the better gains are \emph{gentler} in both stiffness and
+damping ($k_p = 20$, $k_d = 6$ against $k_p = 60$, $k_d = 25$), and give both
+better accuracy (\SI{0.165}{} vs \SI{0.199}{\meter}) and better economy (1.263 vs
+1.330).
+
+\textbf{The claim that a learned policy distributes force more economically than
+a controller optimising that quantity in closed form is therefore not supported,
+and the paragraph advancing it was removed.}
+\end{trap}
+
+\textbf{The honest comparison, both sides measured properly:}
+
+\begin{center}
+\begin{tabular}{@{} L{5.6cm} C{3.4cm} C{3.4cm} @{}}
+\toprule
+& \textbf{Learned ($w_2 = 20$)} & \textbf{Conventional} \\
+\midrule
+Final error & $\mathbf{0.1072 \pm 0.0148}$ & \SI{0.165}{\meter} \\
+Effort ratio & $1.304 \pm 0.025$ & $\mathbf{1.263}$ \\
+Agreement with classical ($r$) & $\mathbf{0.943 \pm 0.008}$ & $0.931$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Neither method dominates. The learned policy reaches about 35\,\% more
+accurately; the conventional controller is about 3\,\% more economical --- a
+margin comparable to the learned policy's own seed spread, so the two are close,
+but the ordering on effort favours the classical method.
+
+What survives is narrower and sturdier than what was first written: \emph{at an
+appropriate effort weight, a learned policy achieves load-sharing fidelity
+comparable to a properly tuned conventional controller, while reaching
+substantially more accurately.}
+
+\section{The speed argument, withdrawn}
+
+The original motivation was inference cost. First measurement: classical
+\SI{2165}{\micro\second} against the network's \SI{295}{\micro\second}, a
+$7.3\times$ advantage.
+
+\begin{trap}
+Two objections, and together they are fatal.
+
+\textbf{It timed the wrong computation.} The \SI{2165}{\micro\second} is the
+Newton--Raphson solve of Hill fibre--tendon equilibrium, which is part of
+\emph{forward simulation}. The question this thesis asks is answered by
+\emph{load-sharing optimisation} --- a different calculation entirely. The two had
+been conflated.
+
+\textbf{Both sides were unoptimised Python.} Re-timed like-for-like, with
+moment-arm extraction charged to the classical side:
+
+\begin{center}
+\begin{tabular}{@{} L{7.6cm} R{2.4cm} R{2.4cm} @{}}
+\toprule
+& \textbf{mean (\si{\micro\second})} & \textbf{p99} \\
+\midrule
+Network forward pass & 288.8 & 499.9 \\
+Classical, general solver (SLSQP) & 2370.5 & 5133.1 \\
+\textbf{Classical, direct solve $+$ moment arms} & \textbf{23.9} & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Against a general-purpose solver the network is $8.2\times$ faster. Against a
+direct solve of the actual problem it is \textbf{about twelve times slower}.
+
+\textbf{The latency argument is withdrawn.} The $7.3\times$ reflected the cost of
+one Python implementation, not a property of the two approaches.
+\end{trap}
+
+\textbf{What survives, honestly stated.} A qualification runs the other way: the
+box constraints are active in 100\,\% of sampled states, so the closed-form solve
+is not exactly valid and a constrained active-set solver would cost more than
+\SI{23.9}{\micro\second}. It would not cost \SI{2370}{}. The defensible statement
+is that the two are \emph{comparable} in cost.
+
+What genuinely survives is the \emph{shape} of the cost, not its magnitude: the
+network's runtime is fixed and branch-free regardless of biomechanical state,
+where the iterative solver's depends on convergence. Where a hard real-time bound
+matters more than mean latency, that retains value. It is a considerably weaker
+claim than a speed-up, and it is the one made.
+
+The policy contains 393{,}750 parameters --- \SI{1.5}{\mega\byte} single-precision,
+\SI{385}{\kilo\byte} quantised to eight bits. These figures are independent of
+policy quality, and specific to the SAC architecture (PPO's is 154{,}131).
+
+\section{Muscle synergies, and the weakest of the three analyses}
+
+Motor-control theory holds that the nervous system manages redundant musculature
+through a few co-activated groups rather than muscle by muscle. Non-negative
+matrix factorisation recovers that structure; VAF measures how much it explains.
+
+\textbf{Two findings and one caution.}
+
+\textbf{The classical solution is uniformly more low-dimensional.} Static
+optimisation needs four or five synergies to reach 90\,\% VAF where the learned
+policies need six to nine. This is co-contraction expressed in synergy space:
+driving an antagonist independently of its agonist requires an extra dimension
+that the classical solution never uses.
+
+\textbf{Agreement between learned and classical synergy structure tracks training
+quality} --- 0.676 for default SAC against 0.851 for tuned SAC at 300k.
+
+\begin{trap}
+\textbf{But this statistic is unstable, and the first version of the result
+exploited that without meaning to.} Varying the episode count for one fixed
+policy gave 0.873, 0.805, 0.950, 0.810, 0.739 at 8, 12, 15, 20, 25 episodes --- a
+spread of 0.21, and non-monotone, so it is sampling noise, not convergence.
+
+The VAF over the same range moved only 0.818--0.870, which localises the problem:
+the instability is in the \emph{basis matching}, not the decomposition. NMF has no
+unique solution, and two independently fitted bases inherit that ambiguity.
+
+Re-estimated over six random 15-episode subsets, the reported 0.950 becomes
+$0.851 \pm 0.129$ --- and 0.950 sits near the top of its own resampled range
+$[0.708, 0.979]$.
+
+\textbf{A separate methodological error in the same statistic.} The similarity was
+originally a best match per synergy, which lets several extracted synergies claim
+the same reference while others go unmatched. On real data only three of four
+references were distinctly matched, inflating the score by roughly 0.10. All
+figures now use a one-to-one (Hungarian) assignment, which is what a
+correspondence between sets actually means.
+\end{trap}
+
+\textbf{Confidence: low, and labelled as such.} The ordering survives --- the gap
+of 0.175 exceeds the pooled spread --- so the qualitative claim stands. But this
+is the weakest of the three convergent analyses and should be weighted
+accordingly: the effort ratio (five seeds, non-overlapping distributions) and the
+co-contraction index are far better determined than a statistic whose sampling
+spread is comparable to the effect it measures.
+
+The comparison against \emph{human} synergies (0.62--0.80) is not interpreted at
+all: the reference loadings are a documented qualitative approximation over this
+model's muscle ordering, not digitised from the original publication.
+
+\section{Confidence: what is solid, and what is not}
+
+\begin{center}
+\begin{tabular}{@{} L{7.0cm} C{2.4cm} L{4.6cm} @{}}
+\toprule
+\textbf{Claim} & \textbf{Confidence} & \textbf{Basis} \\
+\midrule
+$\gamma$ causes the improvement & \textbf{high} & two-sided ablation, 4 alternatives excluded, mechanism predicts timescale \\
+Replay ratio was 0.233 & \textbf{high} & directly counted; run-time arithmetic closes \\
+Load-sharing pattern agrees & \textbf{high} & 5 seeds, proper null, machine-precision validity check \\
+Excess effort is co-contraction at the elbow & \textbf{high} & two independent analyses localise it identically \\
+Raising $w_2$ closes the gap & \textbf{high} & predicted in advance, 5 seeds, non-overlapping distributions, variance collapses \\
+Learned vs conventional trade-off & \textbf{moderate} & both sides tuned, but $n = 1$ controller at one gain pair \\
+Algorithm ordering & \textbf{moderate} & 3 seeds, no significance test, 100k snapshot, untuned \\
+Synergy agreement tracks quality & \textbf{low} & sampling spread comparable to the effect \\
+Anything about \emph{human} motor control & \textbf{none} & no EMG, no subject, no measured force \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{The five limitations that matter most}
+
+\textbf{1. No ground truth exists anywhere in this work.} Both sides are computed
+in the same simulator on the same muscle model. Where they agree, two
+computations over one approximation agree. And static optimisation is itself a
+\emph{theory} of load sharing --- well established, still contested. A controller
+that disagrees with it is not thereby shown to be unphysiological.
+
+\textbf{2. One task.} A single reaching movement in one workspace. Nothing here
+establishes that any finding transfers to another task --- including the $\gamma$
+result, whose mechanism explicitly depends on this task's duration.
+
+\textbf{3. Three seeds, no significance testing.} Where five seeds exist they are
+used; where three do, no test is claimed, because three cannot support one.
+
+\textbf{4. ``Complete Hill model'' overstates what is active.} The parallel
+elastic element returns exactly zero in every sampled state, and the
+force--length curve is exercised only on its ascending limb.
+
+\textbf{5. Trajectory realism is not assessed.} The comparison validates load
+sharing along a given path, never the path itself.
+
+\section{Questions people actually ask}
+
+\textbf{Did the DRL work?} On reaching: yes --- a hand starting \SI{0.80}{\meter}
+away ends within \SI{0.107}{\meter} and holds. On the thesis question: it
+reproduces \emph{which} muscles act and in \emph{what proportion} ($r = 0.94$ at
+$w_2 = 20$), and it reproduces the \emph{magnitude} too once the objective asks
+for it.
+
+\textbf{Is \SI{0.107}{\meter} good?} It is not human-level, and this document does
+not claim it is. For context: the untuned baseline was \SI{0.26}{\meter}, a
+properly tuned conventional controller reaches \SI{0.165}{\meter}, and a
+controller given \emph{full privileged state} has a median final error of
+\SI{0.08}{\meter}. The learned policy, acting only on proprioception, sits between
+the conventional controller and the privileged one.
+
+\textbf{Why is the success rate so low?} Because it demands \SI{2}{\centi\meter}
+\emph{and} settled, and 4\,\% of fifty episodes is two episodes. Across five
+identical runs it read 0, 4, 6, 8 and 20\,\%. It is noise, and it is reported as
+noise.
+
+\textbf{Should we use DRL instead of classical calculation?} Not for this, on this
+evidence. It is not faster (that claim is withdrawn), and it needs the effort
+objective supplied explicitly, which is the classical criterion --- so it does not
+remove the modelling assumption, it relocates it. What it offers is a fixed,
+branch-free inference cost and better endpoint accuracy than a conventional
+controller. That is a trade-off, not a replacement.
+
+\textbf{What is the single most useful thing here?} That the discount factor,
+matched to the timescale of the behaviour, mattered about three times more than
+the choice of algorithm --- and that this was invisible until an ablation was run,
+having been confidently misattributed to something else first.
+
+\textbf{Why does the document keep describing its own mistakes?} Because every
+one of them changed a number that had already been written down, and in every
+case the uncorrected number was the more flattering one. A result that has
+survived a serious attempt to break it is worth more than one that has not been
+tested; showing the attempts is how a reader can tell which kind they are
+holding.

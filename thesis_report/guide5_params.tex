@@ -1,0 +1,214 @@
+\chapter{Every Parameter, Explained}
+
+This chapter is a reference. Each parameter gets: what it controls, the value
+used, why that value, and what happens when it is wrong --- with a measured
+consequence wherever one exists.
+
+\section{Task and episode structure}
+
+\begin{longtable}{@{} L{3.4cm} C{2.0cm} L{9.0cm} @{}}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Meaning, rationale, failure mode} \\
+\midrule
+\endhead
+\texttt{EPISODE\_SEC} & 2.0 s & Duration of one reach. Long enough to travel \SI{0.8}{\meter} and settle; short enough that a million steps buys many attempts. \\
+\texttt{FRAME\_SKIP} & 10 & Physics steps per decision. Physics runs at \SI{500}{\hertz}, the policy at \SI{50}{\hertz}. \textbf{If too small:} a 2-second episode becomes 1000 decisions, so the budget buys few \emph{attempts} and the policy regresses to the workspace centre --- measured, settle spread was 39\,\% of target spread. \textbf{Nearly free:} physics is \SI{6.8}{\micro\second}/step against \SI{14}{\milli\second}/gradient update. \\
+\texttt{MAX\_EPISODE\_STEPS} & 100 & Derived: $2.0 / (0.002 \times 10)$. Not set independently. \\
+\texttt{EVAL\_EPISODES} & 50 & Episodes per reported evaluation. \textbf{Too few and} target-sampling noise dominates --- at 50 the success rate still swings 0--20\,\% across draws. \\
+\texttt{EVAL\_FREQ} & 25--50k & Learning-curve spacing. Monitoring only; five episodes per point is far too noisy to report. \\
+\bottomrule
+\end{longtable}
+
+\section{Reward weights}
+
+\begin{longtable}{@{} L{1.6cm} C{1.6cm} L{11.2cm} @{}}
+\toprule
+\textbf{Weight} & \textbf{Value} & \textbf{Controls / consequence} \\
+\midrule
+\endhead
+$w_1$ & 1.0 & \textbf{Distance cost}, quadratic plus linear. The linear part is essential: quadratic alone gives $e^2 = 0.01$ at \SI{10}{\centi\meter}, less than the cost of holding against gravity, so the policy has no reason to close the last stretch. \textbf{Observed without it:} hovering at 10--15\,cm. \\
+$w_2$ & 1.0 $\rightarrow$ swept & \textbf{Effort.} Mean of $(f_i/F_{\max,i})^2$. This is the classical criterion in form. \textbf{Measured at $w_2=1$:} the term contributes $0.051$ per step against a precision bonus of $1.441$ --- roughly \textbf{28 times too small to influence anything}. Sweeping it is \S\ref{sec:sweepresult}. \\
+$w_3$ & 0.5 & \textbf{Smoothness}, mean squared change in command. Mean rather than sum, so it is bounded by 1 like the effort term and the two weights are comparable. \\
+$w_4$ & 4.5 & \textbf{Survival offset.} Paid every step. Chosen so the per-step reward is strictly positive at any reachable error: costs are bounded by $2.7 + 1.0 + 0.5 = 4.2$. \textbf{If zero:} quitting becomes optimal --- see \S\ref{sec:defect3}. \\
+$w_5$ & 1.0 & \textbf{Success bonus}, paid \emph{per step} on target, not once. Converts the task from reach to reach-and-hold. \textbf{If terminal instead:} an alive bonus makes hovering beat succeeding. \\
+$w_6$ & 10.0 & \textbf{Blow-up penalty.} Belt-and-braces on top of forfeited survival reward. \\
+$w_7$ & 3.0 & \textbf{Precision bonus}, $e^{-\|e\|/s}$. \\
+$s$ & 0.15 m & \textbf{Precision length scale.} \textbf{Originally 0.05, which was a design error:} at the \SI{0.23}{\meter} the policy actually occupied, the bonus was worth $0.03$ of a reward of 4 --- a prize behind a wall. At $0.15$ it is worth $0.65$ at 23\,cm and $2.6$ at 2\,cm: a smooth pull across the region the policy inhabits. \\
+\bottomrule
+\end{longtable}
+
+\section{Learning hyperparameters}
+
+\begin{longtable}{@{} L{3.0cm} C{2.4cm} L{9.0cm} @{}}
+\toprule
+\textbf{Parameter} & \textbf{Default / tuned} & \textbf{Meaning and consequence} \\
+\midrule
+\endhead
+\texttt{gamma} ($\gamma$) & 0.99 / \textbf{0.957} & \textbf{Discount factor.} Sets the planning horizon, about $1/(1-\gamma)$ steps: 100 at the default, 23 when tuned. \textbf{This single parameter accounts for the entire tuning improvement} --- ablation recovers $+106$\,\% of the gap from it alone, while four others recover nothing. \S\ref{sec:gammaresult}. \\
+\texttt{learning\_rate} & $3\times10^{-4}$ / $4.4\times10^{-4}$ & Step size for gradient updates. Too high oscillates, too low crawls. \textbf{Measured contribution here: $-3$\,\%, i.e.\ none.} \\
+\texttt{tau} ($\tau$) & 0.005 / 0.0188 & \textbf{Target-network update rate.} How fast the slow reference copy of the critic tracks the live one. Moved 3.8$\times$ in tuning and was the leading suspect. \textbf{Measured contribution: $-5$\,\%, i.e.\ none.} \\
+\texttt{batch\_size} & 512 / 128 & Samples per gradient update. Smaller is noisier but faster: measured \SI{9.68}{\milli\second} at 128 against \SI{14.39}{\milli\second} at 512. \textbf{Measured contribution to quality: $-5$\,\%.} \\
+\texttt{target\_entropy} & $-9$ (auto) / $-19.6$ & \textbf{SAC only.} How random the policy is kept. Default is minus the action count. \textbf{Believed for weeks to be the cause of the precision plateau; ablation proved it contributes $-8$\,\%, i.e.\ nothing.} \S\ref{sec:entropyrefuted}. \\
+\texttt{buffer\_size} & 300{,}000 & Replay memory. At 38-dim observations this is $\approx$\SI{106}{\mega\byte}. \\
+\texttt{learning\_starts} & 4{,}000 & Steps of random acting before learning begins, to seed the buffer. \\
+\texttt{gradient\_steps} & $-1$ / 8 & \textbf{The replay ratio control, and a trap.} \S\ref{sec:defect5}. \\
+\texttt{net\_arch} & $[256, 256]$ & Two hidden layers. \textbf{Deliberately never searched}, because the reported policy footprint (393{,}750 parameters, latency, memory) is measured for this architecture; searching it would silently invalidate those figures. \\
+\texttt{N\_ENVS} & 4 & Parallel simulations. Interacts dangerously with \texttt{gradient\_steps}. \\
+\bottomrule
+\end{longtable}
+
+\subsection{The replay-ratio trap in detail}
+\label{sec:defect5}
+
+\begin{trap}
+With \texttt{N\_ENVS = 4} and \texttt{gradient\_steps = 1}, one rollout iteration
+collects \emph{four} transitions and is followed by \emph{one} gradient update.
+The replay ratio is therefore $1/4$, not the standard $\approx 1$.
+
+Measured directly rather than reasoned about:
+
+\begin{center}
+\begin{tabular}{@{} L{7.2cm} C{4.0cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Updates per env step} \\
+\midrule
+as originally configured (4 envs, 1 step) & \textbf{0.233} \\
+single environment, 1 step (standard) & 0.933 \\
+4 envs, \texttt{gradient\_steps} $= -1$ & 0.933 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every run had therefore performed about 233{,}000 gradient updates for a nominal
+budget of 1{,}000{,}000 steps --- roughly a quarter of the intended training,
+with no visible symptom. An independent check closes the arithmetic: 233{,}000
+updates at the measured \SI{17}{\milli\second} predicts 71 minutes, against
+observed run times of 78.8 and 80.6 minutes.
+
+The fix is \texttt{gradient\_steps = -1}, which means ``as many updates as
+transitions collected'' and therefore holds the ratio at $\approx 1$ for
+\emph{any} \texttt{N\_ENVS} --- the bug cannot silently return if the environment
+count changes.
+
+\textbf{The consequence nobody had priced in:} correcting it makes training four
+times more expensive. At a correct ratio, one million steps costs 3.7 hours per
+seed, so the originally planned 4 algorithms $\times$ 10 seeds would take
+\textbf{148 hours}, not the $\approx 50$ assumed throughout. That protocol was
+never affordable; it only looked so because the runs were under-training.
+\end{trap}
+
+\section{Domain randomisation}
+
+Each episode, physical properties are perturbed so the controller cannot rely on
+exact values:
+
+\begin{center}
+\begin{tabular}{@{} L{4.4cm} C{3.0cm} L{6.6cm} @{}}
+\toprule
+\textbf{Property} & \textbf{Range} & \textbf{Note} \\
+\midrule
+body mass & $\times[0.85, 1.15]$ & per body, independently \\
+muscle strength & $\times[0.80, 1.20]$ & per muscle, independently \\
+joint damping & $\times[0.70, 1.30]$ & per joint \\
+command noise & $\pm 0.02$ & added to each activation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{trap}
+Two bugs lived here, both silent.
+
+\textbf{Compounding.} The code multiplied the \emph{current} value rather than
+rescaling from nominal, making it a multiplicative random walk. After about a
+thousand episodes the arm weighed roughly 1\,\% of its correct mass. A drift
+measure where 1.0 means no drift read \textbf{0.013}; after the fix, \textbf{0.998}.
+
+\textbf{One number for everything.} The random draw was made without a
+\texttt{size} argument, returning a single scalar applied to every body and every
+muscle. Instead of independent per-element variation there was one global scale
+factor --- which a policy can trivially detect and cancel, making the robustness
+claim vacuous.
+\end{trap}
+
+\section{Evaluation parameters, and a subtlety that mattered}
+\label{sec:evaldefects2}
+
+\begin{trap}
+Four defects in the evaluation path, each verified empirically:
+
+\textbf{1. The evaluation seed was dead code.} \texttt{evaluate(seed=...)} never
+referenced its argument; \texttt{load\_model} fixed the environment seed at zero.
+Two loads with different seeds returned byte-identical results.
+
+\textbf{2. \texttt{reset(seed=...)} does not reseed target sampling.} Targets come
+from a generator seeded only at construction; the standard Gymnasium reset seeds
+a \emph{different} generator this environment never uses. Targets can only be
+changed at construction.
+
+\textbf{3. Two resets per episode.} The loop reset the vectorised environment at
+the top of each iteration while the wrapper also auto-resets on termination.
+Instrumented and confirmed: evaluation scored on every \emph{other} target, a
+different test set from the force and conventional analyses --- which made those
+comparisons unpaired.
+
+\textbf{4. A diverged episode could be scored a success}, because joint speed is
+forced to zero on divergence, automatically satisfying the ``settled'' half of
+the criterion.
+
+\textbf{The consequence.} Every interval reported was \emph{training-seed spread
+on one fixed draw of 50 targets}. Measured across five target draws for one
+policy: final error $0.1130 \pm 0.0146$ against $0.1033 \pm 0.0034$ across
+training seeds --- \textbf{the target draw contributes about four times more
+variance}. And \texttt{reach\_5cm} ranged 0.16--0.34 across draws, with the
+reported 0.34 being the maximum.
+
+\textbf{What it does not undermine.} Because the seed was fixed, every
+configuration was evaluated on \emph{identical} targets, so all
+between-configuration comparisons are \emph{paired} --- the stronger design,
+arrived at by accident. The comparisons stand; the absolute values needed wider
+intervals, and everything has been re-measured across three target seeds.
+\end{trap}
+
+\section{Hardware, and why it constrained the science}
+
+\begin{center}
+\begin{tabular}{@{} L{3.8cm} L{10.2cm} @{}}
+\toprule
+CPU & AMD Ryzen 7 4800H, 8 physical cores / 16 logical \\
+RAM & \SI{15.4}{\giga\byte} \\
+GPU & GTX 1660 Ti --- present, and \emph{slower} than the CPU here \\
+Thread budget & capped at 8 of 16 \\
+Total compute & $\approx$ 60 hours \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{trap}
+The machine \textbf{stopped responding entirely} under four concurrent training
+workers: no crash dump despite dumps being enabled, no hardware error logged, and
+the kernel unable to write its own event log. The evidence points to a thermal or
+power limit rather than a software fault --- single-worker runs of 78--80 minutes
+had completed without incident. It cost a full day.
+
+All subsequent work is capped at 8 of 16 logical processors. Benchmarking then
+showed the parallelism had bought almost nothing anyway: 8 threads are only
+$1.78\times$ faster than 1, so the four workers were starving each other while
+saturating the processor.
+\end{trap}
+
+\begin{why}
+\textbf{Why the GPU does not help.} Measured on the real training path: CPU
+\SI{9.68}{\milli\second} per update, GPU \SI{15.00}{\milli\second} --- the GPU is
+$1.5\times$ \emph{slower}.
+
+The reason is measurable too. A trivial operation costs \SI{7}{\micro\second} on
+the CPU and \SI{26.4}{\micro\second} on the GPU; a full three-layer forward pass
+costs \SI{167}{\micro\second} on the GPU, of which roughly \SI{156}{} is six
+kernel launches. \textbf{The arithmetic is essentially free; you pay almost
+entirely for the privilege of asking.} With networks this small and hundreds of
+tiny operations per update, that launch overhead dominates.
+
+Running CPU and GPU \emph{concurrently on different jobs} is a different question
+and does help: measured $1.43\times$ total throughput, because the jobs are
+independent and the GPU worker needs only about 0.9 of a CPU core.
+\end{why}

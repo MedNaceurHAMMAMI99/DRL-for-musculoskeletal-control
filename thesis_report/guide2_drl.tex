@@ -1,0 +1,258 @@
+\chapter{How Deep Reinforcement Learning Works}
+
+This chapter assumes nothing. If you already know actor--critic methods, skip to
+\S\ref{sec:sacdetail}, where SAC is described as this project uses it.
+
+\section{Learning by consequence}
+
+Most machine learning is \emph{supervised}: you are shown thousands of examples
+with the right answer attached, and you learn to reproduce them. That is
+unavailable here --- nobody can supply the correct muscle forces, because that is
+the very thing we cannot measure.
+
+Reinforcement learning removes the need for correct answers. Instead:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
+\item The learner observes the current situation.
+\item It chooses an action.
+\item The world changes, and it receives a number --- the \emph{reward} --- saying
+how good that was.
+\item Repeat, millions of times, adjusting so that high-reward behaviour becomes
+more likely.
+\end{enumerate}
+
+\begin{plain}
+It is learning the way you learn to ride a bicycle: nobody tells you the correct
+handlebar angle. You try, you wobble, you notice which corrections stop the
+wobbling, and you do more of those. The wobbling is the reward signal.
+\end{plain}
+
+\section{The vocabulary, applied to this arm}
+
+\begin{longtable}{@{} L{3.0cm} L{5.2cm} L{7.4cm} @{}}
+\toprule
+\textbf{Term} & \textbf{General meaning} & \textbf{In this project} \\
+\midrule
+\endhead
+Agent & the thing being trained & a neural network, 393{,}750 numbers \\
+Environment & everything it acts on & the simulated arm and a target point \\
+State & the true situation & joint angles, speeds, muscle states \\
+Observation & what the agent is told & 38 numbers (\S\ref{sec:obs}) \\
+Action & what it outputs & 9 numbers in $[0,1]$, one per muscle \\
+Reward & the score after each action & a formula, seven terms (\S\ref{sec:reward}) \\
+Episode & one attempt & one 2-second reach, 100 decisions \\
+Policy & the learned rule & observation $\rightarrow$ action; this \emph{is} the trained controller \\
+Return & total reward over an episode & what the agent actually maximises \\
+Value & expected return from a state & the critic's estimate (\S\ref{sec:critic}) \\
+\bottomrule
+\end{longtable}
+
+\begin{why}
+Note the distinction between \emph{state} and \emph{observation}. The state is
+what is true; the observation is what the agent is permitted to see. Here they
+differ deliberately: the agent sees muscle lengths, forces and activations, joint
+angles and speeds, and the direction to the target --- but not, for instance, the
+randomised body masses used during training. It must cope without knowing them,
+which is what makes the controller robust rather than brittle.
+\end{why}
+
+\subsection{The reward is a scoring rule, not an instruction}
+
+This distinction causes more trouble than any other idea in the subject, so it is
+worth stating sharply.
+
+The agent is \textbf{never told how to move}. It is told only how good the
+outcome was. Any behaviour that scores highly will therefore be found, including
+behaviour the designer never imagined and would not endorse.
+
+\begin{trap}
+In this project the reward was, for a period, maximised by \textbf{deliberately
+destroying the simulated arm}. Every per-step reward was zero or negative, and a
+numerical blow-up ended the episode with no penalty. In this framework an episode
+that \emph{ends} accrues nothing further --- its remaining value is exactly zero
+--- while surviving the full 100 steps accumulated about $-20$. Quitting was
+therefore worth more than participating.
+
+The agent found this. Measured over 50 evaluation episodes: \textbf{100\,\% ended
+in a deliberate blow-up at step 7 of 100.} Not one ran to completion.
+
+The algorithm was not broken. It did exactly what it was asked. The request was
+wrong. Full account in \S\ref{sec:defect3}.
+\end{trap}
+
+\section{Why a ``value'' is needed, and what the discount factor does}
+\label{sec:critic}
+
+An action's consequences are not immediate. Pulling a muscle now changes where
+the hand is half a second later. So the agent cannot judge an action by the
+reward that immediately follows it --- it must judge by the reward that
+\emph{eventually} follows.
+
+That total is the \textbf{return}:
+\[
+G_t \;=\; r_t \;+\; \gamma\, r_{t+1} \;+\; \gamma^2 r_{t+2} \;+\; \gamma^3 r_{t+3} + \cdots
+\]
+
+The number $\gamma$ (gamma), between 0 and 1, is the \textbf{discount factor}. It
+shrinks rewards that arrive later.
+
+\begin{plain}
+$\gamma$ answers: ``how far into the future should I care?''
+
+At $\gamma = 0$ the agent is purely greedy --- only the next reward matters. At
+$\gamma$ close to 1 it weighs events far ahead almost as heavily as now.
+
+A useful rule of thumb: the agent effectively plans about $1/(1-\gamma)$ steps
+ahead. At $\gamma = 0.99$ that is 100 steps. At $\gamma = 0.957$ it is 23.
+\end{plain}
+
+\begin{why}
+Remember that rule of thumb. \textbf{The discount factor turned out to be the
+single most consequential setting in this entire project} --- worth more than the
+choice of algorithm --- and the reason is exactly this horizon arithmetic. The
+default value made the agent plan over 100 steps when the reach it was learning
+completes in about 25. Chapter~\ref{ch:results}, \S\ref{sec:gammaresult}.
+\end{why}
+
+Because the future is unknown, the agent learns to \emph{estimate} the return.
+That estimator is the \textbf{critic} (or value function): given a situation and
+an action, it predicts the total reward that will follow. The critic is what
+makes learning possible from delayed consequences --- and, as we will see, a
+critic fed noisy targets is what makes learning fail.
+
+\section{Actor and critic}
+
+Modern methods train two networks together:
+
+\begin{itemize}[leftmargin=1.4em, itemsep=3pt]
+\item The \textbf{actor} (the policy) chooses actions. This is the thing we
+ultimately keep and deploy.
+\item The \textbf{critic} estimates how good those choices are.
+\end{itemize}
+
+They bootstrap each other: the critic learns to predict returns from experience,
+and the actor adjusts to prefer actions the critic rates highly.
+
+\begin{plain}
+A coach and an athlete. The athlete performs; the coach judges. The athlete
+changes technique to earn better judgements; the coach refines their judgement by
+watching what actually happens. Both improve together --- and if the coach is
+unreliable, the athlete trains toward the wrong thing. That failure mode is not
+hypothetical here; it is what the discount factor caused.
+\end{plain}
+
+\section{Off-policy learning and the replay buffer}
+
+An \textbf{off-policy} method stores every experience in a large memory --- the
+\emph{replay buffer} --- and re-learns from it repeatedly. An \textbf{on-policy}
+method uses each batch of experience once and discards it.
+
+\begin{plain}
+Off-policy keeps a notebook of every attempt ever made and re-reads it
+constantly. On-policy makes a batch of attempts, learns from them, throws the
+notebook away, and starts fresh.
+
+Re-reading is far more efficient when attempts are expensive, which is why three
+of our four algorithms do it.
+\end{plain}
+
+The \textbf{replay ratio} --- gradient updates performed per environment step ---
+matters enormously and is easy to get wrong.
+
+\begin{trap}
+This project ran with four environments in parallel and one gradient update per
+rollout iteration. Because one iteration over four environments collects
+\emph{four} transitions, the actual ratio was $0.233$ updates per step rather than
+the standard $\approx 1$. Every experiment was doing roughly a quarter of its
+intended training, invisibly. Measured directly in \S\ref{sec:defect5}.
+\end{trap}
+
+\section{The four algorithms}
+\label{sec:sacdetail}
+
+\subsection{DDPG --- Deep Deterministic Policy Gradient}
+
+The oldest of the four. One actor, one critic. The actor outputs a single
+definite action; exploration is added by injecting random noise into it.
+
+Its known weakness is \emph{overestimation}: the critic systematically rates
+actions better than they are, the actor chases those inflated ratings, and
+training becomes unstable.
+
+\subsection{TD3 --- Twin Delayed DDPG}
+
+DDPG with three corrections. It trains \textbf{two} critics and always believes
+the more pessimistic one, which counters overestimation. It updates the actor
+less often than the critics (``delayed''), and it smooths the critic's target by
+adding small noise, so the actor cannot exploit a sharp spike in the critic's
+estimate.
+
+\subsection{SAC --- Soft Actor-Critic}
+
+Also uses twin critics, but differs in one important way: its policy is
+\textbf{stochastic}. It outputs a probability distribution over actions rather
+than a single action, and it is explicitly rewarded for keeping that distribution
+spread out. The quantity being maximised is
+\[
+\sum_t \Big( r_t \;+\; \alpha\, \mathcal{H}[\pi(\cdot \mid s_t)] \Big),
+\]
+where $\mathcal{H}$ is entropy --- a measure of randomness --- and $\alpha$ its
+weight.
+
+\begin{plain}
+Entropy is a measure of how undecided something is. A policy that always does
+exactly the same thing has zero entropy. One that picks randomly has high
+entropy.
+
+SAC pays the agent a bonus for staying undecided. The purpose is to stop it
+committing early to a mediocre habit before exploring alternatives.
+
+The weight $\alpha$ is tuned automatically to hit a chosen \textbf{target
+entropy}. The library default sets that target to minus the number of controls
+--- here $-9$, because there are nine muscles.
+\end{plain}
+
+\begin{why}
+That default is worth pausing on. It scales with the \emph{number of actions},
+not with anything about the task. A nine-muscle arm gets more forced randomness
+than a two-joint one, regardless of whether the task needs precision.
+
+For a long time this project believed that default was the cause of its
+inability to hold position --- the mechanism fits perfectly, and every one of the
+best hyperparameter trials agreed on a much lower value. \textbf{A direct
+ablation later proved that belief wrong.} The story is told in
+\S\ref{sec:entropyrefuted}, because being wrong for a good reason is instructive.
+\end{why}
+
+\subsection{PPO --- Proximal Policy Optimisation}
+
+Structurally different: on-policy. It collects a batch of experience, improves
+the policy while limiting how far it may change in one step (the ``proximal''
+constraint, which prevents destructive updates), then discards the batch.
+
+Simple and robust, but much less sample-efficient --- it needs far more
+interaction for the same skill, which matters when each interaction requires
+simulating physics.
+
+\subsection{Summary of the differences that matter here}
+
+\begin{center}
+\begin{tabular}{@{} L{2.2cm} C{2.0cm} C{2.2cm} C{2.6cm} L{4.6cm} @{}}
+\toprule
+& \textbf{Critics} & \textbf{Policy} & \textbf{Reuses data} & \textbf{Exploration by} \\
+\midrule
+DDPG & 1 & deterministic & yes & added noise \\
+TD3  & 2 (min) & deterministic & yes & added noise \\
+SAC  & 2 (min) & stochastic & yes & entropy bonus \\
+PPO  & 1 (value) & stochastic & no & policy's own randomness \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{why}
+Only SAC has a \emph{target entropy}, because only SAC has an entropy bonus to
+tune. This asymmetry matters for the algorithm comparison: there is no single
+setting one can hold equal across all four, which is part of why fair comparison
+between reinforcement learning algorithms is harder than it looks
+(\S\ref{sec:fairness}).
+\end{why}

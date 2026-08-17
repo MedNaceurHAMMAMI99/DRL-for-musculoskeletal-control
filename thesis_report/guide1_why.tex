@@ -1,0 +1,179 @@
+\chapter{Why This Work Exists}
+
+\section{Start with the body}
+
+Raise your arm and touch something in front of you. That felt like a single
+decision. It was not. Somewhere between deciding and moving, your nervous system
+settled dozens of separate questions: how hard should the biceps pull, how hard
+the triceps, the three heads of the deltoid, and so on, renegotiated continuously
+for the whole half-second the movement takes.
+
+Knowing those individual muscle forces is genuinely useful:
+
+\begin{itemize}[leftmargin=1.4em, itemsep=3pt]
+\item \textbf{Prosthetics and exoskeletons.} A powered device that assists a
+weakened arm must know what the arm is trying to do, and how hard, in order to
+supply the difference.
+\item \textbf{Rehabilitation.} After a stroke, recovery is often tracked by how
+movement is \emph{produced}, not only whether the hand arrives. Two patients can
+touch the same target with completely different muscle strategies, and the
+difference is clinically meaningful.
+\item \textbf{Surgery and injury.} Whether a tendon transfer will work, or
+whether a joint is being overloaded, depends on force in individual muscles ---
+not on the visible motion.
+\end{itemize}
+
+The difficulty is that muscle force is almost never measured. Putting a sensor on
+a tendon inside a living person is not routinely possible. So the forces are
+\emph{computed} from the movement, and that computation is the subject of this
+work.
+
+\section{The counting problem that makes it hard}
+
+Here is the whole difficulty in one observation.
+
+Our model of the arm has \textbf{four ways to move} --- the shoulder can swing
+forward, out to the side, and rotate; the elbow can bend --- and \textbf{nine
+muscles} to move them with. Nine controls, four things to control.
+
+\begin{plain}
+Imagine nine people holding ropes attached to a single heavy door, and you want
+the door at one particular angle.
+
+They could all pull gently together. Or three could pull hard while six rest. Or
+--- wastefully --- four could pull one way while five pull the other, mostly
+cancelling, everyone exhausted, the door in exactly the same place.
+
+Stand across the room and watch only the door. All three look identical. The door
+angle does not tell you who was pulling.
+\end{plain}
+
+That is the \textbf{muscle redundancy problem}, and it is not a limitation of our
+instruments. It is a mathematical fact: with more muscles than degrees of
+freedom, infinitely many force combinations produce exactly the same movement.
+Watching the movement can never, even in principle, tell you the forces.
+
+\begin{why}
+This is why the thesis cannot be answered by simply measuring how well a
+controller reaches its target. Reaching accuracy is the \emph{door angle}. Two
+controllers with identical reaching accuracy can be using completely different
+muscles. Everything in this project that looks like a detour --- the force
+comparison, the co-contraction analysis, the synergy decomposition --- exists
+because the obvious measurement cannot answer the question.
+\end{why}
+
+\section{The classical answer, and what it costs}
+
+Since the movement does not determine the forces, an extra rule is needed to pick
+one answer from the infinitely many. The rule used in biomechanics since
+Crowninshield and Brand (1981) is \textbf{minimum effort}: among all combinations
+that produce the required movement, choose the one where the muscles work least
+hard.
+
+Written out, the method --- called \textbf{static optimisation} --- has two steps.
+
+\textbf{Step one, inverse dynamics.} From the recorded motion and the limb's mass
+properties, compute the twisting force (torque) needed at each joint. This step
+is exact. There is one answer.
+
+\textbf{Step two, load sharing.} Distribute those joint torques among the muscles
+according to the minimum-effort rule:
+\[
+\min_{f}\ \sum_{i=1}^{9}\left(\frac{f_i}{F_{\max,i}}\right)^{2}
+\quad\text{subject to}\quad
+R^{\top} f = \tau,\qquad 0 \le f_i \le F_{\max,i}.
+\]
+
+\begin{plain}
+Reading that formula in words:
+
+\emph{Choose the nine muscle forces $f$ that make the total effort as small as
+possible} --- where each muscle's effort is its force as a fraction of its own
+maximum strength, squared.
+
+\emph{Subject to two conditions.} First, the forces must actually produce the
+required joint torques $\tau$ (that is $R^{\top} f = \tau$, where $R$ holds each
+muscle's leverage about each joint). Second, no muscle may pull harder than it
+can, and none may push --- muscles only pull. That is $0 \le f_i \le F_{\max,i}$.
+
+Why square the effort? Squaring punishes large values disproportionately, so
+sharing work among several muscles beats making one muscle do everything. It also
+makes two people pulling against each other very expensive, because both
+contributions count and neither cancels in the cost.
+\end{plain}
+
+This method works and is standard. Its drawback is that it solves a fresh
+optimisation problem \emph{at every instant of the movement}. That is fine for
+analysing a recording afterwards. It is awkward inside a device that must respond
+in milliseconds.
+
+\section{Why anyone would try machine learning here}
+
+A neural network has the opposite cost profile: expensive to train once, then
+very cheap to use --- a fixed number of multiplications, identical for every
+input, with no iteration and no convergence check.
+
+\begin{plain}
+Classical optimisation is like solving a puzzle from scratch every time you are
+asked. A trained network is like having memorised the \emph{pattern} of answers:
+it responds instantly, but only as well as its training taught it.
+
+The obvious question is whether the memorised pattern is actually right --- and
+that is exactly the question this thesis asks.
+\end{plain}
+
+\begin{trap}
+The original motivation was speed, and speed turned out not to survive
+measurement. The classical solve was timed at \SI{2165}{\micro\second} against
+the network's \SI{295}{\micro\second}, a $7.3\times$ advantage --- but that timed
+a \emph{different} calculation (the muscle-model inversion inside the simulator,
+not the load-sharing problem), and both sides were unoptimised Python. Re-timed
+properly, a direct solve of the actual load-sharing problem takes
+\SI{24}{\micro\second}, about \textbf{ten times faster} than the network. The
+speed argument was withdrawn. Chapter~\ref{ch:results} gives the numbers.
+\end{trap}
+
+\section{What this thesis actually asks}
+
+\begin{center}
+\begin{tabular}{@{}p{3pt}@{\hspace{10pt}}p{0.93\linewidth}@{}}
+\cellcolor{navy} & \textbf{The question.} For a reaching movement of a
+nine-muscle arm, does a controller trained by deep reinforcement learning produce
+the \emph{same per-muscle forces} as classical static optimisation?
+\end{tabular}
+\end{center}
+
+And, because the answer turned out to have two halves that behave differently:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
+\item Does it recruit the \emph{same muscles in the same proportions}? ---
+the \emph{pattern} of the solution.
+\item Does it use the \emph{same amount of force}? --- the \emph{economy} of the
+solution.
+\end{enumerate}
+
+The short answer, established in Chapter~\ref{ch:results}: the pattern agrees
+well; the economy did not, until the objective was changed to ask for it, at
+which point it largely did too.
+
+\section{An important boundary on what can be claimed}
+
+One limitation shapes everything and should be understood before any result is
+read.
+
+Both the learned controller and the classical reference are computed inside the
+same physics simulator, against the same model of muscle. Where they agree, two
+computations over the same approximation agree. \textbf{No real arm, no
+electromyography, and no human subject enters this work at any point.}
+
+Furthermore, static optimisation is itself a \emph{theory} of how the nervous
+system shares load --- a well-established and useful one, but contested. A
+controller that disagrees with it is not thereby shown to be unphysiological.
+
+\begin{why}
+This is stated first rather than buried in a limitations section because it sets
+the meaning of every subsequent number. ``Agreement of $r = 0.94$ with the
+classical solution'' means \emph{this controller resembles the standard
+computational method}. It does not mean \emph{this controller resembles a human}.
+Those are different claims and only the first is supported.
+\end{why}

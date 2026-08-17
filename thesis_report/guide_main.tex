@@ -1,0 +1,117 @@
+% ============================================================
+%  THE COMPLETE TECHNICAL GUIDE
+%  Everything in this project, explained from first principles.
+%  Build:  pdflatex guide_main && pdflatex guide_main
+% ============================================================
+\documentclass[11pt, a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper, margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{amsmath, amssymb}
+\usepackage{siunitx}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{navy}{HTML}{1F3864}
+\definecolor{accent}{HTML}{2E5FA3}
+\definecolor{lightbl}{HTML}{E8F0FA}
+\definecolor{codebg}{HTML}{F6F6F4}
+\definecolor{warm}{HTML}{FDF3E7}
+\definecolor{warmrule}{HTML}{C75000}
+\definecolor{greenbg}{HTML}{EAF5EE}
+\definecolor{greenrule}{HTML}{1B7340}
+\definecolor{grey}{HTML}{555555}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\titleformat{\chapter}[block]{\huge\bfseries\color{navy}}{\thechapter}{0.6em}{}
+\titlespacing*{\chapter}{0pt}{0pt}{18pt}
+\titleformat{\section}{\Large\bfseries\color{navy}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+
+\lstset{basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{codebg},
+        frame=leftline, framerule=2pt, rulecolor=\color{accent},
+        breaklines=true, xleftmargin=10pt, showstringspaces=false,
+        commentstyle=\color{grey}\itshape}
+
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\slshape Complete Technical Guide}
+\fancyhead[R]{\small\slshape\leftmark}
+\fancyfoot[C]{\small\thepage}
+
+% Plain-language explainer
+\newenvironment{plain}[1][]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}p{3pt}@{\hspace{9pt}}p{0.93\linewidth}@{}}
+  \cellcolor{accent} & \small\textbf{\color{accent}IN PLAIN LANGUAGE.}\ \ignorespaces
+}{\end{tabular}\par\medskip}
+
+\newenvironment{why}[1][]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}p{3pt}@{\hspace{9pt}}p{0.93\linewidth}@{}}
+  \cellcolor{greenrule} & \small\textbf{\color{greenrule}WHY IT IS THIS WAY.}\ \ignorespaces
+}{\end{tabular}\par\medskip}
+
+\newenvironment{trap}[1][]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}p{3pt}@{\hspace{9pt}}p{0.93\linewidth}@{}}
+  \cellcolor{warmrule} & \small\textbf{\color{warmrule}WHAT GOES WRONG.}\ \ignorespaces
+}{\end{tabular}\par\medskip}
+
+\begin{document}
+
+\thispagestyle{empty}
+\begin{center}
+\vspace*{2.5cm}
+{\Huge\bfseries\color{navy} The Complete Technical Guide}\\[10pt]
+{\LARGE Learning Muscle Forces with Deep Reinforcement Learning}\\[24pt]
+{\large Every decision, every parameter, every result --- explained from first principles}\\[36pt]
+{\large Mohamed Naceur Hammami}\\[8pt]
+{\normalsize Tunisia Polytechnic School (EPT)}\\[20pt]
+{\normalsize\today}
+\end{center}
+
+\vspace{2cm}
+\noindent
+\begin{tabular}{@{}p{3pt}@{\hspace{10pt}}p{0.94\linewidth}@{}}
+\cellcolor{navy} & \textbf{How to read this document.} It is written to be
+answerable at every level. Ordinary text carries the technical account. Boxes
+marked \textbf{\color{accent}IN PLAIN LANGUAGE} restate the same idea with no
+assumed background --- if a section is opaque, read its box first and then the
+text. Boxes marked \textbf{\color{greenrule}WHY IT IS THIS WAY} explain a design
+decision rather than describing it. Boxes marked \textbf{\color{warmrule}WHAT
+GOES WRONG} record a failure that actually occurred in this project and how it
+presented.
+
+Nothing here is aspirational. Every number is measured, every parameter value is
+the one in the code, and every failure described actually happened.
+\end{tabular}
+
+\clearpage
+\tableofcontents
+
+\input{guide1_why}
+\input{guide2_drl}
+\input{guide3_model}
+\input{guide4_code}
+\input{guide5_params}
+\input{guide6_results}
+
+\end{document}

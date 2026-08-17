@@ -1,0 +1,218 @@
+\chapter{The Physical Model}
+
+\section{What is being simulated}
+
+A right arm, hanging from a fixed shoulder, in three dimensions, under gravity.
+It has three rigid bodies (thorax anchor, upper arm, forearm), four rotational
+degrees of freedom, and nine muscles. Physics is computed by \textbf{MuJoCo}, a
+simulator widely used in robotics and biomechanics.
+
+\subsection{The four degrees of freedom}
+
+\begin{center}
+\begin{tabular}{@{} L{3.8cm} L{5.6cm} C{2.4cm} L{3.4cm} @{}}
+\toprule
+\textbf{Joint axis} & \textbf{Movement} & \textbf{Actuated} & \textbf{Note} \\
+\midrule
+Shoulder flexion   & arm forward/backward & yes & \\
+Shoulder abduction & arm out to the side  & yes & \\
+Shoulder rotation  & upper arm twisting about itself & \textbf{no} & constrained, see below \\
+Elbow flexion      & forearm bending      & yes & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Why shoulder rotation is restrained}
+
+This is a substantive modelling decision, made on measurement rather than
+convenience.
+
+A static test asked, across many arm postures, whether the nine muscles could
+hold the arm still against gravity. Shoulder flexion, abduction and elbow flexion
+were held essentially perfectly --- residual torque \SIrange{0.00}{0.02}{\newton\meter},
+using only about 8\,\% of available strength. Shoulder \emph{rotation} could not
+be held: \SI{0.34}{\newton\meter} residual, and only 59\,\% of postures holdable
+at all.
+
+The cause is anatomical. The muscles that rotate the upper arm about its own axis
+are the rotator cuff --- supraspinatus, infraspinatus, subscapularis, teres minor
+--- and none is in the nine-muscle set.
+
+\begin{plain}
+The model had a joint that no muscle could control. The arm sagged around that
+axis by up to \SI{0.19}{\meter} at the hand no matter what the controller did.
+
+That is not something a learning algorithm can fix. It is a missing part. Leaving
+it in would have meant every experiment carried a large error that had nothing to
+do with learning.
+\end{plain}
+
+The fix constrains that axis near neutral (range $\pm 0.05$\,rad, with stiffness
+and damping) and samples targets accordingly. Afterwards 94--100\,\% of postures
+were holdable with zero residual. The degree of freedom was \emph{retained}
+rather than deleted, so the observation vector stays 38-dimensional and the
+previously measured policy-size and latency figures remain valid.
+
+\subsection{The nine muscles}
+
+\begin{center}
+\begin{tabular}{@{} L{3.4cm} L{6.4cm} L{3.4cm} @{}}
+\toprule
+\textbf{Muscle} & \textbf{Action} & \textbf{Group} \\
+\midrule
+biceps long      & bends elbow, assists shoulder & elbow flexor \\
+biceps short     & bends elbow                   & elbow flexor \\
+brachialis       & bends elbow                   & elbow flexor \\
+triceps long     & straightens elbow, assists shoulder & elbow extensor \\
+triceps lateral  & straightens elbow             & elbow extensor \\
+triceps medial   & straightens elbow             & elbow extensor \\
+deltoid anterior & lifts arm forward             & shoulder \\
+deltoid medial   & lifts arm sideways            & shoulder \\
+deltoid posterior& pulls arm backward            & shoulder \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Anatomical parameters --- optimal fibre length, tendon slack length, peak
+isometric force, pennation angle --- follow Holzbaur et al.\ (2005).
+
+\section{How a muscle is modelled: the Hill model}
+
+A muscle is not a motor. The force it produces depends on three things at once:
+how strongly it is being driven, how stretched it currently is, and how fast it
+is changing length.
+
+The standard description represents a muscle as three mechanical elements:
+
+\begin{itemize}[leftmargin=1.4em, itemsep=3pt]
+\item \textbf{Contractile element (CE)} --- the active part, which pulls when
+stimulated.
+\item \textbf{Parallel elastic element (PEE)} --- a spring alongside it,
+representing the passive stiffness of the tissue, which resists stretching even
+when the muscle is completely relaxed.
+\item \textbf{Series elastic element (SEE)} --- the tendon, a spring in line with
+the muscle connecting it to bone.
+\end{itemize}
+
+Two relationships govern the contractile element.
+
+\textbf{Force--length.} A muscle produces its greatest force at one particular
+length, and less at any other, whether shorter or longer.
+
+\textbf{Force--velocity.} A muscle shortening quickly produces less force than
+one held still. A muscle being stretched while active can resist more than its
+isometric maximum.
+
+\begin{plain}
+Both are familiar from your own body. Force--length is why a push-up is hardest
+at the very bottom, where the chest muscles are at an awkward length.
+Force--velocity is why you can lower a weight slowly that you could never lift:
+muscles are stronger resisting than contracting.
+
+The practical consequence is that ``how much force can this muscle make?'' has no
+single answer. It depends on posture and on how fast you are moving.
+\end{plain}
+
+Total force is
+\[
+F \;=\; \big[\, a\cdot f_L(\tilde{l}) \cdot f_V(\tilde{v}) \;+\; f_{PE}(\tilde{l}) \,\big]\cdot F_{\max}\cos\alpha,
+\]
+where $a\in[0,1]$ is activation, $\tilde{l}$ and $\tilde{v}$ are normalised
+length and velocity, $F_{\max}$ is peak isometric force, and $\alpha$ is the
+pennation angle.
+
+\begin{trap}
+\textbf{Measured in this model, the parallel elastic element never engages.}
+Probing every muscle at zero activation across sampled trajectories returns a
+passive force of exactly zero in all states. The reason is visible in the
+operating lengths: no muscle exceeds 0.67 of its declared length range, because
+the ranges were measured and then padded, and the passive term only rises near
+the top of that range.
+
+So ``complete Hill model'' accurately describes what the model file specifies but
+overstates what is active: the contractile and series-elastic elements do the
+work; the parallel element is inert. The force--length curve is also exercised
+only on its ascending limb and plateau, never its descending limb.
+
+One favourable consequence: the load-sharing analysis bounds muscle force below
+by zero, which would be \emph{wrong} if a passive floor existed --- a muscle
+cannot produce less than its passive tension. Because that tension is zero
+throughout, the bound is correct and the reported effort ratios are not inflated
+by it.
+\end{trap}
+
+\section{Activation dynamics: the difference between \texttt{ctrl} and \texttt{act}}
+
+This distinction is small, easy to miss, and caused a real bug.
+
+The agent outputs a \textbf{command}. The muscle has an internal
+\textbf{activation state} that follows that command with a lag --- real muscle
+cannot switch on instantly, and the model reproduces this with first-order
+dynamics.
+
+In MuJoCo these are separate variables:
+
+\begin{center}
+\begin{tabular}{@{} L{3.6cm} L{3.6cm} L{7.2cm} @{}}
+\toprule
+\textbf{Variable} & \textbf{Meaning} & \textbf{Note} \\
+\midrule
+\texttt{data.ctrl} & the command sent in & what the policy outputs \\
+\texttt{data.act}  & the activation state & lags \texttt{ctrl}; \emph{this} drives force \\
+\texttt{data.actuator\_force} & resulting force & computed from \texttt{act}, length, velocity \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Force is $\text{gain}(l,v)\cdot \texttt{act} + \text{bias}(l,v)$ --- a function of
+\texttt{act}, not of \texttt{ctrl}.
+
+\begin{trap}
+When building the conventional controller, the achievable force range of each
+muscle was probed by setting the command to 0 and then to 1 and reading the
+resulting force. This produced \emph{no change at all}, because recomputing the
+model does not integrate \texttt{ctrl} into \texttt{act} --- the activation state
+was untouched, so the force was identical both times.
+
+The measured achievable range was therefore zero-width, and the controller
+emitted zero activation and never moved. Probing \texttt{act} instead of
+\texttt{ctrl} fixed it immediately. \S\ref{sec:conventional}.
+\end{trap}
+
+\section{Moment arms: how muscle force becomes joint torque}
+
+A muscle pulls along its own line. What that does to a joint depends on its
+\textbf{moment arm} --- the leverage it has about that axis, exactly like the
+length of a spanner.
+
+Collecting these gives the \textbf{moment-arm matrix} $R$, with one row per
+muscle and one column per degree of freedom. The joint torque produced by a set
+of muscle forces is
+\[
+\tau \;=\; R^{\top} f.
+\]
+
+\begin{plain}
+$R$ is the translation table between ``how hard each muscle pulls'' (nine
+numbers) and ``how hard each joint is twisted'' (four numbers).
+
+Nine into four: that is the redundancy problem in one line. Many different
+nine-number inputs give the same four-number output.
+\end{plain}
+
+\begin{why}
+This equation is the pivot of the entire thesis. The classical method solves it
+\emph{backwards} --- given the torque $\tau$, find forces $f$ --- and needs the
+minimum-effort rule because the answer is not unique. The learned controller
+never solves it at all; it outputs $f$ directly and the physics produces whatever
+$\tau$ follows.
+
+The comparison in Chapter~\ref{ch:results} works by taking the $\tau$ the policy
+actually produced, handing it to the classical method, and asking what \emph{it}
+would have done. Both methods then face an identical problem, and any difference
+is purely a difference of strategy.
+
+One technical detail matters: MuJoCo stores $R$ in a compressed (sparse) format
+from version 3.2 onward. Code that assumes the older dense layout reads garbage.
+This broke the conventional controller until it was densified explicitly.
+\end{why}
