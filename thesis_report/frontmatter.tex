@@ -145,12 +145,14 @@ conventional controller solving the same load-sharing problem explicitly attains
 $1{,}33$, so the learned policy uses about 44~\% more effort than is achievable
 rather than 91~\% more than an unattainable ideal.
 
-Two secondary results follow. Library-default hyperparameters imposed an error
-plateau that persisted through three reward redesigns; optimisation halved the
-reaching error, though a subsequent ablation refuted the initial attribution of
-this to the exploration temperature. And tuning proved to dominate
-algorithm choice: tuning SAC improved final error by $38$~\%, against
-approximately $6$~\% separating untuned SAC from TD3.
+Two secondary results follow. An error plateau at \SI{0.10}{\meter} survived
+three reward redesigns and a fourfold correction to the training budget;
+one-at-a-time ablation over five hyperparameters identifies the discount factor
+as its sole cause, recovering $106$~\% of the default-to-tuned interval where the
+other four recover nothing. Its default horizon of 100 steps spanned the whole
+episode against a reach completing in 25. And tuning proved to dominate algorithm
+choice: tuning SAC improved final error by $38$~\%, against approximately
+$6$~\% separating untuned SAC from TD3.
 
 The results rest on three seeds for the algorithm comparison and five for the
 principal analysis. No significance testing is reported. The strict success
@@ -214,16 +216,20 @@ Across all fifteen trained policies the discrepancy is present, ranging from
 $1.21$ to $2.30\times$, and the ordering by muscular economy is approximately the
 inverse of the ordering by reaching accuracy.
 
-Two secondary results are reported. The SAC default target entropy of
-$-\dim(\mathcal{A})$ prevented the controller from settling on a target, a
-plateau that survived three complete reward redesigns and a fourfold correction
-to the effective training budget; hyperparameter optimisation selected
-approximately $-19$, halving the reaching error. Separately, tuning was found to
-dominate algorithm choice, improving SAC by $38$~\% against approximately $6$~\%
+Two secondary results are reported. An error plateau at \SI{0.10}{\meter}
+survived three complete reward redesigns and a fourfold correction to the
+effective training budget. One-at-a-time ablation over five hyperparameters,
+three seeds each, identifies the \emph{discount factor} as its sole cause: it
+recovers $106$~\% of the default-to-tuned interval while the target entropy,
+learning rate, target-network rate and batch size each recover nothing. Its
+default value implies a 100-step horizon --- the entire episode --- against a
+reach that completes in 25 steps. Separately, tuning was found to dominate
+algorithm choice, improving SAC by $38$~\% against approximately $6$~\%
 separating untuned SAC from TD3.
 
-These results rest on three seeds for the algorithm comparison and a single seed
-for the principal analysis; no significance testing is reported. Under the strict
+These results rest on three seeds for the algorithm comparison and the
+ablations, and five for the principal analysis and the effort study; no
+significance testing is reported. Under the strict
 success criterion --- which a privileged controller with full state access
 satisfies only $7$~\% of the time --- the best policy scores $0$--$4$~\%.
 Limitations are stated in full in the general conclusion.

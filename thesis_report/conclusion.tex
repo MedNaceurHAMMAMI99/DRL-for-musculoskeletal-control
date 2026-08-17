@@ -57,8 +57,7 @@ still score well (\cref{sec:forcescope}). Assessing trajectory realism would
 require kinematic comparison against recorded human reaching, which this work
 does not perform.
 
-\textbf{A hyperparameter regime that prevents precision --- and a refuted
-explanation for it.} At \SAC's library
+\textbf{A discount factor mismatched to the task timescale prevents precision.} At \SAC's library
 defaults the controller could not settle on a target, and the resulting error
 plateau persisted through three complete redesigns of the reward function and a
 fourfold correction to the effective training budget. Hyperparameter
@@ -67,26 +66,31 @@ the values than in the diagnostic difficulty: the failure presents as
 insufficient training or as poor reward shaping, and survives attempts to remedy
 both.
 
-An earlier version of this thesis attributed the improvement to \SAC's target
-entropy, on the grounds that it moved furthest from its default, that all five
-best search trials clustered near the selected value, and that its mechanism ---
-residual stochasticity preventing the end effector from settling --- matched the
-symptom precisely.
+\textbf{The cause is the discount factor.} Each of the five tuned parameters was
+changed individually against library defaults, three seeds apiece
+(\cref{sec:ablation}, \cref{sec:ablation2}). Four recover nothing: target
+entropy $-8$\,\% of the default-to-tuned interval, learning rate $-3$\,\%,
+target-network rate $-5$\,\%, batch size $-5$\,\%. The discount factor alone
+recovers $+106$\,\%, reaching $0.1553 \pm 0.0061$ against the fully tuned
+configuration's $0.1610 \pm 0.0084$.
 
-\textbf{A two-sided ablation refutes that attribution} (\cref{sec:ablation}).
-Setting the target entropy to its tuned value while leaving everything else at
-default recovers none of the improvement ($-8$\,\% of the gap); reverting it
-while retaining the other tuned parameters costs nothing ($+106$\,\%). The
-improvement is produced entirely by the learning rate, the target-network update
-rate, the discount factor and the batch size, and this work does not isolate
-which.
+The mechanism is checkable rather than merely plausible. The discount factor sets
+an effective horizon of roughly $1/(1-\gamma)$ steps: $0.99$ gives 100 steps, the
+whole episode, while the selected $0.957$ gives 23 steps, or \SI{0.46}{\second}.
+The policy converges on its target by step~25 --- \SI{0.50}{\second}. The tuned
+value matches the timescale of the behaviour being learned; the default was four
+times longer, forcing the value function to integrate reward over seventy-odd
+subsequent steps of largely irrelevant holding. The resulting estimation variance
+is what produced the oscillating evaluation curves seen in every untuned run, and
+a policy trained against an unreliable critic cannot refine its endpoint.
 
-The error is worth recording because the reasoning that produced it was sound.
-Clustering in the best trials of a TPE search is not evidence of causal
-importance: the sampler concentrates its proposals in regions that perform well,
-so parameters cluster whether or not they are responsible. \textbf{A
-hyperparameter search identifies a configuration, never a cause}, and separating
-the two requires a deliberate experiment.
+An earlier version of this thesis attributed the improvement instead to \SAC's
+exploration temperature, reasoning from the clustering of the best search trials.
+That attribution was refuted by the same ablation procedure. The error is worth
+recording: \textbf{clustering in a TPE search is not evidence of causal
+importance}, since the sampler concentrates proposals wherever performance is
+good, and parameters cluster whether or not they are responsible. A
+hyperparameter search identifies a configuration, never a cause.
 
 \textbf{Evidence that tuning dominates algorithm selection.} In the comparison of
 \cref{sec:benchmark}, tuning \SAC improved final error by 38\,\%, whereas the

@@ -113,5 +113,126 @@
     "reach_10cm": 0.52,
     "effort_ratio": 1.2930105566962262,
     "pearson_r": 0.9484960327237139
+  },
+  "lr_only_seed1": {
+    "group": "ablation_rest",
+    "device": "cuda",
+    "minutes": 63.400287341666505,
+    "mean_final_error": 0.2616702617763201,
+    "mean_min_error": 0.1152646712699709,
+    "success_rate": 0.0,
+    "mean_energy": 1057218.513426872,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.08
+  },
+  "lr_only_seed2": {
+    "group": "ablation_rest",
+    "device": "cpu",
+    "minutes": 63.41506431000016,
+    "mean_final_error": 0.2667845358385398,
+    "mean_min_error": 0.11799077164476784,
+    "success_rate": 0.0,
+    "mean_energy": 1234699.5314704962,
+    "reach_5cm": 0.02,
+    "reach_10cm": 0.08
+  },
+  "tau_only_seed0": {
+    "group": "ablation_rest",
+    "device": "cuda",
+    "minutes": 63.18864301833334,
+    "mean_final_error": 0.2666250775587014,
+    "mean_min_error": 0.13563527832127703,
+    "success_rate": 0.0,
+    "mean_energy": 1034733.5310262738,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.04
+  },
+  "tau_only_seed1": {
+    "group": "ablation_rest",
+    "device": "cpu",
+    "minutes": 62.63963306499985,
+    "mean_final_error": 0.2773699908389123,
+    "mean_min_error": 0.14221152331865855,
+    "success_rate": 0.0,
+    "mean_energy": 1192298.6627987067,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.08
+  },
+  "tau_only_seed2": {
+    "group": "ablation_rest",
+    "device": "cuda",
+    "minutes": 63.096983524999814,
+    "mean_final_error": 0.2540511457333336,
+    "mean_min_error": 0.11475959216102476,
+    "success_rate": 0.0,
+    "mean_energy": 934975.9704961792,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.12
+  },
+  "gamma_only_seed0": {
+    "group": "ablation_rest",
+    "device": "cpu",
+    "minutes": 62.60248432833323,
+    "mean_final_error": 0.15259393067991198,
+    "mean_min_error": 0.09416718698713666,
+    "success_rate": 0.0,
+    "mean_energy": 645021.7494666283,
+    "reach_5cm": 0.02,
+    "reach_10cm": 0.36
+  },
+  "gamma_only_seed1": {
+    "group": "ablation_rest",
+    "device": "cuda",
+    "minutes": 63.04649702833316,
+    "mean_final_error": 0.1509542628688387,
+    "mean_min_error": 0.08348888554115713,
+    "success_rate": 0.0,
+    "mean_energy": 749935.3518849,
+    "reach_5cm": 0.08,
+    "reach_10cm": 0.4
+  },
+  "gamma_only_seed2": {
+    "group": "ablation_rest",
+    "device": "cpu",
+    "minutes": 62.73112003999995,
+    "mean_final_error": 0.16227941994248668,
+    "mean_min_error": 0.08190852196019388,
+    "success_rate": 0.0,
+    "mean_energy": 800161.3706913367,
+    "reach_5cm": 0.1,
+    "reach_10cm": 0.34
+  },
+  "batch_only_seed1": {
+    "group": "ablation_rest",
+    "device": "cpu",
+    "minutes": 38.12384324666637,
+    "mean_final_error": 0.25641438368583575,
+    "mean_min_error": 0.12842886461833147,
+    "success_rate": 0.0,
+    "mean_energy": 1065341.555722757,
+    "reach_5cm": 0.02,
+    "reach_10cm": 0.06
+  },
+  "batch_only_seed0": {
+    "group": "ablation_rest",
+    "device": "cuda",
+    "minutes": 58.603411003333164,
+    "mean_final_error": 0.27552445475116755,
+    "mean_min_error": 0.1894870729577612,
+    "success_rate": 0.0,
+    "mean_energy": 1208011.4979458456,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.06
+  },
+  "batch_only_seed2": {
+    "group": "ablation_rest",
+    "device": "cpu",
+    "minutes": 33.9373075149997,
+    "mean_final_error": 0.2655426920729864,
+    "mean_min_error": 0.15401060123717344,
+    "success_rate": 0.0,
+    "mean_energy": 1079672.5325198735,
+    "reach_5cm": 0.0,
+    "reach_10cm": 0.08
   }
 }

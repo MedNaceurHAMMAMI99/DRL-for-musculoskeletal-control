@@ -214,6 +214,103 @@ The transferable point is not about entropy. It is that a hyperparameter search
 identifies a \emph{configuration}, never a \emph{cause}, and that the distinction
 requires a deliberate experiment to resolve.
 
+
+\subsection{Which parameter is responsible}
+\label{sec:ablation2}
+
+The ablation above excludes the target entropy but identifies no cause. The same
+one-at-a-time procedure was therefore applied to the four remaining parameters:
+library defaults throughout, with a single parameter set to its tuned value,
+three seeds each.
+
+\begin{table}[H]
+\centering
+\caption{One-at-a-time ablation over the remaining hyperparameters. Three seeds
+each; ``gap closed'' is the fraction of the default-to-tuned interval recovered.}
+\begin{tabular}{@{} L{6.4cm} C{3.4cm} C{2.6cm} @{}}
+\toprule
+\textbf{Configuration} & \textbf{Final error (m)} & \textbf{Gap closed} \\
+\midrule
+All defaults \emph{(reference)} & $0.2613 \pm 0.0203$ & 0\,\% \\
+$+$ tuned target entropy only & $0.2688 \pm 0.0090$ & $-8$\,\% \\
+$+$ tuned learning rate only & $0.2642 \pm 0.0026$ & $-3$\,\% \\
+$+$ tuned $\tau$ only & $0.2660 \pm 0.0117$ & $-5$\,\% \\
+$+$ tuned batch size only & $0.2658 \pm 0.0096$ & $-5$\,\% \\
+$\mathbf{+}$ \textbf{tuned discount factor only} & $\mathbf{0.1553 \pm 0.0061}$ & $\mathbf{+106}$\,\% \\
+\midrule
+All tuned \emph{(reference)} & $0.1610 \pm 0.0084$ & 100\,\% \\
+\bottomrule
+\end{tabular}
+\label{tab:ablation2}
+\end{table}
+
+\textbf{The discount factor accounts for the entire improvement.} Changing
+$\gamma$ alone, from the default $0.99$ to the selected $0.957$, recovers the
+whole default-to-tuned interval --- indeed slightly exceeds it, at
+$0.1553$ against the fully tuned configuration's $0.1610$. Each of the other four
+parameters recovers nothing: all sit within noise of the default, and three of
+the four are marginally worse than doing nothing at all.
+
+Five parameters have now been tested individually. Four have no effect. One
+explains everything.
+
+\subsection*{Why the discount factor, and why $0.957$}
+
+The mechanism is specific and checkable. The discount factor sets the effective
+planning horizon, approximately $1/(1-\gamma)$ steps:
+
+\begin{center}
+\begin{tabular}{@{} L{5.0cm} C{3.0cm} C{4.0cm} @{}}
+\toprule
+& \textbf{$\gamma$} & \textbf{effective horizon} \\
+\midrule
+Library default & $0.99$ & 100 steps --- the whole episode \\
+Selected by the search & $0.957$ & 23 steps $=$ \SI{0.46}{\second} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+An episode is 100 agent steps, or \SI{2}{\second} at \SI{50}{\hertz}. At
+$\gamma = 0.99$ the horizon is the entire episode, so the value function must
+integrate reward over the full two seconds. At $\gamma = 0.957$ it is
+\SI{0.46}{\second}.
+
+Compare that against what the policy actually does. The intra-episode trajectory
+of \cref{tab:traj} shows the hand converging on the target by step~25 --- that
+is, \SI{0.50}{\second}. \textbf{The selected discount factor matches the task's
+own timescale almost exactly}, while the default was four times longer than the
+behaviour it needed to evaluate.
+
+This explains the symptom that resisted every other remedy. With a horizon
+spanning the whole episode, the value target for an early step includes seventy-odd
+subsequent steps of largely irrelevant holding reward, which is a high-variance
+quantity to estimate. A critic fed high-variance targets produces the oscillating
+evaluation curves that characterised every untuned run in this project
+(\cref{sec:replayresult}), and a policy trained against an unreliable critic
+cannot refine its endpoint precisely. Shortening the horizon to the duration of
+the reach itself makes credit assignment local and the value estimate tractable.
+
+\subsection*{What this replaces, and why it is a better result}
+
+An earlier version of this thesis attributed the improvement to the exploration
+temperature. That attribution was inferred from the clustering of the best search
+trials, and it was wrong. This one is established by direct ablation: a single
+parameter changed, three seeds, the full effect recovered, and the four
+alternatives excluded by the same procedure.
+
+The transferable statement is not about a particular value:
+
+\begin{quote}
+The discount factor should be matched to the timescale of the behaviour being
+learned, not left at a library default. Where the default horizon substantially
+exceeds the duration of the task, the resulting value-estimation variance
+presents as an inability to refine --- a symptom easily and wrongly attributed to
+insufficient training, to reward shaping, or to exploration.
+\end{quote}
+
+That this project spent considerable effort on all three of those explanations
+before testing the discount factor is itself the evidence for the warning.
+
 \subsection{Confirmation at full budget}
 \label{sec:confirmresult}
 

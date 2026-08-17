@@ -1,0 +1,24 @@
+{
+  "algo": "SAC",
+  "seed": 0,
+  "steps": 100000,
+  "wall_clock_s": 3503.9465354000276,
+  "n_policy_params": 393750,
+  "eval_curve": [
+    {
+      "t": 100000,
+      "success_rate": 0.0,
+      "mean_final_error": 0.3524702510931654,
+      "blow_up_rate": 0.0,
+      "mean_episode_len": 100.0
+    }
+  ],
+  "resumed_from_step": null,
+  "hyperparams": {
+    "gradient_steps": 8,
+    "batch_size": 128
+  },
+  "reward_weights": null,
+  "best_err": 0.3524702510931654,
+  "best_step": 100000
+}
