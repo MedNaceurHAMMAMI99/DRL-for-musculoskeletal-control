@@ -60,9 +60,9 @@ All algorithms use MLPs with the same base architecture
   \normalsize
 \end{table}
 
-Weights are initialized using the orthogonal method for PPO~\parencite{Schulman2017}
-and uniform Xavier initialization~\parencite{Glorot2010} for off-policy algorithms.
-Observation normalization is handled by an exponential moving average layer
+Weights are initialised using the orthogonal method for PPO~\parencite{Schulman2017}
+and uniform Xavier initialisation~\parencite{Glorot2010} for off-policy algorithms.
+Observation normalisation is handled by an exponential moving average layer
 (EMA, $\alpha = 0.001$) via Stable-Baselines3's \texttt{VecNormalize}.
 
 % -----------------------------------------------------------
@@ -85,7 +85,7 @@ Observation normalization is handled by an exponential moving average layer
     TD3  & Off-policy & Deterministic & Gaussian noise + smoothing &
           Corrects $Q$ bias, stable & Deterministic policy \\
     SAC  & Off-policy & Stochastic    & Max-entropy (implicit)   &
-          Robust, natural exploration & $\alpha$ sensitive if poorly initialized \\
+          Robust, natural exploration & $\alpha$ sensitive if poorly initialised \\
     PPO  & On-policy  & Stochastic    & Policy stochasticity     &
           Stable, low variance & Lower sample efficiency \\
     \bottomrule

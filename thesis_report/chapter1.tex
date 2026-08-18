@@ -14,7 +14,7 @@ orchestration between the central nervous system~(CNS), the musculoskeletal
 structures, and the sensory organs. Understanding the mechanisms that govern this
 motor control is a major scientific challenge, with considerable implications for
 rehabilitation medicine~\parencite{Kwakkel2003}, bio-inspired robotics, the design of
-myoelectric prostheses, and neurocomputational modeling.
+myoelectric prostheses, and neurocomputational modelling.
 
 Musculoskeletal models provide a formal framework for simulating the biomechanics of
 movement. Platforms such as OpenSim~\parencite{Delp2007} make it possible to
@@ -45,17 +45,9 @@ Beyond its fundamental scientific interest, the societal stake is considerable.
 Stroke is the world's second leading cause of death and a leading cause of
 acquired disability in adults~\parencite{Feigin2022}.
 
-An earlier version of this section also reported a national incidence figure for
-Tunisia. That figure was attributed to a source whose identifier resolves to an
-unrelated article, and no substitute could be verified; both the statistic and
-its citation have therefore been withdrawn rather than re-attributed. The
-argument does not depend on it --- the global burden reported
-by~\textcite{Feigin2022} is sufficient motivation, and it is independently
-verifiable.
-
 Among stroke survivors, more than $60$~\% still present residual upper-limb motor
 impairment six months after the event~\parencite{Kwakkel2003}. Intensive,
-personalized rehabilitation, guided by robotic devices and assisted therapies,
+personalised rehabilitation, guided by robotic devices and assisted therapies,
 significantly improves recovery~\parencite{Lo2010}. Nevertheless, access to these
 technologies remains limited by their cost and by the shortage of trained therapists,
 particularly in developing countries. A musculoskeletal simulation environment capable
@@ -75,17 +67,15 @@ muscles in the same proportions, and at the same total cost --- and under what
 conditions on the training objective does that agreement hold?
 \end{quote}
 
-This formulation replaces the one carried by earlier drafts, which asked whether
-a trained policy could \emph{replace the iterative Newton--Raphson solver at
-inference time, trading a one-off training cost against virtually zero per-step
-computation}. That question presupposed its own answer, and the presupposition
-did not survive measurement: \cref{sec:latencycaveat} finds that a competently
-implemented classical load-sharing solver runs in \SI{23.9}{\micro\second}
-against the network's \SI{288.8}{\micro\second}, so the network is roughly twelve
-times \emph{slower}, not faster. The speed argument is withdrawn in full, and the
-problem statement is rewritten around the question the evidence actually answers.
+This work was begun on a different premise --- that a trained policy might
+replace the iterative solver cheaply at inference time --- and that premise did
+not survive measurement. A competently implemented classical load-sharing solver
+runs in \SI{23.9}{\micro\second} against the network's
+\SI{288.8}{\micro\second} (\cref{sec:latencycaveat}), so no speed argument is
+made anywhere in this thesis. The question above is the one the evidence
+supports, and it is the one the work is organised around.
 
-This problem can be broken down into five research questions:
+This problem can be broken down into six research questions:
 \begin{enumerate}[label=\textbf{Q\arabic*.}, leftmargin=2.2em]
   \item What level of physiological fidelity is necessary and sufficient for a
         musculoskeletal model dedicated to \DRL{}?
@@ -103,12 +93,8 @@ This problem can be broken down into five research questions:
         like-for-like on the same problem?
 \end{enumerate}
 
-Two of these were narrowed after measurement. \textbf{Q4} originally also promised
-an analysis of \textit{jerk} minimisation and of triphasic activation profiles;
-neither analysis was performed, and the claim has been removed rather than left
-outstanding. \textbf{Q6} originally asked what \emph{computational gain} a policy
-delivers, which assumed there was one; it is restated here as a neutral
-comparison, and \cref{sec:latencycaveat} reports that the comparison favours the
+\textbf{Q6} is deliberately posed as a neutral comparison rather than as a search
+for a speed-up: \cref{sec:latencycaveat} finds the comparison favours the
 classical solver.
 
 % -----------------------------------------------------------
@@ -136,10 +122,10 @@ This thesis pursues the following objectives:
         three seeds at $10^5$~steps, with the principal configuration replicated
         across five seeds at $3{\times}10^5$. No significance testing is claimed
         at those sample sizes.
-  \item Analyze and quantify emerging motor strategies: co-contraction
+  \item Analyse and quantify emerging motor strategies: co-contraction
         (CCI~\parencite{Falconer1985}), metabolic cost~\parencite{Bhargava2004},
         robustness to perturbations, temporal activation profiles, and muscle
-        synergies obtained through non-negative matrix factorization~\parencite{dAvella2003}.
+        synergies obtained through non-negative matrix factorisation~\parencite{dAvella2003}.
   \item Discuss the implications for post-stroke rehabilitation and biomedical
         robotics, including the ethical considerations specific to these
         applications.
@@ -224,12 +210,12 @@ Compared with similar studies, this thesis makes the following contributions:
 \end{enumerate}
 
 % -----------------------------------------------------------
-\section{Thesis Organization}
+\section{Thesis Organisation}
 
-This document is organized as follows:
+This document is organised as follows:
 \begin{description}[leftmargin=3.5em, style=nextline]
   \item[\textbf{Chapter~II}] presents the state of the art in musculoskeletal
-        modeling, computational theories of motor control, and \DRL{} for
+        modelling, computational theories of motor control, and \DRL{} for
         continuous-action spaces.
   \item[\textbf{Chapter~III}] describes the design of the complete
         musculoskeletal model, its validation, and the simulation environment.
@@ -244,6 +230,6 @@ This document is organized as follows:
   \item[\textbf{Chapter~VII}] interprets the results, confronts them with the
         literature, addresses ethical considerations, and identifies the
         limitations of the work.
-  \item[\textbf{Conclusion}] summarizes the contributions and outlines future
+  \item[\textbf{Conclusion}] summarises the contributions and outlines future
         directions.
 \end{description}

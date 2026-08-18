@@ -77,7 +77,7 @@ that scientific research must serve human dignity.\\[16pt]
 \frontchapter{Acknowledgements}
 
 At the completion of this work, I would like to express my deep gratitude to all the
-people who contributed, directly or indirectly, to its realization.
+people who contributed, directly or indirectly, to its realisation.
 
 First and foremost, I extend my most sincere thanks to my thesis supervisor,
 Professor~Taysir Rezgui, whose availability, wise advice, and rigorous guidance were
@@ -109,7 +109,7 @@ patience throughout this academic journey.
 
 Computing the muscle forces required for a voluntary limb movement --- an essential
 capability for rehabilitation and motor-control applications --- involves solving a
-system of implicit nonlinear equations (the Hill fiber--tendon equilibrium) by
+system of implicit nonlinear equations (the Hill fibre--tendon equilibrium) by
 Newton--Raphson iteration at \emph{every simulation timestep}. For 9~muscles at
 \SI{100}{\hertz}, this amounts to thousands of iterations per second, representing
 a significant computational barrier for embedded rehabilitation hardware.
@@ -121,9 +121,9 @@ A six-degree-of-freedom articulated multi-body dynamic model was developed in
 \MuJoCo{} \parencite{Todorov2012}. The model incorporates a complete Hill-type muscle
 representation \parencite{Hill1938, Zajac1989}, including the contractile element with
 its force-length~(FL) and force-velocity~(FV) relationships, the series elastic
-element~(SEE) modeling the tendon, the parallel elastic element~(PEE), pennation-angle
+element~(SEE) modelling the tendon, the parallel elastic element~(PEE), pennation-angle
 dynamics, and neural activation dynamics~\parencite{Thelen2003}. Numerical integration of
-the tendon-fiber equilibrium equation is handled with an iterative Newton--Raphson
+the tendon-fibre equilibrium equation is handled with an iterative Newton--Raphson
 method. The resulting system is wrapped as a Gymnasium simulation environment.
 
 Four \DRL{} algorithms were implemented with Stable-Baselines3
@@ -173,12 +173,12 @@ PPO, SAC, TD3, DDPG, Co-contraction, Exploration temperature.
 \frontchapter{Abstract}
 
 Computing the muscle forces required for a voluntary limb movement demands solving
-a system of implicit nonlinear equations --- the Hill fiber--tendon equilibrium ---
+a system of implicit nonlinear equations --- the Hill fibre--tendon equilibrium ---
 by Newton--Raphson iteration at \emph{every simulation timestep}. For 9~muscles
 at \SI{100}{\hertz}, this amounts to 4\,500--36\,000~iterations per second: a
 significant computational burden for real-time rehabilitation hardware. This thesis
 investigates whether a \textit{Deep Reinforcement Learning}~(\DRL{}) agent can
-replace this iterative solver entirely, amortizing all computation into a one-time
+replace this iterative solver entirely, amortising all computation into a one-time
 training phase and deploying muscle-force control as a single neural network forward
 pass. The latency advantage this was expected to confer does not survive a
 like-for-like comparison against a directly solved classical problem, and is
@@ -273,7 +273,7 @@ EMG      & Electromyography \\
 FL       & Force-length (muscle relationship) \\
 FV       & Force-velocity (muscle relationship) \\
 \rowcolor{lightblue!40}
-GAE      & \textit{Generalized Advantage Estimation} \\
+GAE      & \textit{Generalised Advantage Estimation} \\
 GPU      & \textit{Graphics Processing Unit} \\
 \rowcolor{lightblue!40}
 ICC      & Co-Contraction Index \\
@@ -283,19 +283,19 @@ MJCF     & \textit{MuJoCo XML Format} \\
 MLP      & \textit{Multi-Layer Perceptron} \\
 \rowcolor{lightblue!40}
 \MuJoCo  & \textit{Multi-Joint dynamics with Contact} \\
-NMF      & \textit{Non-negative Matrix Factorization} \\
+NMF      & \textit{Non-negative Matrix Factorisation} \\
 \rowcolor{lightblue!40}
-NRMSE    & \textit{Normalized Root Mean Squared Error} \\
+NRMSE    & \textit{Normalised Root Mean Squared Error} \\
 OFC      & \textit{Optimal Feedback Control} \\
 \rowcolor{lightblue!40}
-WHO      & World Health Organization \\
+WHO      & World Health Organisation \\
 OpenSim  & \textit{Open-Source Musculoskeletal Simulator} \\
 \rowcolor{lightblue!40}
 OU       & Ornstein-Uhlenbeck (stochastic process) \\
 PD       & \textit{Proportional-Derivative} (controller) \\
 \rowcolor{lightblue!40}
 PEE      & \textit{Parallel Elastic Element} --- Parallel elastic element \\
-PPO      & \textit{Proximal Policy Optimization} \\
+PPO      & \textit{Proximal Policy Optimisation} \\
 \rowcolor{lightblue!40}
 ReLU     & \textit{Rectified Linear Unit} \\
 \RL{}    & \textit{Reinforcement Learning} \\
@@ -334,8 +334,8 @@ $a(t)$                 & ---     & Muscle activation, $a \in [0,1]$ \\
 $u(t)$                 & ---     & Neural excitation, $u \in [0,1]$ \\
 $\tau_\text{act}, \tau_\text{deact}$ & s & Activation/deactivation time constants \\
 \rowcolor{lightblue!40}
-$l^M$, $l^M_\text{opt}$ ($\equiv l_0^M$) & m & Fiber length, optimal length \\
-$\lnorm = l^M/l_0^M$   & ---     & Normalized fiber length \\
+$l^M$, $l^M_\text{opt}$ ($\equiv l_0^M$) & m & Fibre length, optimal length \\
+$\lnorm = l^M/l_0^M$   & ---     & Normalised fibre length \\
 \rowcolor{lightblue!40}
 $l^T$, $l^T_\text{slack}$ & m    & Tendon length, slack length \\
 $l^\text{MT}$          & m       & Total musculotendon-unit length \\
@@ -343,7 +343,7 @@ $l^\text{MT}$          & m       & Total musculotendon-unit length \\
 $\alpha$, $\alpha_0$   & rad     & Current pennation angle / value at $l_0^M$ \\
 $v_\text{max}$         & $l_0^M$/s & Maximum shortening velocity \\
 \rowcolor{lightblue!40}
-$\vnorm$               & ---     & Normalized contraction velocity \\
+$\vnorm$               & ---     & Normalised contraction velocity \\
 $f_\text{FL}, f_\text{FV}$ & --- & Force-length / force-velocity factors \\
 \rowcolor{lightblue!40}
 $F_0^M$                & N       & Maximum isometric force \\
@@ -356,7 +356,7 @@ $\gamma_\text{FL}$     & ---     & Width parameter of the FL curve \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{\color{navyblue}\textbf{Multi-Body Dynamics}}}\\
 \midrule
-$q, \dot{q}$           & rad, rad/s & Generalized joint positions / velocities \\
+$q, \dot{q}$           & rad, rad/s & Generalised joint positions / velocities \\
 \rowcolor{lightblue!40}
 $p_\text{ee}$          & m       & End-effector position (hand) \\
 $p_\text{target}$      & m       & Target position \\
@@ -368,7 +368,7 @@ $J(q)$                 & m/rad   & Geometric Jacobian of the end effector \\
 \midrule
 $\mathcal{S}, \mathcal{A}$ & ---   & State / action space \\
 \rowcolor{lightblue!40}
-$\pi_\theta(a|s)$      & ---     & Policy parameterized by $\theta$ \\
+$\pi_\theta(a|s)$      & ---     & Policy parameterised by $\theta$ \\
 $Q^\pi, V^\pi, A^\pi$  & ---     & Action-value, state-value, and advantage functions \\
 \rowcolor{lightblue!40}
 $\gamma$               & ---     & Discount factor ($\in [0,1)$) \\
