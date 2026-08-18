@@ -4,7 +4,7 @@
       "Pilot 4\n(reward v3)",
       "Pilot 5\n(reward v4)",
       "Pilot 6\n(replay fix)",
-      "Final\n(entropy tuned)"
+      "Final\n(tuned)"
     ],
     "final_error": [
       0.2424,

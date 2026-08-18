@@ -241,7 +241,7 @@ filaments~\parencite{Gordon1966}:
   \qquad \lnorm = \frac{l^M}{l^M_\text{opt}}
   \label{eq:fl}
 \end{equation}
-where $\gamma_\text{FL} \approx 0{,}45$ is a shape parameter and $l^M_\text{opt}$ is
+where $\gamma_\text{FL} \approx 0.45$ is a shape parameter and $l^M_\text{opt}$ is
 the optimal fibre length at which the muscle produces its maximum isometric
 force~$F_0^M$.
 
@@ -262,7 +262,7 @@ contractions~\parencite{Zajac1989}:
 \end{equation}
 where $\vnorm = \dot{l}^M / (v_\text{max}\,l^M_\text{opt})$ is the normalised
 contraction velocity, $v_\text{max} \approx 10$ (optimal lengths/s),
-$k_\text{ce} \approx 0{,}25$, and $f_\text{max} \approx 1{,}3$ (maximum eccentric
+$k_\text{ce} \approx 0.25$, and $f_\text{max} \approx 1.3$ (maximum eccentric
 coefficient).
 
 \subsubsection{Parallel Elastic Element (PEE)}
@@ -279,9 +279,9 @@ optimal length:
   \end{cases}
   \label{eq:pee}
 \end{equation}
-with $k_\text{PE} = 5{,}0$. This gives $F_\text{PEE} = 0{,}004\,F_0^M$ at
-$\lnorm = 1{,}1$, $0{,}130\,F_0^M$ at $\lnorm = 1{,}6$, and exactly $F_0^M$ at
-$\lnorm = 2{,}0$.
+with $k_\text{PE} = 5.0$. This gives $F_\text{PEE} = 0.004\,F_0^M$ at
+$\lnorm = 1.1$, $0.130\,F_0^M$ at $\lnorm = 1.6$, and exactly $F_0^M$ at
+$\lnorm = 2.0$.
 
 \subsubsection{Series Elastic Element (SEE) --- Tendon}
 
@@ -297,19 +297,19 @@ above it:
   \varepsilon^T = \frac{l^T - l^T_\text{slack}}{l^T_\text{slack}}
   \label{eq:see}
 \end{equation}
-with $k_T = 37{,}5$, so the tendon carries $F_0^M$ at a strain of $16{,}3$\,\%.
+with $k_T = 37.5$, so the tendon carries $F_0^M$ at a strain of $16.3$\,\%.
 
 \begin{quote}
 \small
 \textbf{Both of these equations replace incorrect ones.} Earlier versions of this
 section gave the PEE as a \emph{quadratic} $F_0^M k_\text{PE}(\lnorm-1)^2$ and the
-SEE as $F_0^M(\lnorm^T-1)^2 / (k_T + \lnorm^T - 1)$ with $k_T \approx 0{,}0475$.
+SEE as $F_0^M(\lnorm^T-1)^2 / (k_T + \lnorm^T - 1)$ with $k_T \approx 0.0475$.
 Neither form is the one implemented. The forms above are those in
 \texttt{biomechanics/hill\_model.py} and reproduced in
 Appendix~\ref{app:newton}, and they are what every result in this thesis was
 computed with; the chapter, not the code, was wrong. The discarded PEE expression
-was also internally inconsistent, since $k_\text{PE} = 5{,}0$ in a quadratic gives
-$1{,}8\,F_0^M$ at $\lnorm = 1{,}6$ rather than the $\approx F_0^M$ its own text
+was also internally inconsistent, since $k_\text{PE} = 5.0$ in a quadratic gives
+$1.8\,F_0^M$ at $\lnorm = 1.6$ rather than the $\approx F_0^M$ its own text
 claimed.
 
 The correction has no effect on any reported result. \Cref{sec:solvervalidation}
@@ -439,7 +439,7 @@ Actor update:
   \label{eq:ddpg_actor}
 \end{equation}
 
-Target-network update (\textit{Polyak averaging}, $\tau = 0{,}005$):
+Target-network update (\textit{Polyak averaging}, $\tau = 0.005$):
 \begin{equation}
   \phi' \leftarrow \tau\phi + (1-\tau)\phi', \qquad
   \theta' \leftarrow \tau\theta + (1-\tau)\theta'

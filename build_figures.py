@@ -80,7 +80,7 @@ data = {}
 def fig_progression():
     """Every metric that mattered, across the four pilots that produced them."""
     runs = ["Pilot 4\n(reward v3)", "Pilot 5\n(reward v4)",
-            "Pilot 6\n(replay fix)", "Final\n(entropy tuned)"]
+            "Pilot 6\n(replay fix)", "Final\n(tuned)"]
     final = [0.2424, 0.2540, 0.2040, 0.1074]   # last value re-measured, corrected eval
     minerr = [0.1781, 0.1344, 0.1316, 0.0734]   # re-measured
     data["progression"] = {"runs": runs, "final_error": final,
@@ -118,9 +118,9 @@ def fig_trajectory():
 
     fig, ax = plt.subplots(figsize=(7.2, 4.0))
     ax.plot(steps, p6, "-o", color=C_ORANGE, lw=2, ms=7,
-            label="Before entropy tuning", zorder=3)
+            label="Before tuning", zorder=3)
     ax.plot(steps, fin, "-o", color=C_BLUE, lw=2, ms=7,
-            label="After entropy tuning", zorder=4)
+            label="After tuning", zorder=4)
     ax.axhline(0.08, color=C_AQUA, ls="--", lw=2, label="Classical benchmark")
     ax.annotate("reaches here and STAYS", xy=(50, 0.110), xytext=(56, 0.30),
                 fontsize=9, color=INK2,

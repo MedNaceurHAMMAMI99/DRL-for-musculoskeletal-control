@@ -249,7 +249,7 @@ reported numbers had been incorrect for an extended period without any indicatio
 The generalisable observation is that a metric which cannot fail cannot detect
 failure. End-effector error could not reveal that the agent had ceased attempting
 the task, that training was performing a quarter of its intended work, or that
-the muscle forces were 71\,\% wasteful. Each required a measurement designed
+the muscle forces were nearly twice the minimum required. Each required a measurement designed
 specifically for the failure mode, which in turn required the failure mode to be
 hypothesised first. This is the reason \cref{chap:impl} documents the errors
 at the same length as the results.
@@ -257,37 +257,42 @@ at the same length as the results.
 \section{Future directions}
 \label{sec:future}
 
-\textbf{Isolate the hyperparameter responsible for the precision plateau.} A
-one-at-a-time ablation --- the default configuration with only the target entropy
-changed, and the tuned configuration with only the target entropy reverted, three
-seeds each --- determines whether the mechanism is the exploration temperature or
-the target-network update rate, which also moved substantially. Approximately
-four hours. Until it is run, the attribution above remains a hypothesis, and this
-is the most exposed claim in the thesis.
-
-\textbf{Replicate the principal result across seeds.} Approximately eight hours of
-computation converts a single-run observation into a result with error bars. This
-should precede any publication.
-
-\textbf{Train with the classical criterion as the effort term.} \Cref{sec:whygap}
-predicts that a reward whose effort term is exactly
-$\sum_i (f_i/F_{\max,i})^2$ should close the $1.71\times$ discrepancy. This
-distinguishes a limitation of reinforcement learning from a limitation of the
-reward chosen here --- two conclusions with entirely different implications.
-
-\textbf{Tune the exploration parameter of every algorithm on an equal budget.}
-Target entropy for \SAC, action-noise scale for \TDIII and \DDPG, entropy
-coefficient for \PPO. This is the only route to a fair four-way comparison, given
-that this work identifies exploration as the decisive axis.
+Four items listed here in earlier versions have since been carried out, and are
+recorded as completed rather than deleted, since the sequence is part of the
+account. The one-at-a-time ablation that was to isolate the plateau's cause was
+run (\cref{sec:ablation}, \cref{sec:ablation2}) and refuted the attribution it
+was meant to test. The principal result was replicated across five seeds
+(\cref{sec:replication}). The effort-weight experiment was run
+(\cref{sec:effortsweep}) and closed most of the discrepancy. The algorithm
+comparison was repeated with a matched discount factor
+(\cref{sec:fairbench}). What remains outstanding is the following.
 
 \textbf{Compare against electromyography.} Static optimisation is a model;
 measured muscle activity is closer to ground truth. This step would convert a
 computational comparison into a physiological claim, and is the natural extension
-toward the clinical applications that motivate the work.
+toward the clinical applications that motivate the work. It is the single most
+valuable addition, and nothing in this thesis substitutes for it.
 
-\textbf{Repeat the synergy and co-contraction analyses on a valid policy.} The
-implementation now exists; the earlier results were computed on policies since
-established to be invalid.
+\textbf{Search the accuracy--economy knee.} The effort weight was sampled at
+$w_2 \in \{1, 5, 20\}$. Fidelity improves monotonically and accuracy degrades
+monotonically across that range, so an intermediate value plausibly dominates
+both endpoints; it was not searched.
+
+\textbf{Repeat the synergy analysis on the higher-weight variants.} The
+decomposition was performed on the $w_2 = 1$ policies only, so whether improved
+load-sharing fidelity brings a more classical modular organisation is untested.
+\Cref{tab:synergyrerun} also shows the basis-matching statistic to be unstable
+under re-execution, so that repetition should report resampled estimates rather
+than single draws.
+
+\textbf{Tune each algorithm's exploration parameter on an equal budget.} Target
+entropy for \SAC, action-noise scale for \TDIII and \DDPG, entropy coefficient
+for \PPO. \Cref{sec:fairbench} equalises the discount factor only, which is a
+fair comparison rather than a tuned one.
+
+\textbf{Extend beyond a single task.} Every result here is one reaching movement
+in one workspace. The discount-factor finding in particular is stated in terms of
+a task timescale, and testing it requires a task with a different one.
 
 \section{Closing remark}
 
@@ -298,7 +303,7 @@ uncertain or absent, the text records it as such.
 
 That a learned controller recovers the coordination structure of a classical
 optimisation criterion without ever being shown it is a genuine and encouraging
-result. That it does so while expending 71\,\% more effort than necessary is an
-equally genuine limitation, and identifying it required measuring muscle forces
+result. That it does so while expending about 51\,\% more effort than a properly
+tuned conventional controller requires is an equally genuine limitation, and identifying it required measuring muscle forces
 directly --- which no amount of additional accuracy on the reaching task would ever
 have revealed.

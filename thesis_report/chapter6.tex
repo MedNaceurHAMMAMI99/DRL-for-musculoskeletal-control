@@ -130,7 +130,7 @@ exploits promising regions and will cluster whether or not the clustered
 parameter is the causal one. Attribution to the target entropy specifically is
 therefore advanced here as the leading hypothesis --- its mechanism matches the
 symptom, an inability to settle --- and not as an established result. The
-one-at-a-time ablation that would settle it is set out in \cref{sec:future}.
+one-at-a-time ablation that settles it is reported in \cref{sec:ablation}.
 
 The target entropy governs how much stochasticity \SAC deliberately retains in
 its policy, and the mechanism by which a value too high would prevent an end
@@ -390,7 +390,8 @@ relies upon.
 \caption{Reaching error across the four principal experiments. Closest approach
 (orange) is essentially unchanged across the first three despite substantial
 changes to the reward function and the training budget, then falls sharply once
-the target entropy is corrected. The dashed line marks the privileged
+the hyperparameters are corrected --- an improvement \cref{sec:ablation2}
+attributes to the discount factor. The dashed line marks the privileged
 controller's median final error.}
 \label{fig:progression}
 \end{figure}
@@ -403,7 +404,7 @@ controller's median final error.}
 episodes.}
 \begin{tabular}{@{} C{2.6cm} C{3.4cm} C{3.4cm} @{}}
 \toprule
-\textbf{Step} & \textbf{Default entropy} & \textbf{Tuned entropy} \\
+\textbf{Step} & \textbf{Default hyperparameters} & \textbf{Tuned hyperparameters} \\
 \midrule
 0  & 0.795 & 0.795 \\
 10 & 0.314 & 0.198 \\
@@ -473,15 +474,24 @@ so the interval between them isolates the effect of tuning.}
 Tuning \SAC reduced final error from 0.261 to \SI{0.161}{\meter}, an improvement
 of 38\,\%. The interval between untuned \SAC and \TDIII is 0.261 against 0.279,
 approximately 6\,\%, against seed standard deviations of 0.020 and 0.011; this
-difference is comparable to the spread and does not support an ordering. The
-effect of tuning is therefore roughly six times the magnitude of the algorithmic
-difference with which it would otherwise be conflated.
+difference is comparable to the spread and does not support an ordering. On these
+figures the effect of tuning is roughly six times the algorithmic difference with
+which it would otherwise be conflated --- a ratio \cref{sec:fairbench} revises to
+about three once every algorithm is correctly configured.
 
-\DDPG and \PPO are both substantially worse than \TDIII, by approximately
-\SI{0.14}{\meter} --- many times the seed spread. For \DDPG this is consistent
-with the theoretical expectation of \cref{chap:drl}, as it lacks the twin
-critics that mitigate value overestimation. \DDPG and \PPO are, however,
-indistinguishable from one another.
+\DDPG and \PPO are both substantially worse than \TDIII here, by approximately
+\SI{0.14}{\meter} --- many times the seed spread --- and are indistinguishable
+from one another.
+
+\textbf{The obvious explanation for \DDPG's position is the wrong one, and this
+thesis offered it.} That \DDPG lacks the twin critics which mitigate value
+overestimation (\cref{chap:drl}) fits the ordering, and was reported as its
+cause. It does not survive the fair re-run of \cref{sec:fairbench}: given a
+matched discount factor \DDPG improves by 40\,\% and becomes indistinguishable
+from \TDIII. The deficit was configuration, not architecture. The account is
+retained here because the sequence --- plausible theory fitted to an artefact,
+then overturned by a controlled re-run --- is the substance of
+\cref{sec:fairbench}.
 
 Three constraints limit what this comparison establishes. No significance testing
 was performed: three seeds cannot support a Wilcoxon signed-rank test with useful

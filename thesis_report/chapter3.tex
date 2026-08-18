@@ -314,7 +314,7 @@ The composite reward function is:
 where:
 \begin{align}
   r_\text{task}   &= \exp\!\left(-\frac{\|\Delta p\|_2}{\sigma_\text{target}}\right),
-                     \quad \sigma_\text{target} = 0{,}05~\text{m}
+                     \quad \sigma_\text{target} = 0.05~\text{m}
                      \label{eq:r_task} \\[4pt]
   r_\text{energy} &= -\frac{\|a_t\|_2^2}{n_\text{muscles}}
                      \label{eq:r_energy} \\[4pt]
@@ -341,8 +341,8 @@ outstanding items in \cref{ch:conclusion}.
 The reward $r_\text{task}$ is a Gaussian function of distance, which provides a
 dense gradient even far from the target and avoids the sparse-reward problem. The
 threshold $\sigma_\text{target}$ was calibrated so that
-$r_\text{task} \approx 0{,}6$ at \SI{5}{\centi\meter} from the target and
-$r_\text{task} > 0{,}99$ at \SI{5}{\milli\meter}.
+$r_\text{task} \approx 0.6$ at \SI{5}{\centi\meter} from the target and
+$r_\text{task} > 0.99$ at \SI{5}{\milli\meter}.
 
 \subsection{Domain Randomization}
 \label{sec:dr}
@@ -352,12 +352,12 @@ Randomization~\parencite{Tobin2017} is applied at every episode reset:
 
 \begin{itemize}
   \item \textbf{Initial posture}: Gaussian perturbation
-        $\mathcal{N}(0,\, 0{,}05~\text{rad})$ on each DOF.
+        $\mathcal{N}(0,\, 0.05~\text{rad})$ on each DOF.
   \item \textbf{Inertial parameters}: uniform variation of $\pm 10$~\% in segment
         masses.
   \item \textbf{Muscle parameters}: uniform variation of $\pm 5$~\% in
         $F_0^M$ and $l_0^M$.
-  \item \textbf{Force perturbations}: with probability $p = 0{,}15$,
+  \item \textbf{Force perturbations}: with probability $p = 0.15$,
         application of a random force impulse of \num{5}--\SI{15}{\newton}
         for \num{50}--\SI{100}{\milli\second} on the forearm.
 \end{itemize}
@@ -366,11 +366,11 @@ Randomization~\parencite{Tobin2017} is applied at every episode reset:
 
 An episode terminates when:
 \begin{itemize}
-  \item $\|\Delta p\|_2 < \delta_\text{success} = 0{,}02$~m (success: a
+  \item $\|\Delta p\|_2 < \delta_\text{success} = 0.02$~m (success: a
         \SI{2}{\centi\meter} criterion based on motor-precision thresholds
         from~\parencite{Flash1985}),
   \item a joint position exceeds its physiological limits (mechanical
         failure), or
   \item the number of steps reaches $t \geq T_\text{max} = 1000$ (timeout,
-        $\Delta t = 0{,}01$~s, i.e., $T = 10$~s per episode).
+        $\Delta t = 0.01$~s, i.e., $T = 10$~s per episode).
 \end{itemize}

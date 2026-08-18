@@ -141,14 +141,14 @@ $3{\times}10^5$ steps and evaluated over fifty episodes.
 The central analysis compares the learned muscle forces against those prescribed
 by classical static optimisation on the identical movements. The learned
 controller reproduces the coordination pattern of the classical solution ---
-correlation $0{,}81 \pm 0{,}04$ over five independent training runs; pattern
-cosine $0{,}813$ against a shuffled null of $0{,}372$ --- while expending
-$1{,}91 \pm 0{,}15$ times the minimum effort required to generate the same joint
+correlation $0.81 \pm 0.04$ over five independent training runs; pattern
+cosine $0.813$ against a shuffled null of $0.372$ --- while expending
+$1.91 \pm 0.15$ times the minimum effort required to generate the same joint
 torques, the excess concentrated in co-contraction of the elbow antagonists. A
 properly tuned conventional controller solving the same load-sharing problem
-explicitly attains $1{,}263$, so the learned policy uses about 51~\% more effort
+explicitly attains $1.263$, so the learned policy uses about 51~\% more effort
 than is achievable rather than 91~\% more than an unattainable ideal. Raising the
-reward's effort weight closes most of that gap, to $1{,}304 \pm 0{,}025$ against
+reward's effort weight closes most of that gap, to $1.304 \pm 0.025$ against
 that floor.
 
 Two secondary results follow. An error plateau at \SI{0.10}{\meter} survived
@@ -300,9 +300,6 @@ NMF      & \textit{Non-negative Matrix Factorisation} \\
 NRMSE    & \textit{Normalised Root Mean Squared Error} \\
 OFC      & \textit{Optimal Feedback Control} \\
 \rowcolor{lightblue!40}
-SLSQP    & \textit{Sequential Least-Squares Quadratic Programming} \\
-VAF      & Variance accounted for (synergy decomposition) \\
-\rowcolor{lightblue!40}
 OpenSim  & \textit{Open-Source Musculoskeletal Simulator} \\
 \rowcolor{lightblue!40}
 OU       & Ornstein-Uhlenbeck (stochastic process) \\
@@ -317,9 +314,11 @@ ReLU     & \textit{Rectified Linear Unit} \\
 SAC      & \textit{Soft Actor-Critic} \\
 \rowcolor{lightblue!40}
 SEE      & \textit{Series Elastic Element} --- the tendon (Hill model) \\
+SLSQP    & \textit{Sequential Least-Squares Quadratic Programming} \\
 \rowcolor{lightblue!40}
 TD3      & \textit{Twin Delayed Deep Deterministic Policy Gradient} \\
 TPE      & \textit{Tree-structured Parzen Estimator} (sampler Optuna) \\
+VAF      & Variance accounted for (synergy decomposition) \\
 \bottomrule
 \end{tabularx}
 }
