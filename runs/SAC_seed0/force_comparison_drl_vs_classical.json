@@ -1,5 +1,5 @@
 {
-  "run": "C:\\Users\\moham\\thesis_run\\runs\\SAC_seed0",
+  "run": "runs/SAC_seed0",
   "episodes": 20,
   "timesteps": 2000,
   "verdict": "PATTERN AGREES, MAGNITUDE DOES NOT",
