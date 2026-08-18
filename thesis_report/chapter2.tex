@@ -19,10 +19,13 @@ Three major computational hypotheses guide the modeling of motor control:
   \item \textbf{\textit{Jerk} minimization}~\parencite{Flash1985}: trajectories
         minimize the derivative of acceleration, producing smooth bell-shaped
         velocity profiles characteristic of human pointing movements.
-  \item \textbf{End-point variance minimization}~\parencite{Harris1998}: this
-        integrates the stochastic nature of the neural signal
-        (\textit{signal-dependent noise}) and predicts curved trajectories for
-        large-amplitude movements.
+  \item \textbf{End-point variance minimization}~\parencite{Harris1998}: neural
+        control signals carry noise whose variance grows with signal magnitude,
+        and the trajectory is selected to minimise the variance of the
+        \emph{final} position. The model accounts for saccades and arm movements
+        under one principle, reproduces the speed--accuracy trade-off of Fitts'
+        law, and recovers the two-thirds power law relating path curvature to
+        hand velocity in drawing.
   \item \textbf{Stochastic optimal control}~\parencite{Todorov2002}: this unifies
         the previous approaches within a Bayesian framework and underlies the theory
         of Optimal Feedback Control~(OFC). OFC predicts that the CNS corrects only
@@ -99,7 +102,7 @@ Several software platforms support musculoskeletal simulation
     OpenSim     & Open-source & Validated anatomical models, rich GUI, motion library & \cite{Delp2007} \\
     AnyBody     & Commercial  & Static/dynamic analysis, subject-specific parameters & --- \\
     \MuJoCo     & Free         & Speed, robust contact handling, Python interface, native muscle actuators & \cite{Todorov2012} \\
-    MyoSuite    & Open-source & Musculoskeletal + DRL, detailed hand ($>$50~muscles) & \cite{Caggiano2022} \\
+    MyoSuite    & Open-source & Musculoskeletal + DRL; MyoHand 23~DOF / 39~muscles, MyoLegs 16~DOF / 80~muscles & \cite{Caggiano2022} \\
     dm\_control & Open-source & Standardized RL environments, based on \MuJoCo{} & \cite{Tassa2020} \\
     MotorNet    & Open-source & Differentiable, native PyTorch integration, planar arm & \cite{Codol2023} \\
     \bottomrule
@@ -107,10 +110,13 @@ Several software platforms support musculoskeletal simulation
   \normalsize
 \end{table}
 
-\MuJoCo{}~\parencite{Todorov2012}, acquired by DeepMind in 2021 and later made
-freely available, represents the state of the art for \DRL{} thanks to its
-exceptional performance: up to one million simulation steps per second on a standard
-CPU, a robust contact solver, and native support for Hill-type muscle actuators.
+\MuJoCo{}~\parencite{Todorov2012}, acquired by DeepMind in 2021 and subsequently
+released freely, is the common choice for \DRL{} work: a fast solver, robust
+contact handling, and native Hill-type muscle actuators. An earlier version of this
+paragraph claimed ``up to one million simulation steps per second on a standard
+CPU'', which was unsourced and is not what this model achieves. Measured on the
+host machine, the nine-muscle arm of this thesis integrates at
+\SI{6.4}{\micro\second} per physics step, about $157\,000$ steps per second.
 
 \subsection{Computational Bottleneck: the Real-Time Cost of Exact Solving}
 \label{sec:compute_bottleneck}
@@ -119,26 +125,44 @@ A critical and often overlooked aspect of physics-based muscle control is its
 per-step computational cost. Because the fiber--tendon equilibrium
 equation~\eqref{eq:equilibrium} is implicit and nonlinear in~$l^M$, it cannot be
 solved analytically: Newton--Raphson iteration is required at \emph{every
-simulation timestep, for every muscle}. For a 9-muscle model running at
-\SI{100}{\hertz}, this amounts to approximately
-$9 \times (5\text{--}40) \times 100 = 4\,500$--$36\,000$~arithmetic iterations
-per second --- a workload that grows linearly with model complexity and control
-frequency.
+simulation timestep, for every muscle}. This model integrates physics at
+\SI{500}{\hertz} with the policy acting every tenth step
+(\cref{sec:compute}), so at the measured mean of 31.2 iterations per muscle the
+solve accounts for roughly $9 \times 31.2 \times 500 \approx 1.4 \times 10^5$
+Newton iterations per simulated second --- a workload growing linearly with
+muscle count and integration rate.
 
-On a standard CPU, each Newton--Raphson solve requires 5--40 iterations and
-takes on the order of 10--100~\si{\micro\second} per muscle. While this is
-manageable in an offline simulation context, it represents a non-trivial burden
-for embedded systems (\eg{} wearable exoskeletons, myoelectric prostheses) where
-power and memory are constrained.
+Measured on the host CPU over 950 queries, the full nine-muscle solve averages
+\SI{2165}{\micro\second} at a mean of 31.2 iterations, or roughly
+\SI{240}{\micro\second} per muscle (\cref{sec:compute_efficiency}). In an offline
+simulation this is unremarkable; on an embedded target it is not free.
 
-This bottleneck motivates the central hypothesis of the present work: a
-\emph{trained RL policy}, which replaces iterative solving with a single matrix
-multiplication chain through a shallow MLP, can produce equally accurate muscle
-activation commands in \emph{microseconds}, with all the ``computation'' amortized
-into a one-time training phase. Whether this hypothesis holds --- and to what extent
-the quality of control is preserved --- is one of the core empirical questions
-addressed in Chapter~\ref{chap:impl} and the computational benchmark of
-Chapter~\ref{chap:drl} (Section~\ref{sec:compute_efficiency}).
+\begin{quote}
+\small
+This subsection originally continued: \emph{``this bottleneck motivates the
+central hypothesis of the present work: a trained RL policy [\ldots] can produce
+equally accurate muscle activation commands in microseconds, with all the
+computation amortized into a one-time training phase.''} That hypothesis was
+tested and it failed, so the framing has been removed rather than left standing
+as motivation for a result the thesis goes on to withdraw.
+
+The failure has a specific cause worth stating here, because it changes what this
+subsection is evidence for. The Newton--Raphson cost above belongs to
+\emph{forward simulation} --- inverting the fibre--tendon equilibrium to find the
+force a muscle produces at a given length. That is not the calculation a
+controller would need to replace. The controller's problem is \emph{load
+sharing}: given a required joint torque, choose the nine muscle forces. Solved
+directly, that problem costs \SI{23.9}{\micro\second}, against
+\SI{288.8}{\micro\second} for a forward pass of the trained network
+(\cref{sec:latencycaveat}). Comparing the network against the wrong baseline made
+it look roughly seven times faster; compared against the right one it is about
+twelve times slower.
+
+What survives is narrower: the network's cost is fixed and branch-free regardless
+of biomechanical state, where the iterative solver's depends on convergence.
+Where a hard real-time bound matters more than mean latency, that property has
+value --- but it is not a speed advantage, and this thesis no longer claims one.
+\end{quote}
 
 \subsection{The Hill Muscle Model: Complete Formulation}
 \label{sec:hill}
@@ -243,40 +267,64 @@ coefficient).
 
 \subsubsection{Parallel Elastic Element (PEE)}
 
-The passive force generated by muscle tissue when
-$\lnorm > 1$~\parencite{Zajac1989}:
+The passive force rises exponentially once the fibre exceeds its optimal
+length~\parencite{Zajac1989}, normalised so that it reaches $F_0^M$ at twice the
+optimal length:
 \begin{equation}
   F_\text{PEE}(\lnorm) =
   \begin{cases}
-    F_0^M \cdot k_\text{PE} \left(\lnorm - 1\right)^2 & \lnorm > 1 \\
+    F_0^M \dfrac{e^{\,k_\text{PE}(\lnorm - 1)} - 1}{e^{\,k_\text{PE}} - 1}
+      & \lnorm > 1 \\[6pt]
     0 & \lnorm \leq 1
   \end{cases}
   \label{eq:pee}
 \end{equation}
-with $k_\text{PE} \approx 5{,}0$ a dimensionless stiffness coefficient such that
-$F_\text{PEE}(\lnorm = 1{,}6) \approx F_0^M$.
+with $k_\text{PE} = 5{,}0$. This gives $F_\text{PEE} = 0{,}004\,F_0^M$ at
+$\lnorm = 1{,}1$, $0{,}130\,F_0^M$ at $\lnorm = 1{,}6$, and exactly $F_0^M$ at
+$\lnorm = 2{,}0$.
 
 \subsubsection{Series Elastic Element (SEE) --- Tendon}
 
-The tendon is modeled by a quadratic law for small strains and a quasi-linear one
-beyond the zero-load length
-$l^T_\text{slack}$~\parencite{Thelen2003}:
+The tendon carries no load below its slack length and is quadratic in strain
+above it:
 \begin{equation}
-  F_\text{SEE}(\lnorm^T) =
+  F_\text{SEE}(\varepsilon^T) =
   \begin{cases}
-    0 & \lnorm^T \leq 1 \\
-    F_0^M \dfrac{(\lnorm^T - 1)^2}{k_T + \lnorm^T - 1} & \lnorm^T > 1
+    F_0^M \, k_T \, (\varepsilon^T)^2 & \varepsilon^T > 0 \\
+    0 & \varepsilon^T \leq 0
   \end{cases}
+  \qquad
+  \varepsilon^T = \frac{l^T - l^T_\text{slack}}{l^T_\text{slack}}
   \label{eq:see}
 \end{equation}
-where $\lnorm^T = l^T / l^T_\text{slack}$ is the normalized tendon length and
-$k_T \approx 0{,}0475$ is a dimensionless stiffness coefficient.
+with $k_T = 37{,}5$, so the tendon carries $F_0^M$ at a strain of $16{,}3$\,\%.
+
+\begin{quote}
+\small
+\textbf{Both of these equations replace incorrect ones.} Earlier versions of this
+section gave the PEE as a \emph{quadratic} $F_0^M k_\text{PE}(\lnorm-1)^2$ and the
+SEE as $F_0^M(\lnorm^T-1)^2 / (k_T + \lnorm^T - 1)$ with $k_T \approx 0{,}0475$.
+Neither form is the one implemented. The forms above are those in
+\texttt{biomechanics/hill\_model.py} and reproduced in
+Appendix~\ref{app:newton}, and they are what every result in this thesis was
+computed with; the chapter, not the code, was wrong. The discarded PEE expression
+was also internally inconsistent, since $k_\text{PE} = 5{,}0$ in a quadratic gives
+$1{,}8\,F_0^M$ at $\lnorm = 1{,}6$ rather than the $\approx F_0^M$ its own text
+claimed.
+
+The correction has no effect on any reported result. \Cref{sec:solvervalidation}
+validates the solver against \MuJoCo{}'s internal muscle model numerically
+(5.25\,\% NRMSE, $r = 0.989$), and that validation exercised the implemented
+equations throughout.
+\end{quote}
 
 \subsubsection{Pennation Angle Dynamics}
 
 The pennation angle $\alpha$ (angle between the muscle fibers and the tendon line of
-action) varies with fiber length according to the constant-volume
-constraint~\parencite{Zajac1989}:
+action) varies with fiber length according to the constant-thickness
+constraint~\parencite{Zajac1989} --- the fibre-sheet height $l^M \sin\alpha$ is
+held fixed, which is the standard assumption and is not the same as constant
+volume:
 \begin{equation}
   \alpha(l^M) = \arcsin\!\left(\frac{\sin\alpha_0 \cdot l^M_\text{opt}}{l^M}\right)
   \label{eq:pennation}
@@ -372,8 +420,9 @@ $A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$ in place of~$G_t$.
 
 \subsubsection{DDPG — Deep Deterministic Policy Gradient}
 
-\textcite{Lillicrap2016} introduce DDPG, the first modern actor-critic algorithm
-for continuous action spaces. The actor learns a deterministic policy
+\textcite{Lillicrap2016} introduce DDPG, which brought the deterministic
+policy-gradient formulation into the deep-network setting for continuous action
+spaces. The actor learns a deterministic policy
 $\mu_\theta : \mathcal{S} \to \mathcal{A}$; the critic evaluates $Q_\phi(s,a)$.
 
 Critic update (Bellman-error minimization):
@@ -473,9 +522,9 @@ movements in musculoskeletal models, demonstrating the feasibility of \DRL{} on
 highly redundant systems.
 
 The \textit{Learning to Run} challenge~\parencite{Kidzinski2018} stimulated a
-worldwide competition on the control of a bipedal musculoskeletal model, revealing
-the superiority of \textit{off-policy} algorithms with replay memory for long-horizon
-tasks. \textcite{Song2021} extend this approach to modeling human locomotion
+worldwide competition on the control of a bipedal musculoskeletal model, in which
+\textit{off-policy} methods with replay memory featured prominently among the
+leading entries. \textcite{Song2021} extend this approach to modeling human locomotion
 control in a more general neuromechanical framework.
 
 \textcite{Peng2018} introduce DeepMimic, which combines human motion-capture
@@ -485,9 +534,10 @@ combining \textit{imitation learning} with \DRL{}.
 \textcite{Caggiano2022} present MyoSuite, with highly detailed hand and wrist
 models ($>50$~muscles) for the study of fine motor control and rehabilitation, and
 simultaneously launch MyoChallenge as a public benchmark.
-\textcite{Codol2023} propose MotorNet, a differentiable simulator of a two-joint,
-nine-muscle planar arm, fully integrated into PyTorch and enabling training by
-backpropagation through physics.
+\textcite{Codol2023} propose MotorNet, a differentiable simulator whose reference
+effector is a two-joint, six-muscle planar arm --- monoarticular flexor and
+extensor pairs at shoulder and elbow plus a biarticular pair --- fully integrated
+into PyTorch and enabling training by backpropagation through the physics.
 
 \subsection{Domain Randomization and Sim-to-Real Transfer}
 
@@ -503,9 +553,20 @@ making policies robust to inter-individual variability and modeling errors.
 \textcite{Henderson2018} highlighted the reproducibility fragility of published
 \DRL{} results: inter-seed variance is often of the same order as the gap between
 algorithms. \textcite{Agarwal2021} formalized a set of good practices (bootstrap
-confidence intervals, \textit{interquartile mean}, performance profiles) that are now
-considered standard for any serious benchmarking effort. Our experimental protocol
-(Chapter~\ref{chap:impl}) adopts these recommendations.
+confidence intervals, \textit{interquartile mean}, performance profiles) that are
+now considered standard for any serious benchmarking effort.
+
+\textbf{This work does not meet that standard, and says so rather than implying
+otherwise.} An earlier version of this paragraph claimed that the experimental
+protocol ``adopts these recommendations''. It does not: no bootstrap confidence
+interval, interquartile mean or performance profile is reported anywhere in this
+thesis, and no significance test is performed
+(\cref{sec:stats_protocol}). What is reported is mean and standard deviation over
+three to five seeds, with the explicit rule that differences smaller than the
+observed seed spread are not treated as an ordering. The
+\textcite{Henderson2018} warning is therefore taken seriously as a
+\emph{constraint on what may be concluded}, which is the honest use of it, rather
+than claimed as a methodology that was followed.
 
 % -----------------------------------------------------------
 \section{Synthesis and Positioning}
@@ -513,25 +574,36 @@ considered standard for any serious benchmarking effort. Our experimental protoc
 The analysis of the state of the art reveals several gaps:
 
 \begin{enumerate}[label=(\roman*)]
-  \item Most studies compare \DRL{} algorithms on models without an explicit,
-        mathematically complete Hill-type muscle model (SEE, PEE, pennation).
-  \item The systematic analysis of emerging motor strategies, with quantitative
-        comparison to human EMG data and synergy decomposition, remains underdeveloped.
-  \item Rigorous comparative benchmarks including classical controller baselines
-        (impedance PD) and adopting modern statistical standards~\parencite{Agarwal2021}
-        are rare.
+  \item \DRL{} studies on musculoskeletal models frequently adopt a simulator's
+        built-in muscle actuator without stating the constitutive equations or
+        validating them against an independent implementation.
+  \item Where learned controllers are compared against classical biomechanics,
+        the comparison is usually at the level of task performance rather than
+        of the per-muscle forces themselves --- which is the level at which the
+        redundancy problem actually lives.
+  \item Comparative benchmarks that include a tuned classical controller as a
+        baseline, rather than only other learned methods, are uncommon.
   \item The effect of Domain Randomization on the robustness of musculoskeletal
-        policies, applied across all compared algorithms, has been little studied in a
-        systematic way.
-  \item The analysis of real-time computational feasibility (inference latency
-        $<$~\SI{5}{\milli\second}) for clinical applications is rarely addressed.
-  \item[\textit{(vi)}] \textbf{No study has directly benchmarked the per-step
-        computational cost of physics-based muscle control} (Newton--Raphson
-        equilibrium solving over all muscles) \textbf{against RL policy inference},
-        making it impossible to quantify the computational argument for replacing the
-        solver with a trained network. This gap leaves the core trade-off ---
-        training cost vs.\ deployment efficiency --- empirically unresolved.
+        policies, applied uniformly across compared algorithms, has been little
+        studied systematically.
 \end{enumerate}
 
-Our contribution is distinguished by points~C1--C6 detailed in
-Section~\ref{sec:contributions}, with~C6 specifically addressing gap~(vi).
+This work addresses (i) through the independently implemented and validated
+solver of \cref{sec:solvervalidation}, (ii) through the per-muscle load-sharing
+comparison of \cref{ch:forces}, and (iii) through the tuned impedance controller
+of \cref{sec:conventional}. Contribution~C3 of \cref{sec:contributions} is the
+principal one; the remainder are secondary or negative results.
+
+\begin{quote}
+\small
+Two further gaps were claimed in earlier versions and are withdrawn. One asserted
+that \emph{``no study has directly benchmarked the per-step computational cost of
+physics-based muscle control against RL policy inference''} --- an unsupported
+priority claim, and one attached to a comparison this thesis went on to show was
+posed against the wrong baseline (\cref{sec:latencycaveat}). The other claimed a
+gap in \emph{``quantitative comparison to human EMG data''}, which this work does
+not fill: no electromyographic or measured-force data enters it at any point, and
+\cref{sec:synergies} declines to interpret its one comparison against published
+human synergies for exactly that reason. A gap a thesis does not close does not
+belong in its positioning.
+\end{quote}

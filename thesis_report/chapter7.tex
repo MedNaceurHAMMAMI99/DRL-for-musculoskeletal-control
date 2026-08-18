@@ -597,12 +597,57 @@ qualitative claim stands: tuning brings the learned modular organisation closer
 to the classical one. But the reported 0.950 lies near the top of its own
 resampled range $[0.708, 0.979]$, and the honest figure is $0.851 \pm 0.129$.
 
-\textbf{This is the weakest of the three convergent analyses}, and it should be
-weighted accordingly. The effort ratio (five seeds, non-overlapping
-distributions) and the co-contraction index are far better determined than the
-synergy comparison, which rests on a statistic whose sampling spread is
-comparable to the effect it measures. The three analyses do order the
-configurations consistently, but only two of them do so with confidence.
+\subsubsection*{An independent re-run, and what it settles}
+
+The resampling above varies the episode subset within a single collection. A
+stronger test is to repeat the whole analysis from scratch --- fresh rollouts,
+fresh factorisations --- and compare. That was done, and it separates cleanly
+into what reproduces and what does not.
+
+\begin{table}[H]
+\centering
+\caption{Two independent executions of the identical synergy analysis,
+fifteen episodes each.}
+\begin{tabular}{@{} L{3.6cm} C{3.2cm} C{3.6cm} @{}}
+\toprule
+\textbf{Configuration} & $|\Delta|$ \textbf{VAF@4} & $|\Delta|$ \textbf{cos(pol,\,cls)} \\
+\midrule
+\SAC tuned, 300k & 0.002 & \textbf{0.145} \\
+\SAC tuned, 100k & 0.009 & \textbf{0.158} \\
+\SAC default     & 0.005 & 0.049 \\
+\TDIII           & 0.001 & \textbf{0.106} \\
+\DDPG            & 0.001 & 0.063 \\
+\PPO             & 0.003 & 0.012 \\
+\bottomrule
+\end{tabular}
+\label{tab:synergyrerun}
+\end{table}
+
+\textbf{The decomposition reproduces; the correspondence does not.} VAF@4 moves
+by at most $0.009$ between independent runs and $k_{90}$ is identical for all six
+configurations. The policy-versus-classical cosine moves by up to $0.158$ ---
+larger than most of the differences \cref{tab:synergies} invites the reader to
+compare.
+
+The consequence is specific. \textbf{The full ordering of \cref{tab:synergies} is
+not reproducible}: between the two runs \TDIII{} and \DDPG{} exchange places, as
+do \PPO{} and \SAC{}~tuned~300k. What does survive is the single contrast the
+argument actually rests on --- \SAC{} default against \SAC{} tuned at 300k, which
+gives $0.598 \rightarrow 0.805$ in one run and $0.647 \rightarrow 0.950$ in the
+other, a gap of $+0.207$ and $+0.303$ respectively. That contrast is the same
+sign and comfortably outside the noise in both.
+
+\textbf{So: tuning does bring the learned modular organisation closer to the
+classical one, and no finer ranking than that should be read out of
+\cref{tab:synergies}.} The individual cosine values in that table are single
+draws quoted to three decimals, and this re-run is the reason they should not be
+compared with one another.
+
+\textbf{This remains the weakest of the three convergent analyses}, and it should
+be weighted accordingly. The effort ratio (five seeds, non-overlapping
+distributions) and the co-contraction index are far better determined. Both of
+those order the configurations consistently and reproducibly; the synergy
+comparison supports one binary contrast and nothing more.
 
 A second methodological point applies to every value in \cref{tab:synergies}. The
 similarity was originally computed as a best match for each extracted synergy,
