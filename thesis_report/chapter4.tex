@@ -13,7 +13,7 @@ muscle excitations. The transition function $P(s_{t+1}|s_t,a_t)$ is deterministi
 in the standard configuration (physics simulation) and stochastic under Domain
 Randomization.
 
-L'équation de Bellman pour la fonction action-valeur $Q^\pi$ est~:
+The Bellman equation for the action-value function $Q^\pi$ is:
 \begin{equation}
   Q^\pi(s,a) = \E\!\left[r(s,a) + \gamma\,Q^\pi(s', \pi(s'))\right]
   \label{eq:bellman}
@@ -40,25 +40,49 @@ All algorithms use MLPs with the same base architecture
 
 \begin{table}[H]
   \centering
-  \caption{Neural network architectures. The actor input is $\R^{38}$;
-           the critic input is $\R^{38+9} = \R^{47}$.}
+  \caption{Network sizes, counted from the saved models. The actor input is
+           $\R^{38}$; the critic input is $\R^{38+9} = \R^{47}$.}
   \label{tab:nn_arch}
   \rowcolors{2}{lightblue!30}{white}
   \small
   \setlength{\tabcolsep}{5pt}
-  \begin{tabularx}{\textwidth}{@{} L{2.5cm} X C{2.1cm} C{2.1cm} @{}}
+  \begin{tabularx}{\textwidth}{@{} L{3.0cm} X C{2.0cm} C{2.0cm} @{}}
     \toprule
     \rowcolor{lightblue}
-    \textbf{Network} & \textbf{Architecture} & \textbf{Activ.} & \textbf{Params.} \\
+    \textbf{Component} & \textbf{Architecture} & \textbf{Activ.} & \textbf{Params.} \\
     \midrule
-    Actor (SAC)       & $[38 \to 256 \to 256 \to 2\times9]$ & ReLU + tanh    & 76\,809 \\
-    Actor (TD3/DDPG)  & $[38 \to 256 \to 256 \to 9]$        & ReLU + sigmoid & 76\,809 \\
-    Critic            & $[47 \to 256 \to 256 \to 1]$        & ReLU           & 79\,617 \\
-    Value (PPO)       & $[38 \to 256 \to 256 \to 1]$        & ReLU           & 76\,545 \\
+    Actor, \SAC        & $[38 \to 256 \to 256 \to 2{\times}9]$ & ReLU + tanh & 80\,402 \\
+    Actor, \TDIII/\DDPG & $[38 \to 256 \to 256 \to 9]$      & ReLU + tanh & 78\,089 \\
+    Critic (one)       & $[47 \to 256 \to 256 \to 1]$        & ReLU        & 78\,337 \\
+    Twin critics, \SAC/\TDIII & two of the above              & ReLU        & 156\,674 \\
+    \PPO{} extractor   & separate policy and value trunks      & Tanh        & 151\,552 \\
+    \PPO{} heads       & $256 \to 9$ and $256 \to 1$          & ---         & 2\,570 \\
+    \midrule
+    \multicolumn{3}{@{}l}{\textbf{Complete saved object} --- \SAC}    & \textbf{393\,750} \\
+    \multicolumn{3}{@{}l}{\hphantom{\textbf{Complete saved object}} --- \TDIII} & 469\,526 \\
+    \multicolumn{3}{@{}l}{\hphantom{\textbf{Complete saved object}} --- \DDPG} & 312\,852 \\
+    \multicolumn{3}{@{}l}{\hphantom{\textbf{Complete saved object}} --- \PPO}  & 154\,131 \\
     \bottomrule
   \end{tabularx}
   \normalsize
 \end{table}
+
+Three points follow from \cref{tab:nn_arch}. The \SAC{} actor is larger than the
+\TDIII/\DDPG{} actor because it emits a mean \emph{and} a log-standard-deviation
+per muscle, $2\times9$ outputs rather than $9$. \SAC{} and \TDIII{} carry twin
+critics and their targets, which is where most of their parameter count sits.
+\PPO{} builds separate policy and value trunks rather than sharing one, so its
+extractor is two $[38 \to 256 \to 256]$ stacks.
+
+Only the actor is needed at deployment: \SI{80402}{} parameters for \SAC{} and
+\SI{78089}{} for the others, against the \SI{393750}{} of the complete saved
+object. The \SI{1.5}{\mega\byte} footprint quoted in
+\cref{sec:compute_efficiency} is the full object in single precision, which is
+the conservative figure.
+
+An earlier version of this table gave 76\,809 / 76\,809 / 79\,617 / 76\,545.
+None matched, and the first two could not both be right in any case, since the
+two actors differ in output dimension.
 
 Weights are initialised using the orthogonal method for PPO~\parencite{Schulman2017}
 and uniform Xavier initialisation~\parencite{Glorot2010} for off-policy algorithms.
@@ -103,14 +127,31 @@ without any learning. It establishes the lower performance bound.
 
 \subsection{PD Impedance Controller}
 
-The PD impedance controller computes a restoring force toward the target in
-operational space, then uses the transposed Jacobian to map forces to joint
-torques, and a pseudo-inverse method to map torques to muscle activations:
+The impedance controller computes a restoring wrench toward the target in
+operational space, maps it to joint torques through the transposed site Jacobian,
+compensates the bias forces, and distributes the result onto muscles by
+minimum-effort load sharing over each muscle's achievable force interval:
 \begin{equation}
-  \tau^\text{cmd} = K_p \,\Delta p - K_d\,\dot{p}_\text{ee},
-  \quad u_i = \max\!\left(0,\, [J^\top(q)]^+\, \tau^\text{cmd} / F_{0,i}^M \right)
+  \tau^\text{cmd} = J^\top\!\left(K_p (x^\star - x) - K_d \dot{x}\right)
+                   + h(q,\dot q),
+  \qquad
+  \min_{f}\ \sum_i \left(\frac{f_i}{F_{0,i}^M}\right)^{2}
+  \ \text{s.t.}\ R^\top f = \tau^\text{cmd},\ f \in [f^{\min}, f^{\max}]
   \label{eq:pd_controller}
 \end{equation}
-with $K_p = 100$~N/m and $K_d = 20$~N$\cdot$s/m, tuned empirically by bisection on
-mean episode reward. This controller represents a reasonable level of performance
-achievable without learning, and anchors the comparison of \DRL{} agents.
+where $h(q,\dot q)$ is \MuJoCo{}'s \texttt{qfrc\_bias} (gravity, Coriolis and
+centrifugal terms) and $[f^{\min}, f^{\max}]$ is recovered per muscle by probing
+the activation state at $a=0$ and $a=1$.
+
+Gains were selected by grid search, not by hand: a twelve-point coarse grid gave
+$K_p = 60$, $K_d = 25$, and a thirty-point refinement gave
+$\mathbf{K_p = 20}$, $\mathbf{K_d = 6}$ (\cref{sec:finegains}), which is the
+configuration used for every conventional-controller result in this thesis.
+
+Both the bias compensation and the bounded load-sharing step matter, and neither
+was present in the first implementation. \Cref{sec:conventional} records what
+their absence cost: without gravity compensation the controller reached only
+\SI{0.46}{\meter}, worse than a random policy, and an activation mapping that
+assumed force proportional to activation produced a zero-width achievable
+interval and no motion at all. Both corrections improve the classical side, and
+the comparison is reported with them in place.

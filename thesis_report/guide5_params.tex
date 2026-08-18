@@ -51,7 +51,7 @@ $s$ & 0.15 m & \textbf{Precision length scale.} \textbf{Originally 0.05, which w
 \texttt{target\_entropy} & $-9$ (auto) / $-19.6$ & \textbf{SAC only.} How random the policy is kept. Default is minus the action count. \textbf{Believed for weeks to be the cause of the precision plateau; ablation proved it contributes $-8$\,\%, i.e.\ nothing.} \S\ref{sec:entropyrefuted}. \\
 \texttt{buffer\_size} & 300{,}000 & Replay memory. At 38-dim observations this is $\approx$\SI{106}{\mega\byte}. \\
 \texttt{learning\_starts} & 4{,}000 & Steps of random acting before learning begins, to seed the buffer. \\
-\texttt{gradient\_steps} & $-1$ / 8 & \textbf{The replay ratio control, and a trap.} \S\ref{sec:defect5}. \\
+\texttt{gradient\_steps} & \textbf{8} & \textbf{The replay ratio control, and a trap.} Set to $2\times$\texttt{N\_ENVS} by every run script, giving a measured ratio of \textbf{1.867} --- not the $0.933$ that merely undoes the bug. \S\ref{sec:defect5}. \\
 \texttt{net\_arch} & $[256, 256]$ & Two hidden layers. \textbf{Deliberately never searched}, because the reported policy footprint (393{,}750 parameters, latency, memory) is measured for this architecture; searching it would silently invalidate those figures. \\
 \texttt{N\_ENVS} & 4 & Parallel simulations. Interacts dangerously with \texttt{gradient\_steps}. \\
 \bottomrule
@@ -75,6 +75,7 @@ Measured directly rather than reasoned about:
 as originally configured (4 envs, 1 step) & \textbf{0.233} \\
 single environment, 1 step (standard) & 0.933 \\
 4 envs, \texttt{gradient\_steps} $= -1$ & 0.933 \\
+\textbf{4 envs, \texttt{gradient\_steps} $= 8$ --- what was actually run} & \textbf{1.867} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -85,10 +86,17 @@ with no visible symptom. An independent check closes the arithmetic: 233{,}000
 updates at the measured \SI{17}{\milli\second} predicts 71 minutes, against
 observed run times of 78.8 and 80.6 minutes.
 
-The fix is \texttt{gradient\_steps = -1}, which means ``as many updates as
-transitions collected'' and therefore holds the ratio at $\approx 1$ for
-\emph{any} \texttt{N\_ENVS} --- the bug cannot silently return if the environment
-count changes.
+Two fixes are available and the distinction matters. \texttt{gradient\_steps = -1}
+means ``as many updates as transitions collected'', which restores the ratio to
+$\approx 1$ for \emph{any} \texttt{N\_ENVS} --- the bug cannot silently return if
+the environment count changes, and that is the module default in
+\texttt{rl/algorithms.py}.
+
+\textbf{But that is not what the experiments ran.} Every run script sets
+\texttt{gradient\_steps} $= 2 \times$ \texttt{N\_ENVS} $= 8$ explicitly, which
+overrides the default and gives a measured ratio of \textbf{1.867} --- deliberately
+about twice the restored value, since a replay ratio near two is common for
+off-policy control. Read the reported results as produced at 1.867, not 0.933.
 
 \textbf{The consequence nobody had priced in:} correcting it makes training four
 times more expensive. At a correct ratio, one million steps costs 3.7 hours per

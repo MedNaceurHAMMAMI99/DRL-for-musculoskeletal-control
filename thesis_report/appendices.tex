@@ -5,13 +5,12 @@
 \chapter{MJCF File of the Musculoskeletal Model}
 \label{app:mjcf}
 
-Extrait du fichier MJCF décrivant le modèle du bras à neuf muscles. Les
-propriétés biomécaniques (longueurs optimales, forces isométriques maximales,
-points d'insertion) sont issues de \parencite{Holzbaur2005}~; les paramètres
-inertiels proviennent de \parencite{Winter2009}. Le fichier complet est
-disponible sur le dépôt Git associé à ce mémoire.
+An excerpt from the MJCF file describing the nine-muscle arm. The muscle force
+scales follow \parencite{Holzbaur2005}; the inertial parameters follow
+\parencite{Winter2009}. \Cref{tab:muscles} lists the values as compiled. The
+complete file is in the Git repository accompanying this thesis.
 
-\begin{lstlisting}[language=XML, caption={Extrait du fichier MJCF (arm.xml).}, label={lst:mjcf}]
+\begin{lstlisting}[language=XML, caption={Excerpt from the MJCF model file (\texttt{arm.xml}).}, label={lst:mjcf}]
 <mujoco model="arm_9muscles">
   <option timestep="0.002" iterations="50" solver="Newton"
           integrator="implicit" cone="elliptic"/>
@@ -136,114 +135,57 @@ disponible sur le dépôt Git associé à ce mémoire.
 \chapter[Gymnasium Environment (Python)]{Gymnasium Environment\\(Python)}
 \label{app:env}
 
-Implémentation Python de l'environnement \texttt{ArmMusculoEnv} héritant de
-\texttt{gymnasium.Env}, intégrant la randomisation de domaine et le calcul
-de la récompense définie en~\eqref{eq:reward}.
+The Gymnasium environment \texttt{ArmReachEnv}, which integrates domain
+randomisation and computes the reward of \cref{sec:reward}.
 
-\begin{lstlisting}[language=Python, caption={Extrait de \texttt{arm\_env.py}.}, label={lst:env}]
-import numpy as np
-import gymnasium as gym
-from gymnasium import spaces
-import mujoco
-import mujoco.viewer
+\begin{lstlisting}[language=Python, caption={Excerpt from \texttt{rl/environment.py}, as used for every reported result.}, label={lst:env}]
+class ArmReachEnv(gym.Env):
+    """Nine-muscle upper limb, 3D reaching task."""
 
+    def __init__(self, domain_rand: bool = True, max_steps: int = None,
+                 seed: int = None, reward_weights: dict = None, ...):
+        self.model = mujoco.MjModel.from_xml_path(config.ARM_XML)
+        self.data  = mujoco.MjData(self.model)
 
-class ArmMusculoEnv(gym.Env):
-    """Environnement musculo-squelettique pour tache d'atteinte 3D."""
+        # Nominal values kept so domain randomisation rescales from nominal
+        # rather than compounding on the current value (see sec:defects).
+        self._nominal_body_mass = self.model.body_mass.copy()
+        self._nominal_gainprm   = self.model.actuator_gainprm.copy()
+        self._nominal_damping   = self.model.dof_damping.copy()
 
-    metadata = {"render_modes": ["human", "rgb_array"]}
+        # Per-muscle peak isometric force, used to normalise the effort term.
+        self._fmax = self._nominal_gainprm[:, 2].copy()
 
-    def __init__(self, model_path="arm.xml", domain_rand=True,
-                 max_steps=1000, render_mode=None, seed=None):
-        super().__init__()
-        self.model = mujoco.MjModel.from_xml_path(model_path)
-        self.data = mujoco.MjData(self.model)
-        self.domain_rand = domain_rand
-        self.max_steps = max_steps
-        self.render_mode = render_mode
-        self.rng = np.random.default_rng(seed)
+        self.action_space      = spaces.Box(0.0, 1.0, shape=(9,),  dtype=np.float32)
+        self.observation_space = spaces.Box(-np.inf, np.inf, shape=(38,),
+                                            dtype=np.float32)
 
-        # 9 muscles, activation dans [0,1]
-        self.action_space = spaces.Box(
-            low=0.0, high=1.0, shape=(9,), dtype=np.float32)
-
-        # 38 dimensions : 4q, 4qdot, 9 lengths, 9 forces, 9 acts, 3 err
-        self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(38,), dtype=np.float32)
-
-        # Poids de recompense optimises par Optuna
-        self.w1, self.w2, self.w3 = 1.0, 0.005, 0.01
-        self.w4, self.w5 = 0.1, 0.5
-
-    def reset(self, seed=None, options=None):
-        super().reset(seed=seed)
-        mujoco.mj_resetData(self.model, self.data)
-
-        # Randomisation de domaine
-        if self.domain_rand:
-            # Masses +/- 15%
-            self.model.body_mass[:] *= self.rng.uniform(0.85, 1.15)
-            # Parametres de Hill Fmax +/- 20%
-            for i in range(self.model.nu):
-                self.model.actuator_gainprm[i, 2] *= \
-                    self.rng.uniform(0.80, 1.20)
-            # Amortissement articulaire
-            self.model.dof_damping[:] *= self.rng.uniform(0.70, 1.30)
-
-        # Cible aleatoire dans l'espace atteignable
-        self.target = self.rng.uniform(
-            low=[-0.20, -0.30, -0.45], high=[0.45, 0.30, 0.00])
-
-        self.steps = 0
-        self.prev_action = np.zeros(9, dtype=np.float32)
-        obs = self._get_obs()
-        return obs, {}
+        # Reward weights come from config.REWARD_WEIGHTS -- the single source
+        # of truth. They are hand-set, NOT searched. An override dict is used
+        # only by the reward-ablation study, to zero individual terms.
+        w = dict(config.REWARD_WEIGHTS)
+        if reward_weights:
+            w.update(reward_weights)
+        self.w1, self.w2, self.w3 = w["w1"], w["w2"], w["w3"]
+        self.w4, self.w5          = w["w4"], w["w5"]
+        self.w6                   = w.get("w6", 0.0)
+        self.w7                   = w.get("w7", 0.0)
 
     def step(self, action):
-        action = np.clip(action, 0.0, 1.0).astype(np.float32)
-        self.data.ctrl[:] = action
-        # Bruit moteur (OU) pour robustesse
-        if self.domain_rand:
-            self.data.ctrl[:] += self.rng.normal(0, 0.02, size=9)
-            self.data.ctrl[:] = np.clip(self.data.ctrl, 0, 1)
-        mujoco.mj_step(self.model, self.data)
-
-        obs = self._get_obs()
-        err = np.linalg.norm(obs[-3:])
-        e_metab = np.sum(self.data.actuator_force ** 2)
-        d_act = np.sum((action - self.prev_action) ** 2)
-        v = np.linalg.norm(self.data.qvel[:4])
-
-        reward = -(self.w1 * err**2 + self.w2 * e_metab +
-                   self.w3 * d_act) + self.w4
-        success = (err < 0.02) and (v < 0.1)
-        if success:
-            reward += self.w5
-
-        self.steps += 1
-        terminated = bool(success) or (err > 0.60) or \
-                     np.any(np.abs(self.data.qvel[:4]) > 50)
-        truncated = self.steps >= self.max_steps
-
-        self.prev_action = action
-        info = {"err": err, "success": success, "energy": e_metab}
-        return obs, float(reward), terminated, truncated, info
-
-    def _get_obs(self):
-        q = self.data.qpos[:4]
-        qdot = self.data.qvel[:4]
-        lm = np.array([self.data.actuator_length[i]
-                       for i in range(9)])
-        fm = np.array([self.data.actuator_force[i]
-                       for i in range(9)])
-        act = np.array([self.data.act[i] for i in range(9)])
-        ee = self.data.site_xpos[
-            mujoco.mj_name2id(
-                self.model, mujoco.mjtObj.mjOBJ_SITE, "end_effector")]
-        err = self.target - ee
-        return np.concatenate([q, qdot, lm, fm, act, err]).astype(
-            np.float32)
+        ...
+        reward  = self.w4 - (self.w1 * (err**2 + 0.5 * err)
+                             + self.w2 * e_eff
+                             + self.w3 * float(np.mean(d_act**2)))
+        reward += self.w7 * np.exp(-err / config.PRECISION_SCALE)
 \end{lstlisting}
+
+An earlier version of this appendix printed a hand-written excerpt that had
+drifted from the code: it named the class \texttt{ArmMusculoEnv}, set
+\texttt{max\_steps=1000} where the environment uses 100, gave the reward weights
+as $(1.0, 0.005, 0.01)$, and annotated them ``optimised by Optuna''. The weights
+are $(1.0, 1.0, 0.5)$ and were never searched --- \cref{sec:stats_protocol}
+records that claim as withdrawn. The listing above is taken from the source that
+produced the results.
 
 % -----------------------------------------------------------
 \chapter{SAC Training Script}
@@ -253,7 +195,7 @@ Training script using Stable-Baselines3 for \SAC{}, with
 observation normalisation, periodic evaluation, and saving of
 the best-performing models.
 
-\begin{lstlisting}[language=Python, caption={Excerpt from \texttt{train\_sac.py}.}, label={lst:train}]
+\begin{lstlisting}[language=Python, caption={Excerpt from \texttt{rl/train.py}.}, label={lst:train}]
 import argparse, os, numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import (
@@ -282,22 +224,29 @@ def main(args):
         eval_env, norm_obs=True, norm_reward=False,
         training=False)
 
-    # Hyperparametres issus d'Optuna (Annexe D)
+    # SAC defaults as registered in rl/algorithms.py. The tuned run overrides
+    # gamma (0.957), learning_rate (4.40e-4), batch_size (128) and tau (0.0188)
+    # via the `hyperparams` passthrough; see tab:hparams.
+    #
+    # gradient_steps is set by the caller to 2 * config.N_ENVS = 8, giving a
+    # measured replay ratio of 1.867. Leaving it at 1 is the defect of
+    # sec:replaybug and must not be copied from here.
     model = SAC(
         "MlpPolicy", train_envs,
         learning_rate=3e-4,
-        buffer_size=1_000_000,
-        batch_size=256,
+        buffer_size=300_000,
+        batch_size=512,
+        learning_starts=4_000,
         tau=0.005,
         gamma=0.99,
         train_freq=1,
-        gradient_steps=1,
+        gradient_steps=2 * config.N_ENVS,
         ent_coef="auto",
         target_entropy="auto",
         policy_kwargs=dict(net_arch=[256, 256]),
         seed=args.seed,
-        verbose=1,
-        tensorboard_log=args.logdir)
+        verbose=1)
+        # TensorBoard logging is deliberately not enabled (sec. 5.1).
 
     callback = EvalCallback(
         eval_env,
@@ -369,7 +318,7 @@ def solve_muscle_equilibrium(L_MT, a, L_M0, L_S0, alpha0,
         else:
             f_SEE = 0.0
 
-        # Residu d'equilibre
+        # Equilibrium residual
         res = (f_CE + f_PEE) * cos_alpha - f_SEE
         if abs(res) < epsilon:
             break
@@ -412,7 +361,7 @@ from scipy import stats
 from scipy.stats import wilcoxon
 
 def rank_biserial(x, y):
-    """Taille d'effet rank-biserial pour deux echantillons apparies."""
+    """Rank-biserial effect size for two paired samples."""
     diff = np.asarray(x) - np.asarray(y)
     pos = np.sum(diff > 0)
     neg = np.sum(diff < 0)
@@ -420,7 +369,7 @@ def rank_biserial(x, y):
 
 def bootstrap_bca(data, stat_fn=np.mean, n_boot=10000,
                   alpha=0.05, rng=None):
-    """Intervalle de confiance BCa (biais corrige, accelere)."""
+    """BCa confidence interval (bias-corrected and accelerated)."""
     rng = np.random.default_rng(rng)
     data = np.asarray(data)
     n = len(data)
@@ -429,9 +378,9 @@ def bootstrap_bca(data, stat_fn=np.mean, n_boot=10000,
         for _ in range(n_boot)])
     theta_hat = stat_fn(data)
 
-    # Correction de biais
+    # Bias correction
     z0 = stats.norm.ppf(np.mean(boot_stats < theta_hat))
-    # Acceleration via jackknife
+    # Acceleration via jackknife estimate
     jack = np.array([
         stat_fn(np.delete(data, i)) for i in range(n)])
     jack_mean = np.mean(jack)
@@ -468,19 +417,7 @@ def compare_algorithms(results):
 \clearpage
 \thispagestyle{empty}
 \vspace*{\fill}
-\begin{center}
-  \begin{minipage}{0.75\textwidth}
-    \begin{center}
-      \itshape
-      \Large
-      « Nous n'imitons pas la nature pour la copier, mais pour comprendre
-      les principes qui en ordonnent la complexité ---\\
-      et mettre ces principes au service de ceux qui peinent à se mouvoir. »
-      \vspace{1em}
+% An unattributed French epigraph stood here. It could not be
+% traced to any source, so it was removed rather than left
+% presented as a quotation.
 
-      \normalsize
-      --- Toward a biologically inspired neuroprosthetics
-    \end{center}
-  \end{minipage}
-\end{center}
-\vspace*{\fill}

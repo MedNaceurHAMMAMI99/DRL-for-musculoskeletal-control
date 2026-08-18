@@ -85,6 +85,7 @@ def main():
         ("n_envs=1, gs=1  (standard SAC)",           1,   1),
         ("n_envs=4, gs=4  (candidate fix)",          4,   4),
         ("n_envs=4, gs=-1 (SB3 'match env steps')",  4,  -1),
+        ("n_envs=4, gs=8  (AS RUN: 2*N_ENVS)",        4,   8),
     ]
 
     results = {}

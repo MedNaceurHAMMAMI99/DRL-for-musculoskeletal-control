@@ -24,7 +24,7 @@
     MuJoCo             & 3.7.0   & Physics simulation engine~\parencite{Todorov2012} \\
     Gymnasium          & 1.2.3   & Standard \RL{} environment interface \\
     Stable-Baselines3  & 2.8.0   & DDPG/TD3/SAC/PPO implementation~\parencite{Raffin2021} \\
-    PyTorch            & 2.11.0  & Deep learning backend (CPU build) \\
+    PyTorch            & 2.11.0+cu126 & Deep-learning backend. The CUDA build is installed, but \texttt{config.DEVICE} defaults to \texttt{cpu} and every reported result was produced on CPU; the GPU path was used only to schedule independent jobs concurrently while producing the runs. \\
     NumPy              & 2.2.6   & Numerical computation \\
     SciPy              & 1.13.0  & Static-optimisation QP (SLSQP), NNLS \\
     scikit-learn       & 1.4.2   & NMF decomposition (synergies) \\
@@ -145,8 +145,11 @@ between them; \PPO is on-policy and has no equivalent parameter.
 Two training budgets are used. The algorithm comparison of
 \cref{sec:benchmark} trains five configurations for $10^5$ steps with
 \textbf{three seeds} each ($\{0,1,2\}$). The best configuration is additionally
-retrained from initialisation for $3 \times 10^5$ steps, single seed, and it is
-this run that the force analysis of \cref{ch:forces} examines.
+retrained from initialisation for $3 \times 10^5$ steps. That configuration was
+subsequently replicated across \textbf{five seeds} (\cref{sec:replication}), and
+it is those runs that the force analysis of \cref{ch:forces} examines; the
+per-muscle breakdown of \cref{tab:permuscle} is from seed~0 alone, but every
+aggregate the chapter argues from is a five-seed mean.
 
 The seed count is a compute constraint, not a methodological choice, and it is
 the principal limitation of this work.
@@ -405,13 +408,23 @@ update. Direct measurement confirmed the consequence:
 \toprule
 \textbf{Configuration} & \textbf{Updates per step} \\
 \midrule
-As originally configured (4 envs, 1 step) & 0.233 \\
+As originally configured (4 envs, \texttt{gradient\_steps}=1) & 0.233 \\
 Single environment, one step (standard) & 0.933 \\
-Corrected setting & 0.933 \\
+4 envs, \texttt{gradient\_steps}$=4$ or $-1$ & 0.933 \\
+\textbf{4 envs, \texttt{gradient\_steps}$=8$ --- the setting actually used} & \textbf{1.867} \\
 \bottomrule
 \end{tabular}
 \label{tab:replayratio}
 \end{table}
+
+The last row is the one that matters for reading the results. The experiments do
+not run at the ``restored'' ratio of $0.933$ but at $1.867$, because every run
+script sets \texttt{gradient\_steps} $= 2 \times$ \texttt{N\_ENVS} explicitly
+rather than relying on the module default. That is a deliberate choice --- a
+replay ratio near two is common for off-policy control --- and it is applied
+uniformly to every off-policy configuration, so it is not a confound between
+them. It is recorded here because \cref{tab:hparams} reports
+\texttt{gradient\_steps} $=8$ and the two statements must be read together.
 
 Every run had therefore performed approximately 233\,000 gradient updates against
 a nominal budget of 1\,000\,000 steps. An independent consistency check supports
