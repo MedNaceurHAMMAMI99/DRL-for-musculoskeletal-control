@@ -29,53 +29,75 @@ co-contraction of an antagonist pair. That this is independently corroborated by
 the co-contraction index (\cref{sec:icc}), computed by an unrelated method over
 the same muscle groups, strengthens the inference considerably.
 
-\section{The exploration parameter}
+\section{The discount factor, and a hypothesis that had to be abandoned}
 
-\Cref{sec:tuning} established that the \SAC default target entropy of
-$-\dim(\mathcal{A})$ prevents this task from being solved to better than
-approximately \SI{0.10}{\meter}, and that reducing it to roughly $-19$ halves the
-error.
+\Cref{sec:ablation2} established that the discount factor alone accounts for the
+entire default-to-tuned improvement on this task: changing $\gamma$ from $0.99$ to
+$0.957$ recovers $106$\,\% of the interval, while the learning rate, the
+target-network rate, the batch size and the target entropy each recover nothing.
 
-The value itself is specific to this problem. What is transferable is the
-diagnostic difficulty. The failure does not present as a hyperparameter problem:
-it presents as a policy that approaches its target and then departs from it,
-which is naturally attributed to insufficient training, to a poorly shaped
-reward, or to a target beyond the arm's reach. In the present work the symptom
-persisted through three complete redesigns of the reward function, a fourfold
-correction to the effective training budget, and a doubling of the control rate
-before its actual cause was identified.
+The mechanism is quantitative and checkable. The discount factor sets an
+effective planning horizon of roughly $1/(1-\gamma)$ steps: 100 at the library
+default, 23 at the selected value. An episode is 100 steps, but the reach itself
+completes by step 25 (\cref{tab:traj}). The default therefore asked the value
+function to integrate reward over four times the duration of the behaviour being
+learned, and the surplus is largely holding reward --- a high-variance quantity to
+estimate. A critic fed high-variance targets produces the oscillating evaluation
+curves that characterised every untuned run here, and an actor trained against an
+unreliable critic cannot refine its endpoint.
 
-The mechanism is intelligible. \SAC augments its objective with an entropy term
-that rewards stochasticity, with the weight adapted automatically to meet a
-target entropy set by default in proportion to the action-space dimension. For a
-nine-muscle action space this default retains substantial randomness in the
-commanded activations. Exploration of that magnitude is productive early in
-training, when the policy must discover which muscles produce which motions, and
-counterproductive later, when the end effector must be held stationary within
-centimetres. A high-dimensional action space inflates the default precisely when
-the task also demands fine terminal precision.
+\subsection*{The attribution this replaces}
 
-Any application of \SAC to a musculoskeletal model with comparable action
-dimensionality is likely to encounter this, and likely to misattribute it in the
-same manner.
+Earlier versions of this chapter attributed the same plateau to \SAC's default
+target entropy of $-\dim(\mathcal{A})$, and argued the case at length: a
+nine-muscle action space inflates the default, the retained stochasticity is
+productive early and harmful when the hand must be held still, and the failure
+would therefore be expected in any musculoskeletal model of comparable action
+dimensionality.
+
+The reasoning was sound and the conclusion was wrong. A two-sided ablation
+(\cref{sec:ablation}) shows the target entropy recovers $-8$\,\% of the gap ---
+adding it to defaults changes nothing, removing it from the tuned configuration
+costs nothing. The evidence that had seemed decisive was the clustering of all
+five best search trials near $-19.6$, and that clustering is precisely what a TPE
+sampler produces in any region it finds promising, causal or not.
+
+What survives is a warning of a different kind, and a more useful one. \textbf{A
+hyperparameter search identifies a configuration, never a cause.} Reading
+causality from which parameters cluster in the best trials is a specific,
+tempting error, and separating the two requires a deliberate one-at-a-time
+experiment. The diagnostic difficulty described above was real --- the symptom
+does present as insufficient training or as a poorly shaped reward, and it
+survived three reward redesigns, a fourfold budget correction and a doubling of
+the control rate --- but the cause was the horizon, not the exploration.
 
 \section{Tuning against algorithm selection}
 
-\Cref{sec:benchmark} found the effect of tuning \SAC to be approximately six
-times the magnitude of the difference between untuned \SAC and \TDIII.
+\Cref{sec:fairbench} retrained all four algorithms with a correctly matched
+discount factor. With every entrant configured, \SI{0.060}{\meter} separates the
+best off-policy method from the second; correcting $\gamma$ alone within a single
+algorithm was worth \SI{0.165}{\meter}, about three times as much.
 
 The implication is methodological. A comparison of learning algorithms conducted
 at library defaults --- the common practice, and that of the earlier version of
-this work --- measures which algorithm's defaults happen to suit the problem at
-hand rather than which algorithm is intrinsically better. Where the decisive
-hyperparameter differs structurally between algorithms, as the exploration
-parameter does here, no common default exists and the comparison has no neutral
-setting to adopt.
+this work --- measures which algorithm's defaults happen to suit the problem
+rather than which algorithm is better suited to it. This work demonstrated the
+hazard on itself: the first benchmark ran one entrant with a corrected $\gamma$
+and three without, reported \DDPG{} as clearly the weakest off-policy method, and
+explained that result by its lack of twin critics. Re-run fairly, \DDPG{}
+improves by $40$\,\% and becomes indistinguishable from \TDIII. The textbook
+explanation had been fitted to an artefact.
 
-This does not invalidate algorithm comparison as an exercise; it constrains what
-such a comparison can claim. The defensible form tunes the corresponding
-parameter of each algorithm under an equal budget, which is the recommendation of
-\cref{ch:conclusion}.
+That the decisive parameter here is the discount factor rather than an
+algorithm-specific one is what makes the fair comparison possible at all: every
+algorithm has a $\gamma$, so a common correction exists. Had the decisive
+parameter been structural --- as the target entropy would have been, since only
+\SAC{} has one --- there would have been no neutral setting to adopt, and the
+comparison would have had no defensible form.
+
+This does not invalidate algorithm comparison; it constrains what one can claim
+from it. The defensible form tunes each algorithm's corresponding parameter under
+an equal budget, which is the recommendation of \cref{ch:conclusion}.
 
 \section{Accuracy and physiological economy as separate axes}
 

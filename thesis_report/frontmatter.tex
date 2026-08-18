@@ -107,19 +107,23 @@ patience throughout this academic journey.
 % ===========================================================
 \frontchapter{Executive Summary}
 
-Computing the muscle forces required for a voluntary limb movement --- an essential
-capability for rehabilitation and motor-control applications --- involves solving a
-system of implicit nonlinear equations (the Hill fibre--tendon equilibrium) by
-Newton--Raphson iteration at \emph{every simulation timestep}. For 9~muscles at
-\SI{100}{\hertz}, this amounts to thousands of iterations per second, representing
-a significant computational barrier for embedded rehabilitation hardware.
-This thesis investigates whether a \textit{Deep Reinforcement Learning} (\DRL{})
-agent can replace this iterative solver entirely, learning the muscle-force control
-problem once during training and deploying with a single neural network forward pass.
+Because nine muscles actuate four degrees of freedom, infinitely many force
+distributions produce any given arm movement, and the movement itself can never
+reveal which one the controller used. Biomechanics resolves this indeterminacy
+with a minimum-effort criterion; this thesis asks whether a \textit{Deep
+Reinforcement Learning} (\DRL{}) controller, trained only on a reaching reward,
+arrives at the same per-muscle force distribution.
 
-A six-degree-of-freedom articulated multi-body dynamic model was developed in
-\MuJoCo{} \parencite{Todorov2012}. The model incorporates a complete Hill-type muscle
-representation \parencite{Hill1938, Zajac1989}, including the contractile element with
+The work began from a different question --- whether a trained policy could
+replace the iterative Newton--Raphson muscle solver cheaply at inference time ---
+and that premise did not survive measurement. A directly solved classical
+load-sharing problem runs in \SI{23.9}{\micro\second} against the network's
+\SI{288.8}{\micro\second}, so no speed advantage is claimed anywhere in this
+work.
+
+A four-degree-of-freedom articulated multi-body dynamic model driven by nine
+muscles was developed in \MuJoCo{} \parencite{Todorov2012}. The model specifies a
+Hill-type muscle representation \parencite{Hill1938, Zajac1989}, including the contractile element with
 its force-length~(FL) and force-velocity~(FV) relationships, the series elastic
 element~(SEE) modelling the tendon, the parallel elastic element~(PEE), pennation-angle
 dynamics, and neural activation dynamics~\parencite{Thelen2003}. Numerical integration of
@@ -141,18 +145,21 @@ correlation $0{,}81 \pm 0{,}04$ over five independent training runs; pattern
 cosine $0{,}813$ against a shuffled null of $0{,}372$ --- while expending
 $1{,}91 \pm 0{,}15$ times the minimum effort required to generate the same joint
 torques, the excess concentrated in co-contraction of the elbow antagonists. A
-conventional controller solving the same load-sharing problem explicitly attains
-$1{,}33$, so the learned policy uses about 44~\% more effort than is achievable
-rather than 91~\% more than an unattainable ideal.
+properly tuned conventional controller solving the same load-sharing problem
+explicitly attains $1{,}263$, so the learned policy uses about 51~\% more effort
+than is achievable rather than 91~\% more than an unattainable ideal. Raising the
+reward's effort weight closes most of that gap, to $1{,}304 \pm 0{,}025$ against
+that floor.
 
 Two secondary results follow. An error plateau at \SI{0.10}{\meter} survived
 three reward redesigns and a fourfold correction to the training budget;
 one-at-a-time ablation over five hyperparameters identifies the discount factor
 as its sole cause, recovering $106$~\% of the default-to-tuned interval where the
 other four recover nothing. Its default horizon of 100 steps spanned the whole
-episode against a reach completing in 25. And tuning proved to dominate algorithm
-choice: tuning SAC improved final error by $38$~\%, against approximately
-$6$~\% separating untuned SAC from TD3.
+episode against a reach completing in 25. And configuration proved to dominate algorithm choice: with every algorithm
+given a correctly matched discount factor, \SI{0.060}{\meter} separates the best
+off-policy method from the second, while correcting the discount factor within a
+single algorithm is worth \SI{0.165}{\meter} --- about three times as much.
 
 The results rest on three seeds for the algorithm comparison and five for the
 principal analysis. No significance testing is reported. The strict success
@@ -164,7 +171,7 @@ full in the general conclusion.
 \bigskip
 \noindent\textbf{Keywords:} Musculoskeletal model, \MuJoCo{}, Hill model, Static
 optimisation, Muscle redundancy, Deep Reinforcement Learning, Motor control,
-PPO, SAC, TD3, DDPG, Co-contraction, Exploration temperature.
+PPO, SAC, TD3, DDPG, Co-contraction, Discount factor.
 
 % ===========================================================
 %  ABSTRACT — ENGLISH
@@ -172,21 +179,23 @@ PPO, SAC, TD3, DDPG, Co-contraction, Exploration temperature.
 \begin{otherlanguage}{english}
 \frontchapter{Abstract}
 
-Computing the muscle forces required for a voluntary limb movement demands solving
-a system of implicit nonlinear equations --- the Hill fibre--tendon equilibrium ---
-by Newton--Raphson iteration at \emph{every simulation timestep}. For 9~muscles
-at \SI{100}{\hertz}, this amounts to 4\,500--36\,000~iterations per second: a
-significant computational burden for real-time rehabilitation hardware. This thesis
-investigates whether a \textit{Deep Reinforcement Learning}~(\DRL{}) agent can
-replace this iterative solver entirely, amortising all computation into a one-time
-training phase and deploying muscle-force control as a single neural network forward
-pass. The latency advantage this was expected to confer does not survive a
-like-for-like comparison against a directly solved classical problem, and is
-withdrawn.
+Nine muscles actuate four degrees of freedom in the model studied here, so
+infinitely many force distributions produce any given movement and the movement
+cannot reveal which was used. Biomechanics resolves this indeterminacy by a
+minimum-effort criterion. This thesis asks whether a \textit{Deep Reinforcement
+Learning}~(\DRL{}) controller, trained only on a reaching reward, recovers the
+same per-muscle force distribution, and under what conditions on the training
+objective.
 
-A six-degree-of-freedom multi-body articulated dynamic model was developed using the
-\MuJoCo{} physics engine \parencite{Todorov2012}. The model incorporates a full
-Hill-type muscle model \parencite{Hill1938, Zajac1989} comprising: a contractile
+The work was begun on a different premise --- that a trained policy might replace
+the iterative Newton--Raphson muscle solver cheaply at inference time. That
+premise did not survive measurement: a directly solved classical load-sharing
+problem takes \SI{23.9}{\micro\second} against the network's
+\SI{288.8}{\micro\second}. The latency argument is withdrawn in full.
+
+A four-degree-of-freedom multi-body articulated dynamic model driven by nine
+muscles was developed using the \MuJoCo{} physics engine
+\parencite{Todorov2012}. The model specifies a Hill-type muscle model \parencite{Hill1938, Zajac1989} comprising: a contractile
 element~(CE) governed by force-length~(FL) and force-velocity~(FV) relationships; a
 series elastic element~(SEE) representing the tendon; a parallel elastic element~(PEE);
 pennation-angle dynamics; and first-order activation dynamics \parencite{Thelen2003}.
@@ -210,8 +219,9 @@ controller reproduces the coordination structure of the classical solution
 (Pearson $r = 0.81 \pm 0.04$ over five seeds; pattern cosine $0.813$ against a
 shuffled null of $0.372$) at a fixed, branch-free inference cost, but expends
 $1.91 \pm 0.15$ times the minimum effort needed for the same joint torques, the
-excess concentrated in elbow antagonist co-contraction. The latency advantage originally claimed does not
-survive a like-for-like comparison and is withdrawn.
+excess concentrated in elbow antagonist co-contraction. Raising the reward's
+effort weight reduces that ratio to $1.304 \pm 0.025$ against the $1.263$ a
+properly tuned conventional controller attains, for a mild accuracy cost.
 Across all fifteen trained policies the discrepancy is present, ranging from
 $1.21$ to $2.30\times$, and the ordering by muscular economy is approximately the
 inverse of the ordering by reaching accuracy.
@@ -223,9 +233,10 @@ three seeds each, identifies the \emph{discount factor} as its sole cause: it
 recovers $106$~\% of the default-to-tuned interval while the target entropy,
 learning rate, target-network rate and batch size each recover nothing. Its
 default value implies a 100-step horizon --- the entire episode --- against a
-reach that completes in 25 steps. Separately, tuning was found to dominate
-algorithm choice, improving SAC by $38$~\% against approximately $6$~\%
-separating untuned SAC from TD3.
+reach that completes in 25 steps. Separately, configuration was found to dominate algorithm choice: with every
+algorithm given a correctly matched discount factor, \SI{0.060}{\meter} separates
+the best off-policy method from the second, against \SI{0.165}{\meter} recovered
+by correcting that one setting within a single algorithm.
 
 These results rest on three seeds for the algorithm comparison and the
 ablations, and five for the principal analysis and the effort study; no
@@ -238,7 +249,7 @@ Limitations are stated in full in the general conclusion.
 \noindent\textbf{Keywords:} Musculoskeletal model, \MuJoCo{}, Hill muscle model,
 Static optimisation, Muscle redundancy, Newton--Raphson solver, Deep
 Reinforcement Learning, Motor control, PPO, SAC, TD3, DDPG,
-Co-contraction, Exploration temperature.
+Co-contraction, Discount factor.
 \end{otherlanguage}
 
 % ===========================================================
@@ -256,10 +267,12 @@ Co-contraction, Exploration temperature.
 \rowcolor{lightblue}
 \textbf{Abbrev.} & \textbf{Meaning} \\
 \midrule
-AVC      & Stroke \\
 \rowcolor{lightblue!40}
 BCa      & \textit{Bias-Corrected and accelerated (bootstrap)} \\
-CE       & \textit{Contractile Element} --- Contractile element (Hill model) \\
+CCI      & Co-contraction index (Falconer \& Winter) \\
+\rowcolor{lightblue!40}
+CE       & \textit{Contractile Element} (Hill model) \\
+CNS      & Central nervous system \\
 \rowcolor{lightblue!40}
 DOF      & Degrees of freedom \\
 DDPG     & \textit{Deep Deterministic Policy Gradient} \\
@@ -276,7 +289,6 @@ FV       & Force-velocity (muscle relationship) \\
 GAE      & \textit{Generalised Advantage Estimation} \\
 GPU      & \textit{Graphics Processing Unit} \\
 \rowcolor{lightblue!40}
-ICC      & Co-Contraction Index \\
 MDP      & \textit{Markov Decision Process} \\
 \rowcolor{lightblue!40}
 MJCF     & \textit{MuJoCo XML Format} \\
@@ -288,23 +300,23 @@ NMF      & \textit{Non-negative Matrix Factorisation} \\
 NRMSE    & \textit{Normalised Root Mean Squared Error} \\
 OFC      & \textit{Optimal Feedback Control} \\
 \rowcolor{lightblue!40}
-WHO      & World Health Organisation \\
+SLSQP    & \textit{Sequential Least-Squares Quadratic Programming} \\
+VAF      & Variance accounted for (synergy decomposition) \\
+\rowcolor{lightblue!40}
 OpenSim  & \textit{Open-Source Musculoskeletal Simulator} \\
 \rowcolor{lightblue!40}
 OU       & Ornstein-Uhlenbeck (stochastic process) \\
 PD       & \textit{Proportional-Derivative} (controller) \\
 \rowcolor{lightblue!40}
-PEE      & \textit{Parallel Elastic Element} --- Parallel elastic element \\
+PEE      & \textit{Parallel Elastic Element} (Hill model) \\
 PPO      & \textit{Proximal Policy Optimisation} \\
 \rowcolor{lightblue!40}
 ReLU     & \textit{Rectified Linear Unit} \\
 \RL{}    & \textit{Reinforcement Learning} \\
 \rowcolor{lightblue!40}
 SAC      & \textit{Soft Actor-Critic} \\
-SB3      & Stable-Baselines3 \\
 \rowcolor{lightblue!40}
-SEE      & \textit{Series Elastic Element} --- Series elastic element (tendon) \\
-SNC      & Central Nervous System \\
+SEE      & \textit{Series Elastic Element} --- the tendon (Hill model) \\
 \rowcolor{lightblue!40}
 TD3      & \textit{Twin Delayed Deep Deterministic Policy Gradient} \\
 TPE      & \textit{Tree-structured Parzen Estimator} (sampler Optuna) \\

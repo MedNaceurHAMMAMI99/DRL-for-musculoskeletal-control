@@ -97,29 +97,43 @@ importance}, since the sampler concentrates proposals wherever performance is
 good, and parameters cluster whether or not they are responsible. A
 hyperparameter search identifies a configuration, never a cause.
 
-\textbf{Evidence that tuning dominates algorithm selection.} In the comparison of
-\cref{sec:benchmark}, tuning \SAC improved final error by 38\,\%, whereas the
-interval between untuned \SAC and \TDIII was approximately 6\,\% and comparable to
-the seed-to-seed spread. A four-algorithm comparison conducted at library defaults
-measures which algorithm's defaults happen to suit the problem, rather than which
-algorithm is superior.
+\textbf{Evidence that configuration dominates algorithm selection.} The first
+benchmark of \cref{sec:benchmark} was itself compromised --- one entrant ran with
+a corrected discount factor and three without --- and was re-run fairly
+(\cref{sec:fairbench}). With every algorithm correctly configured,
+\SI{0.060}{\meter} separates the best off-policy method from the second, while
+correcting $\gamma$ alone within a single algorithm is worth \SI{0.165}{\meter},
+about three times as much. \DDPG{} improved by 40\,\% under that correction and
+became indistinguishable from \TDIII, overturning the original ordering and the
+twin-critic explanation that had been offered for it. A comparison conducted at
+library defaults measures which algorithm's defaults happen to suit the problem,
+not which algorithm is superior.
 
 \textbf{Convergent evidence from three independent analyses.} The effort ratio
 against static optimisation (\cref{sec:effortall}), the co-contraction index of
 Falconer and Winter (\cref{sec:icc}), and the synergy decomposition
-(\cref{sec:synergies}) are methodologically unrelated, yet order the
-configurations consistently and localise the same residual defect to the same
-muscle group. The synergy analysis additionally shows that agreement between the
-learned and classical modular organisation rises as the policy improves --- from
-$0.676 \pm 0.054$ to $0.851 \pm 0.129$ on resampling --- and that the classical
-solution is uniformly the more low-dimensional of the two, requiring four to five
-synergies where the learned policies require six to nine. This is the least
-well-determined of the three analyses: the synergy statistic's sampling spread is
-comparable to the effect it measures (\cref{sec:synergies}), and the ordering
-survives while the magnitude should not be pressed. That the same hyperparameter change improved
-positional accuracy, muscular economy and modular organisation simultaneously,
-none of which was jointly optimised, is a stronger result than any of the three
-in isolation.
+(\cref{sec:synergies}) are methodologically unrelated, yet localise the same
+residual defect to the same muscle group. The synergy analysis additionally shows
+that agreement between the learned and classical modular organisation rises as
+the policy improves --- from $0.676 \pm 0.054$ to $0.851 \pm 0.129$ on resampling
+--- and that the classical solution is uniformly the more low-dimensional of the
+two, requiring four to five synergies where the learned policies require six to
+nine.
+
+The convergence must be stated at the strength the evidence supports, which is
+not uniform across the three. The effort ratio (five seeds, non-overlapping
+distributions) and the co-contraction index are well determined. The synergy
+comparison is not: an independent re-execution of the whole analysis
+(\cref{tab:synergyrerun}) reproduces the decomposition --- VAF@4 moves by at most
+$0.009$ and $k_{90}$ is identical --- but not the basis matching, which moves by
+up to $0.158$ and exchanges the positions of \TDIII{} with \DDPG{} and \PPO{}
+with \SAC. \textbf{Only the default-versus-tuned contrast survives re-running};
+no finer ordering should be read from it.
+
+What remains, and is the substance of the claim, is that a single hyperparameter
+change improved positional accuracy, muscular economy and --- on the one synergy
+contrast that reproduces --- modular organisation, none of which was jointly
+optimised.
 
 A further observation, less firmly established but of interest, is that reaching
 accuracy and load-sharing fidelity ordered themselves inversely across the five
@@ -159,7 +173,7 @@ themselves are sound, but they were used to support a conclusion they do not
 reach: they time the Hill equilibrium solve rather than load sharing, and both
 sides were unoptimised Python. Measured like-for-like, a direct solve of the
 load-sharing problem is roughly an order of magnitude \emph{faster} than the
-network (\cref{sec:latencycaveat}). 	extbf{The speed-based argument for
+network (\cref{sec:latencycaveat}). \textbf{The speed-based argument for
 replacing classical calculation is withdrawn.} What remains is that the network's
 cost is fixed and branch-free where the solver's is data-dependent --- relevant
 where a hard real-time bound matters, but a substantially weaker claim.
